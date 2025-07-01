@@ -1,0 +1,28 @@
+body{
+    padding: 0;
+    margin: 0;
+}
+
+.Sidebar {
+    width: 80px;
+    height: 100vh;
+    border: 2px solid black;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.topIcons{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bottomIcons{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
