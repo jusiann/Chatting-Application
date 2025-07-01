@@ -1,13 +1,18 @@
 
-import Sidebar from './components/Sidebar'
+
 import './App.css'
+import Textinput from './components/Textinput'
 
 function App() {
 
   return (
     <>
-      <Sidebar />
+
+      <Textinput />
+
     </>
+
+
   )
 }
 
