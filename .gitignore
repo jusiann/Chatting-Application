@@ -1,0 +1,16 @@
+ 
+# Flutter/Dart
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# VS Code
+.vscode/
+
+# Android/iOS
+android/.gradle/
+ios/Pods/
+
+# Alt dizinlerdeki tüm modules klasörleri
+**/node_modules/
