@@ -1,0 +1,189 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterState();
+}
+
+class _RegisterState extends State<RegisterPage> {
+  bool _obscureText1 = true;
+  bool _obscureText2 = true;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: LayoutBuilder(
+        builder: (context, constrainst) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constrainst.maxHeight),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/Logo1.png',
+                      height: 175,
+                      width: 175,
+                    ),
+                    SizedBox(height: 50),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Adınız',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 20),
+                          Expanded(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Soyadınız',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Email adresiniz',
+                          prefixIcon: Icon(Icons.email),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Container(
+                      width: double.infinity,
+                      height: 64,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: TextField(
+                        obscureText: _obscureText1,
+                        decoration: InputDecoration(
+                          hintText: 'Şifreniz',
+                          prefixIcon: Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscureText1 = !_obscureText1;
+                              });
+                            },
+                            icon: Icon(
+                              _obscureText1
+                                  ? (Icons.visibility)
+                                  : (Icons.visibility_off),
+                            ),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: double.infinity,
+                      height: 64,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: TextField(
+                        obscureText: _obscureText2,
+                        decoration: InputDecoration(
+                          hintText: 'Şifreniz tekrar',
+                          prefixIcon: Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _obscureText2 = !_obscureText2;
+                              });
+                            },
+                            icon: Icon(
+                              _obscureText2
+                                  ? (Icons.visibility)
+                                  : (Icons.visibility_off),
+                            ),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 50),
+                    Container(
+                      height: 64,
+                      width: double.infinity,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: FilledButton(
+                        onPressed: () {},
+                        child: Text('Kayıt ol'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Color(0xFF910811),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Container(
+                      width: double.infinity,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Zaten hesabın var mı? ',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              'Giriş yap',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF910811),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
