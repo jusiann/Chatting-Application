@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
+import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/features/chat/views/widgets/emoji_select_widget.dart';
 
 class IndividualPage extends StatefulWidget {
@@ -157,12 +158,32 @@ class _IndividualPageState extends State<IndividualPage> {
                                         color: Color(0xFF910811),
                                       ),
                                     ),
-                                    suffixIcon: IconButton(
-                                      onPressed: () {},
-                                      icon: Icon(
-                                        Icons.attach_file,
-                                        color: Color(0xFF910811),
-                                      ),
+                                    suffixIcon: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(
+                                            Icons.attach_file,
+                                            color: Color(0xFF910811),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (builder) =>
+                                                    CameraView(),
+                                              ),
+                                            );
+                                          },
+                                          icon: Icon(
+                                            Icons.photo_camera,
+                                            color: Color(0xFF910811),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),

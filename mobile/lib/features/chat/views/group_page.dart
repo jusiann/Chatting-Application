@@ -67,21 +67,17 @@ class _GroupPageState extends State<GroupPage> {
                   color: Colors.white,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: users.length,
+                    itemCount: groupMember.length,
                     itemBuilder: (context, index) {
-                      if (users[index].selected) {
-                        return InkWell(
-                          onTap: () {
-                            setState(() {
-                              users[index].selected = false;
-                              groupMember.remove(users[index]);
-                            });
-                          },
-                          child: AvatarGroup(user: users[index]),
-                        );
-                      } else {
-                        return Container();
-                      }
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            groupMember[index].selected = false;
+                            groupMember.remove(groupMember[index]);
+                          });
+                        },
+                        child: AvatarGroup(user: groupMember[index]),
+                      );
                     },
                   ),
                 )
