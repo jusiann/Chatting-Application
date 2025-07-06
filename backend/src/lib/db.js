@@ -1,6 +1,6 @@
 import { Client } from "pg";
 
-const client = Client({
+const client = new Client({
     user: "postgres",
     host: "localhost",
     database:"chat_app",  //database ismi
@@ -8,12 +8,8 @@ const client = Client({
     port: "5432",
 });
 
-client.connect(()=>{
-    try {
-        console.log("Succesfully connected to database")
-    } catch (err) {
-        console.log("Database connection is failed.", err);
-    }
-});
+client.connect()
+    .then(() => console.log("Successfully connected to Database"))
+    .catch(err => console.error("Database connection failed", err));
 
 export default client;
