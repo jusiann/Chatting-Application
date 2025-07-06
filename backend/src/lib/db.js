@@ -1,3 +1,4 @@
+
 import { Client } from "pg";
 
 const client = new Client({
@@ -13,3 +14,4 @@ client.connect()
     .catch(err => console.error("Database connection failed", err));
 
 export default client;
+
