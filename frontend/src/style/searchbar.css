@@ -1,0 +1,47 @@
+.searchbar {
+    width: 480px;
+    height: 84px;
+    background-color: white;
+    border-radius: 18px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1.5px solid #e6eaef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
+}
+
+.logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.input-area {
+    flex: 1;
+    height: 60px;
+    background-color: #f5f7fa;
+    border-radius: 40px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    color: #444;
+}
+
+.input-area input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+    flex: 1;
+}
