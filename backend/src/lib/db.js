@@ -1,11 +1,11 @@
 
-import { Client } from "pg";
+import {Client} from "pg";
 
 const client = new Client({
     user: "postgres",
     host: "localhost",
-    database:"chat_app",  //database ismi
-    password:"chatapp123", //database sifresi
+    database:"chat_app",
+    password:"chatapp123",
     port: "5432",
 });
 

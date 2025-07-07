@@ -21,7 +21,6 @@ export const createToken = async (user, res) => {
 
 export const verifyToken = async (req, res, next) => {
     const token = req.cookies.token;
-
     if(!token)
         return res.status(401).json({
             success: false,
