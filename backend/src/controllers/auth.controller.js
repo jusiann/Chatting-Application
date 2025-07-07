@@ -8,12 +8,11 @@ import jwt from "jsonwebtoken";
 export const signup = async (req ,res) => {
     try {
         const {name, surname, email, password} = req.body;
-
-        if (!name || !surname || !email || !password) {
+        if (!name || !surname || !email || !password)
             return res.status(400).json({
                 message: "Name, Surname, Email and Password are required."
             });
-        }
+
         const checkUser = await client.query(
             "SELECT * FROM users WHERE email = $1",
             [email]
@@ -25,7 +24,7 @@ export const signup = async (req ,res) => {
             });
 
         const hashedPassword = await bcrypt.hash(password, 8);
-        console.log("Hashed Password: ", hashedPassword);
+        // console.log("Hashed Password: ", hashedPassword);
 
         await client.query(
             "INSERT INTO users (name, surname, email, password) VALUES ($1, $2, $3, $4)",
@@ -46,12 +45,11 @@ export const signup = async (req ,res) => {
 export const signin = async (req, res) => {
     try {
         const { email, password } = req.body;
-
-        if (!email || !password) {
+        if (!email || !password)
             return res.status(400).json({
                 message: "Email and Password are required."
             });
-        }
+
         const checkUser = await client.query(
             "SELECT * FROM users WHERE email = $1",
             [email]
@@ -63,9 +61,8 @@ export const signin = async (req, res) => {
             });
 
         const user = checkUser.rows[0];
-
-        console.log("Request password:", password);
-        console.log("DB password hash:", user.password);
+        // console.log("Request password:", password);
+        // console.log("DB password hash:", user.password);
 
         const comparePassword = await bcrypt.compare(password, user.password);
 
@@ -86,12 +83,10 @@ export const signin = async (req, res) => {
 export const forgetpassword = async (req, res) => {
     try {
         const {email} = req.body;
-
-        if (!email) {
+        if (!email)
             return res.status(400).json({
                 message: "Email is required."
             });
-        }
 
         const checkUser = await client.query(
             "SELECT id, name, surname, email FROM users WHERE email = $1",
@@ -103,12 +98,11 @@ export const forgetpassword = async (req, res) => {
                 message: "User does not exist!"
             });
 
-        console.log("User: ", checkUser.rows[0]);
-
         const resetCode = crypto.randomBytes(16).toString("hex");
-        console.log("Reset Code: ", resetCode);
+        // console.log("User: ", checkUser.rows[0]);
+        // console.log("Reset Code: ", resetCode);
 
-        const resetTime = moment.utc().toISOString();
+        const resetTime = new Date().toISOString();
 
         await client.query(
             "UPDATE users SET reset_code = $1, reset_time = $2 WHERE email = $3",
@@ -131,46 +125,39 @@ export const forgetpassword = async (req, res) => {
 export const checkResetCode = async (req, res) => {
     try {
         const { email, reset_code } = req.body;
-
-        if (!email || !reset_code) {
+        if (!email || !reset_code)
             return res.status(400).json({
                 message: "Email and reset code are required."
             });
-        }
 
         const userCheck = await client.query(
             "SELECT id, email, reset_code, reset_time FROM users WHERE email = $1",
             [email]
         );
 
-        if (userCheck.rows.length === 0) {
+        if (userCheck.rows.length === 0)
             return res.status(404).json({
                 message: "User not found!"
             });
-        }
 
         const user = userCheck.rows[0];
 
-        if (!user.reset_code || !user.reset_time) {
+        if (!user.reset_code || !user.reset_time)
             return res.status(400).json({
                 message: "No active password reset request found for this user."
             });
-        }
 
-        const timeDB = moment(user.reset_time);
-        const timeNow = moment();
+        const timeDB = moment.utc(user.reset_time);
+        const timeNow = moment.utc();
+        // console.log("timeDB (UTC):", timeDB.format());
+        // console.log("timeNow (UTC):", timeNow.format());
 
         const differenceInMinutes = timeNow.diff(timeDB, 'minutes');
+        // console.log("Difference in minutes:", differenceInMinutes);
 
-        const EXPIRATION_TIME = 15;
-
-        console.log("Time DB (Formatted): ", timeDB.format());
-        console.log("Time Now (Formatted): ", timeNow.format());
-        console.log("Difference in minutes: ", differenceInMinutes);
-
-        if (differenceInMinutes > EXPIRATION_TIME)
+        if (differenceInMinutes >= process.env.RESETCODE_EXPIRES_IN)
             return res.status(401).json({
-                message: "Reset code has expired! Please request a new one."
+                message: "Reset code expired! Please request a new one."
             });
 
         if (String(user.reset_code) !== String(reset_code))
@@ -197,7 +184,6 @@ export const checkResetCode = async (req, res) => {
             message: "Reset code verified successfully. You can now set a new password.",
             token: token
         });
-
     } catch (error) {
         console.error("Error in checkResetCode:", error);
         res.status(500).json({
@@ -209,23 +195,19 @@ export const checkResetCode = async (req, res) => {
 export const changepassword = async (req, res) => {
     try {
         const {email, password, token} = req.body;
-
-        if (!email || !password || !token) {
+        if (!email || !password || !token)
             return res.status(400).json({
                 message: "Email, Password and Token are required."
             });
-        }
-        const decoded = jwt.verify(token, process.env.JWT_TEMPORARY_KEY);
-        console.log("Decoded: ", decoded);
 
+        const decoded = jwt.verify(token, process.env.JWT_TEMPORARY_KEY);
         if(decoded.type !== "reset")
             return res.status(401).json({
                 message: "Invalid token!"
             });
-        console.log("Decoded: ", decoded);
+        // console.log("Decoded: ", decoded);
 
         const hashedPassword = await bcrypt.hash(password, 8);
-
         await client.query(
             "UPDATE users SET password = $1, reset_code = NULL, reset_time = NULL WHERE id = $2",
             [hashedPassword, decoded.sub]
@@ -240,4 +222,4 @@ export const changepassword = async (req, res) => {
             message: "Invalid token or other error."
         });
     }
-}
+};
