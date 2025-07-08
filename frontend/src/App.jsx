@@ -1,15 +1,32 @@
-import GroupCancelButton from "./components/groupCancelButton.jsx";
-import CreateGroupButton from "./components/createGroupButton.jsx";
-import GroupApprovalButton from "./components/groupApprovalButton.jsx";
 
-import './App.css';
 
+import './App.css'
+import Textinput from './components/Textinput'
+import Searchbar from './components/Searchbar'
+import SettingCard from './components/Settingcard'
+import Sendbox from './components/Sendbox'
+import Settinguser from './components/Settinguser'
+import MessageTopBar from './components/Messagetopbar'
+import Personcard from './components/Personcard'
+import MessageSended from './components/Messagesended'
+import MessageReceived from './components/Messagereceived'
 function App() {
 
   return (
     <>
-    <GroupApprovalButton />
+
+      <Textinput />
+      <Searchbar />
+      <SettingCard />
+      <Sendbox />
+      <Settinguser />
+      <MessageTopBar />
+      <Personcard />
+      <MessageSended />
+      <MessageReceived />
     </>
+
+
   )
 }
 
