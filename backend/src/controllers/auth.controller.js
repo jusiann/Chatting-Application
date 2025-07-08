@@ -4,6 +4,7 @@ import {createToken} from "../middlewares/auth.js";
 import crypto from "crypto";
 import moment from "moment";
 import jwt from "jsonwebtoken";
+import sendEmail from "../utils/sendEmail.js";
 
 export const signup = async (req ,res) => {
     try {
@@ -108,6 +109,15 @@ export const forgetpassword = async (req, res) => {
             "UPDATE users SET reset_code = $1, reset_time = $2 WHERE email = $3",
             [resetCode, resetTime, email]
         );
+
+        const mailText = `
+            Merhaba ${checkUser.name},\n
+            Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:\n\n
+            Bu bağlantı 15 dakika boyunca geçerlidir.\n
+            Eğer bu işlemi siz başlatmadıysanız bu mesajı yok sayabilirsiniz.
+            `;
+
+        await sendEmail(email, "Şifre Sıfırlama Talebi", mailText);
 
         res.status(200).json({
             success: true,
