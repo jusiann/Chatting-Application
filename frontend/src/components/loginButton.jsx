@@ -2,9 +2,9 @@ import "../style/loginButton.css";
 
 const LoginButton = () => {
     return (
-        <div className="loginButton">
+        <button className="loginButton">
             <span>Giriş yap</span>
-        </div>
+        </button>
     );
 };
 

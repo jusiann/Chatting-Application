@@ -30,16 +30,22 @@ body {
     border-radius: 10px;
 
     background-color: #ffffff;
+    color: #910811;
 
     opacity: 1;
 
     text-align: center;
+    cursor: pointer;
+}
+.groupCancelButton:hover{
+    background-color: #910811;
+    color: white;
+}
+.groupCancelButton:active{
+    background-color: hsl(356, 90%, 40%);
 }
 
 .groupCancelButton span {
-    width: 60px;
-
-    height: 22px;
 
     font-family: Inter;
 
@@ -49,15 +55,13 @@ body {
 
     font-size: 18px;
 
-    line-height: 100%;
+ 
 
     letter-spacing: 0%;
 
     text-align: center;
 
     vertical-align: middle;
-
-    color: #910811;
 
     white-space: nowrap;
 
@@ -69,10 +73,6 @@ body {
 
 .groupCancelButton svg {
     width: 30px;
-
-    height: 30px;
-
-    color: #910811;
 
     flex-shrink: 0;
 

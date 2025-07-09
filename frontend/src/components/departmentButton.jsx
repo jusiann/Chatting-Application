@@ -3,10 +3,10 @@ import { Building } from "lucide-react";
 
 const DepartmentButton = () => {
     return (
-        <div className="departmentButton">
+        <button className="departmentButton">
             <Building />
             <span>Bilgisayar mühendisliği</span>
-        </div>
+        </button>
     );
 };
 

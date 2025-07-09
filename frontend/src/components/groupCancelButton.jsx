@@ -2,10 +2,10 @@ import "../style/groupCancelButton.css";
 import { XCircle } from "lucide-react";
 const GroupCancelButton = () => {
     return (
-        <div className="groupCancelButton">
+        <button className="groupCancelButton">
             <span>İptal et</span>
             <XCircle />
-        </div>
+        </button>
     );
 };
 
