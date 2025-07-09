@@ -9,8 +9,10 @@ const ContactCard = () => {
             </div>
             <div className="text-area">
                 <div className="title-text">
-                    <span>Prof. Dr. Taner Çevik</span>
-                    <span>~</span>
+                    <div className="Name">
+                        <span>Prof. Dr. Taner Çevik</span>
+                        <span>~</span>
+                    </div>
                     <span>Bilgisayar Mühendisliği Bölüm Başkanı</span>
                 </div>
             </div>

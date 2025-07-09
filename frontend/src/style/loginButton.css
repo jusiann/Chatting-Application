@@ -35,7 +35,13 @@ body {
     opacity: 1;
 
     text-align: center;
+    border: none;
+    cursor: pointer;
 
+}
+
+.loginButton:hover{
+    background-color: hsl(356, 90%, 35%);
 }
 
 .loginButton span {

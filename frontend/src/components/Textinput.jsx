@@ -1,10 +1,10 @@
 import "../style/textinput.css";
 import { Mail } from "lucide-react";
 
-const Textinput = () => {
+const Textinput = ({icon: Icon = Mail}) => {
     return (
         <div className="textinput">
-            <Mail className="icon" />
+            <Icon className="icon" />
             <input type="email" placeholder="Email adresinizi giriniz" />
         </div>
     );
