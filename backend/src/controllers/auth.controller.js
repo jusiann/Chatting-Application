@@ -6,11 +6,12 @@ import moment from "moment";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
 
-export const signup = async (req ,res) => {
+export const signUp = async (req ,res) => {
     try {
         const {name, surname, email, password} = req.body;
         if (!name || !surname || !email || !password)
             return res.status(400).json({
+                success: false,
                 message: "Name, Surname, Email and Password are required."
             });
 
@@ -21,6 +22,7 @@ export const signup = async (req ,res) => {
 
         if(checkUser.rows.length > 0)
             return res.status(400).json({
+                success: false,
                 message: "Email already exists!"
             });
 
@@ -33,21 +35,24 @@ export const signup = async (req ,res) => {
         );
 
         res.status(201).json({
+            success: true,
             message: "User created!!"
         });
     } catch (error) {
         console.error("Signup error:", error);
         res.status(500).json({
+            success: false,
             message: "User cannot created!!"
         });
     }
 };
 
-export const signin = async (req, res) => {
+export const signIn = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password)
             return res.status(400).json({
+                success: false,
                 message: "Email and Password are required."
             });
 
@@ -58,6 +63,7 @@ export const signin = async (req, res) => {
 
         if (checkUser.rows.length === 0)
             return res.status(400).json({
+                success: false,
                 message: "Email or Password is wrong!"
             });
 
@@ -69,6 +75,7 @@ export const signin = async (req, res) => {
 
         if (!comparePassword)
             return res.status(401).json({
+                success: false,
                 message: "Password is wrong!"
             });
 
@@ -76,16 +83,18 @@ export const signin = async (req, res) => {
     } catch (error) {
         console.error("Signin error:", error);
         res.status(500).json({
+            success: false,
             message: "Signin failed!"
         });
     }
 };
 
-export const forgetpassword = async (req, res) => {
+export const forgetPassword = async (req, res) => {
     try {
         const {email} = req.body;
         if (!email)
             return res.status(400).json({
+                success: false,
                 message: "Email is required."
             });
 
@@ -96,6 +105,7 @@ export const forgetpassword = async (req, res) => {
 
         if(!checkUser.rows.length > 0)
             return res.status(400).json({
+                success: false,
                 message: "User does not exist!"
             });
 
@@ -127,6 +137,7 @@ export const forgetpassword = async (req, res) => {
     } catch (error) {
         console.error("Forget password error:", error);
         res.status(500).json({
+            success: false,
             message: "Forget password failed!"
         });
     }
@@ -137,6 +148,7 @@ export const checkResetCode = async (req, res) => {
         const { email, reset_code } = req.body;
         if (!email || !reset_code)
             return res.status(400).json({
+                success: false,
                 message: "Email and reset code are required."
             });
 
@@ -147,6 +159,7 @@ export const checkResetCode = async (req, res) => {
 
         if (userCheck.rows.length === 0)
             return res.status(404).json({
+                success: false,
                 message: "User not found!"
             });
 
@@ -154,6 +167,7 @@ export const checkResetCode = async (req, res) => {
 
         if (!user.reset_code || !user.reset_time)
             return res.status(400).json({
+                success: false,
                 message: "No active password reset request found for this user."
             });
 
@@ -167,11 +181,13 @@ export const checkResetCode = async (req, res) => {
 
         if (differenceInMinutes >= process.env.RESETCODE_EXPIRES_IN)
             return res.status(401).json({
+                success: false,
                 message: "Reset code expired! Please request a new one."
             });
 
         if (String(user.reset_code) !== String(reset_code))
             return res.status(400).json({
+                success: false,
                 message: "Reset code does not match!",
             });
 
@@ -191,28 +207,33 @@ export const checkResetCode = async (req, res) => {
         });
 
         res.status(200).json({
+            success: true,
             message: "Reset code verified successfully. You can now set a new password.",
             token: token
         });
     } catch (error) {
         console.error("Error in checkResetCode:", error);
         res.status(500).json({
+            success: false,
             message: "An internal server error occurred. Please try again later."
         });
     }
 };
 
-export const changepassword = async (req, res) => {
+export const changePassword = async (req, res) => {
     try {
-        const {email, password, token} = req.body;
-        if (!email || !password || !token)
+        const {email, password} = req.body;
+        if (!email || !password)
             return res.status(400).json({
+                success: false,
                 message: "Email, Password and Token are required."
             });
 
+        const token = req.cookies.token;
         const decoded = jwt.verify(token, process.env.JWT_TEMPORARY_KEY);
         if(decoded.type !== "reset")
             return res.status(401).json({
+                success: false,
                 message: "Invalid token!"
             });
         // console.log("Decoded: ", decoded);
@@ -224,12 +245,56 @@ export const changepassword = async (req, res) => {
         );
 
         res.status(200).json({
+            success: true,
             message: "Password has been changed successfully!"
         });
     } catch (error) {
         console.error("Reset password error:", error);
         res.status(400).json({
+            success: false,
             message: "Invalid token or other error."
         });
+    }
+};
+
+export const changePasswordAuthenticated = async (req, res) => {
+    try {
+        const {currentPassword, newPassword} = req.body;
+        if (!currentPassword || !newPassword)
+            return res.status(400).json({
+                success: false,
+                message: "Current password and new password are required."
+            });
+
+        const user = req.user;
+        const checkUser = await client.query(
+            "SELECT password FROM users WHERE id = $1",
+            [user.id]
+        );
+
+        const dbPassword = checkUser.rows[0].password;
+        const comparePassword = await bcrypt.compare(currentPassword, dbPassword);
+        if (!comparePassword)
+            return res.status(401).json({
+                success: false,
+                message: "Current password is wrong!"
+            });
+
+        const hashedPassword = await bcrypt.hash(newPassword, 8);
+        await client.query(
+            "UPDATE users SET password = $1 WHERE id = $2",
+            [hashedPassword, user.id]
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Password has been changed successfully!"
+        });
+    } catch (error) {
+        console.error("Change password authenticated error:", error);
+        res.status(401).json({
+            success: false,
+            message: "Authentication failed!"
+        })
     }
 };
