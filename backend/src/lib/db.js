@@ -13,5 +13,5 @@ client.connect()
     .then(() => console.log("Successfully connected to Database"))
     .catch(err => console.error("Database connection failed", err));
 
-export default client;
+export default client
 
