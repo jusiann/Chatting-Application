@@ -31,7 +31,10 @@ body {
     position: relative;
 
     text-align: center;
-
+    cursor: pointer;
+}
+.departmentButton:hover{
+    background-color: hsl(0, 0%, 95%);
 }
 
 .departmentButton span {

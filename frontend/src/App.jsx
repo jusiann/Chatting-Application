@@ -10,20 +10,22 @@ import MessageTopBar from './components/Messagetopbar'
 import Personcard from './components/Personcard'
 import MessageSended from './components/Messagesended'
 import MessageReceived from './components/Messagereceived'
+import GroupApprovalButton from './components/groupApprovalButton'
+import ContactCard from './components/contactCard'
+import CreateDepartmentButton from './components/createDepartmentButton'
+import CreateGroupButton from './components/createGroupButton'
+import DepartmentButton from './components/departmentButton'
+import GroupCancelButton from './components/groupCancelButton'
+import LoginButton from './components/loginButton'
+import RememberMe from './components/rememberMe'
+import SearchBar from './components/Searchbar'
+import Sidebar from './components/Sidebar'
+import SortBar from './components/sortBar'
 function App() {
 
   return (
     <>
-
       <Textinput />
-      <Searchbar />
-      <SettingCard />
-      <Sendbox />
-      <Settinguser />
-      <MessageTopBar />
-      <Personcard />
-      <MessageSended />
-      <MessageReceived />
     </>
 
 
