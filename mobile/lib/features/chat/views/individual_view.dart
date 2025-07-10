@@ -5,6 +5,7 @@ import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/features/chat/views/widgets/emoji_select_widget.dart';
 import 'package:mobile/features/chat/views/widgets/received_message_widget.dart';
 import 'package:mobile/features/chat/views/widgets/send_message_widget.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class IndividualPage extends StatefulWidget {
   const IndividualPage({super.key, required this.chat});
@@ -17,6 +18,26 @@ class IndividualPage extends StatefulWidget {
 class _IndividualPageState extends State<IndividualPage> {
   bool _showemoji = false;
   final _controller = TextEditingController();
+  IO.Socket? socket;
+
+  @override
+  void initState() {
+    super.initState();
+    connect();
+  }
+
+  void connect() {
+    socket = IO.io("http://192.168.1.9:5001", <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": "false",
+    });
+    if (socket != null) {
+      socket!.connect();
+      socket!.onConnect((data) => print("connected"));
+      socket!.emit("/test", "hello");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobile/features/authentication/controllers/register_controller.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,6 +10,11 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterState extends State<RegisterPage> {
+  final _nameController = TextEditingController();
+  final _surnameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _passwordReplyController = TextEditingController();
   bool _obscureText1 = true;
   bool _obscureText2 = true;
   @override
@@ -37,6 +43,7 @@ class _RegisterState extends State<RegisterPage> {
                         children: [
                           Expanded(
                             child: TextField(
+                              controller: _nameController,
                               decoration: InputDecoration(
                                 hintText: 'Adınız',
                                 border: OutlineInputBorder(
@@ -48,6 +55,7 @@ class _RegisterState extends State<RegisterPage> {
                           SizedBox(width: 20),
                           Expanded(
                             child: TextField(
+                              controller: _surnameController,
                               decoration: InputDecoration(
                                 hintText: 'Soyadınız',
                                 border: OutlineInputBorder(
@@ -64,6 +72,7 @@ class _RegisterState extends State<RegisterPage> {
                       width: double.infinity,
                       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: TextField(
+                        controller: _emailController,
                         decoration: InputDecoration(
                           hintText: 'Email adresiniz',
                           prefixIcon: Icon(Icons.email),
@@ -79,6 +88,7 @@ class _RegisterState extends State<RegisterPage> {
                       height: 64,
                       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: TextField(
+                        controller: _passwordController,
                         obscureText: _obscureText1,
                         decoration: InputDecoration(
                           hintText: 'Şifreniz',
@@ -106,6 +116,7 @@ class _RegisterState extends State<RegisterPage> {
                       height: 64,
                       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: TextField(
+                        controller: _passwordReplyController,
                         obscureText: _obscureText2,
                         decoration: InputDecoration(
                           hintText: 'Şifreniz tekrar',
@@ -134,7 +145,23 @@ class _RegisterState extends State<RegisterPage> {
                       width: double.infinity,
                       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: FilledButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          String name = _nameController.text;
+                          String surname = _surnameController.text;
+                          String email = _emailController.text;
+                          String password = _passwordController.text;
+                          String passwordRep = _passwordReplyController.text;
+                          if (password != passwordRep) {
+                            print('Şifreler eşleşmiyor.');
+                          } else {
+                            RegisterController.signupUser(
+                              name: name,
+                              surname: surname,
+                              email: email,
+                              password: password,
+                            );
+                          }
+                        },
                         child: Text('Kayıt ol'),
                         style: FilledButton.styleFrom(
                           backgroundColor: Color(0xFF910811),
