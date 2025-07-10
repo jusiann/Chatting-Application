@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/authentication/controllers/login_controller.dart';
 import 'package:mobile/features/authentication/views/register_view.dart';
 import 'package:mobile/features/chat/views/home_view.dart';
 
@@ -12,6 +13,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool? _isChecked = false;
   bool _obscureText = true;
+  final auth = AuthService();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +49,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 64,
                       width: 353,
                       child: TextField(
+                        controller: _emailController,
                         decoration: InputDecoration(
                           hintText: 'Email adresinizi giriniz',
                           border: OutlineInputBorder(
@@ -61,6 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 64,
                       width: 353,
                       child: TextField(
+                        controller: _passwordController,
                         obscureText: _obscureText,
                         decoration: InputDecoration(
                           hintText: 'Şifrenizi giriniz',
@@ -132,7 +138,11 @@ class _LoginPageState extends State<LoginPage> {
                       height: 59,
                       width: 359,
                       child: FilledButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await auth.loginUser(
+                            _emailController.text,
+                            _passwordController.text,
+                          );
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (_) => HomeShell()),

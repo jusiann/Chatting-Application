@@ -31,7 +31,7 @@ class RegisterController {
           msg: 'Kayıt başarılı',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.green,
           textColor: Colors.white,
           fontSize: 16.0,
         );
@@ -45,7 +45,14 @@ class RegisterController {
         } catch (e) {
           message = 'sunucu hatası ${response.body}';
         }
-        Fluttertoast.showToast(msg: message);
+        Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       }
     }
   }
