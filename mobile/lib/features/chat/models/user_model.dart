@@ -1,15 +1,30 @@
 class UserModel {
+  int id;
   String name;
+  String surname;
+  String email;
   String? status;
-  String department;
+  String? department;
   String? avatar;
   bool selected;
 
   UserModel({
     required this.name,
+    required this.surname,
+    required this.id,
+    required this.email,
     this.status,
-    required this.department,
+    this.department,
     this.avatar,
     this.selected = false,
   });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      name: json['name'],
+      surname: json['surname'],
+      id: json['id'],
+      email: json['email'],
+    );
+  }
 }

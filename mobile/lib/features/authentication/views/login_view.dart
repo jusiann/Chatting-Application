@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/authentication/controllers/login_controller.dart';
 import 'package:mobile/features/authentication/views/register_view.dart';
-import 'package:mobile/features/chat/views/home_view.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   bool? _isChecked = false;
   bool _obscureText = true;
   final auth = AuthService();
@@ -139,14 +140,12 @@ class _LoginPageState extends State<LoginPage> {
                       width: 359,
                       child: FilledButton(
                         onPressed: () async {
-                          await auth.loginUser(
-                            _emailController.text,
-                            _passwordController.text,
-                          );
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => HomeShell()),
-                          );
+                          await ref
+                              .read(authControllerProvider.notifier)
+                              .login(
+                                _emailController.text,
+                                _passwordController.text,
+                              );
                         },
                         style: FilledButton.styleFrom(
                           backgroundColor: Color(0xFF910811),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/providers.dart';
 import 'package:mobile/features/chat/views/chat_view.dart';
 import 'package:mobile/features/chat/views/contact_view.dart';
@@ -22,7 +23,17 @@ class HomeShell extends ConsumerWidget {
         ),
         actions: [
           IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-          IconButton(onPressed: () {}, icon: Icon(Icons.menu)),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.menu),
+            onSelected: (value) {
+              if (value == 'cikis') {
+                ref.read(authControllerProvider.notifier).logout();
+              }
+            },
+            itemBuilder: (context) => <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(value: 'cikis', child: Text('Çıkış')),
+            ],
+          ),
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(1),

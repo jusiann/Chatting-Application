@@ -26,7 +26,7 @@ class RegisterController {
         }),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         Fluttertoast.showToast(
           msg: 'Kayıt başarılı',
           toastLength: Toast.LENGTH_SHORT,
