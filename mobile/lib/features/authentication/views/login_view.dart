@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/authentication/controllers/login_controller.dart';
 import 'package:mobile/features/authentication/views/register_view.dart';
+import 'package:mobile/features/chat/controllers/user_service.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -17,6 +18,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final auth = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      await ref.read(authControllerProvider.notifier).checkLoginStatus();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +154,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 _emailController.text,
                                 _passwordController.text,
                               );
+                          await ref
+                              .read(userServiceProvider.notifier)
+                              .fetchUsers();
                         },
                         style: FilledButton.styleFrom(
                           backgroundColor: Color(0xFF910811),

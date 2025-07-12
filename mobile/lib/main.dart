@@ -11,6 +11,8 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 

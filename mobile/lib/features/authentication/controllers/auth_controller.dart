@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/features/authentication/models/auth_user_model.dart';
+import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 part 'auth_controller.g.dart';
@@ -20,14 +21,16 @@ class AuthController extends _$AuthController {
 
   @override
   AuthState build() {
-    checkLoginStatus();
     return AuthState(isLoggedIn: false);
   }
 
+  String? _token;
+  String? get token => _token;
+
   Future<void> checkLoginStatus() async {
-    final token = await _storage.read(key: 'accessToken');
-    if (token != null && !JwtDecoder.isExpired(token)) {
-      final decoded = JwtDecoder.decode(token);
+    _token ??= await _storage.read(key: 'accessToken');
+    if (_token != null && !JwtDecoder.isExpired(_token!)) {
+      final decoded = JwtDecoder.decode(_token!);
       final user = AuthUserModel.fromJwt(decoded);
       state = AuthState(isLoggedIn: true, authUser: user);
     } else {
@@ -45,6 +48,7 @@ class AuthController extends _$AuthController {
           final accessToken = data['accessToken'];
           final refreshToken = data['refreshToken'];
           await _storage.write(key: 'accessToken', value: accessToken);
+          _token = accessToken;
           await _storage.write(key: 'refreshToken', value: refreshToken);
           final decodedToken = JwtDecoder.decode(accessToken);
           final user = AuthUserModel.fromJwt(decodedToken);

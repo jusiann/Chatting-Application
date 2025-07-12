@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/authentication/views/login_view.dart';
 import 'package:mobile/features/chat/views/home_view.dart';
+import 'package:mobile/main.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final auth = ref.watch(authControllerProvider);
@@ -12,6 +13,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/home', builder: (context, state) => HomeShell()),
       GoRoute(path: '/login', builder: (context, state) => LoginPage()),
     ],
+    observers: [routeObserver],
     redirect: (context, state) {
       final isLoggedIn = auth.isLoggedIn;
       final isOnLoginPage = state.uri.toString() == '/login';

@@ -1,30 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
+import 'package:mobile/features/chat/models/message_model.dart';
 import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/features/chat/views/widgets/emoji_select_widget.dart';
 import 'package:mobile/features/chat/views/widgets/received_message_widget.dart';
 import 'package:mobile/features/chat/views/widgets/send_message_widget.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-class IndividualPage extends StatefulWidget {
-  const IndividualPage({super.key, required this.chat});
+class IndividualPage extends ConsumerStatefulWidget {
+  const IndividualPage({super.key, required this.chat, required this.messages});
   final ChatModel chat;
+  final List<MessageModel> messages;
 
   @override
-  State<IndividualPage> createState() => _IndividualPageState();
+  ConsumerState<IndividualPage> createState() => _IndividualPageState();
 }
 
-class _IndividualPageState extends State<IndividualPage> {
+class _IndividualPageState extends ConsumerState<IndividualPage> {
   bool _showemoji = false;
   final _controller = TextEditingController();
   IO.Socket? socket;
 
-  @override
+  /* @override
   void initState() {
     super.initState();
     connect();
-  }
+  } */
 
   void connect() {
     socket = IO.io("http://192.168.1.9:5001", <String, dynamic>{
@@ -69,7 +72,7 @@ class _IndividualPageState extends State<IndividualPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    widget.chat.name,
+                    '${widget.chat.name} ${widget.chat.surname}',
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 16,
@@ -135,53 +138,12 @@ class _IndividualPageState extends State<IndividualPage> {
           child: Column(
             children: [
               Expanded(
-                child: ListView(
-                  children: [
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                    SendMessageWidget(),
-                    ReceivedMessageWidget(),
-                  ],
+                child: ListView.builder(
+                  itemBuilder: (context, index) =>
+                      widget.messages[index].senderid == widget.chat.id
+                      ? ReceivedMessageWidget(message: widget.messages[index])
+                      : SendMessageWidget(message: widget.messages[index]),
+                  itemCount: widget.messages.length,
                 ),
               ),
               Align(

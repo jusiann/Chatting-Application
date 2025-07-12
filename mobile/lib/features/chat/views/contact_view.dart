@@ -1,36 +1,68 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/chat/models/user_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/views/widgets/contact_card_widget.dart';
 import 'package:mobile/features/chat/views/widgets/department_card_widget.dart';
 import 'package:mobile/features/chat/views/widgets/group_card_widget.dart';
+import 'package:mobile/main.dart';
 
-class ContactPage extends StatelessWidget {
+class ContactPage extends ConsumerStatefulWidget {
   ContactPage({super.key});
-  final List<UserModel> users = [
-    UserModel(
-      name: 'Taner Çevik',
-      status: 'Prof. Dr.',
-      department: 'Bilgisayar Mühendisliği Bölüm Başkanı',
-    ),
-    UserModel(
-      name: 'Emre Tanrıverdi',
-      status: 'Doç. Dr.',
-      department: 'Elektrik-Elektronik Mühendisliği',
-    ),
-  ];
+
+  @override
+  ConsumerState<ContactPage> createState() => _ContactPageState();
+}
+
+class _ContactPageState extends ConsumerState<ContactPage> with RouteAware {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() async {
+      if (ref.read(userServiceProvider).contactUsers.isEmpty) {
+        await ref.read(userServiceProvider.notifier).fetchUsers();
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    ref.read(userServiceProvider.notifier).fetchUsers();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: users.length + 2,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return GroupCard();
-        } else if (index == 1) {
-          return DepartmentCard();
-        }
-        return ContactCard(user: users[index - 2]);
+    final userState = ref.watch(userServiceProvider);
+    if (userState.contactUsers.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(userServiceProvider.notifier).fetchUsers();
       },
+      child: ListView.builder(
+        itemCount: userState.contactUsers.length + 2,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return GroupCard();
+          } else if (index == 1) {
+            return DepartmentCard();
+          }
+          return ContactCard(user: userState.contactUsers[index - 2]);
+        },
+      ),
     );
   }
 }

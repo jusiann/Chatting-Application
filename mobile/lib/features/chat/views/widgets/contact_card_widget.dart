@@ -34,7 +34,7 @@ class ContactCard extends StatelessWidget {
         ),
       ),
       title: Text(
-        '${user.status ?? ''} ' + user.name,
+        '${user.status ?? 'bilinmiyor'} ${user.name} ${user.surname}',
         style: TextStyle(
           fontFamily: 'Inter',
           fontSize: 16,
@@ -42,7 +42,7 @@ class ContactCard extends StatelessWidget {
         ),
       ),
       subtitle: Text(
-        user.department,
+        user.department ?? 'bilinmiyor',
         style: TextStyle(
           fontFamily: 'Inter',
           fontSize: 12,

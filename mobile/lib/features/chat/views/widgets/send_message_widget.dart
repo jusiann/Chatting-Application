@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
+import 'package:mobile/features/chat/models/message_model.dart';
 
 class SendMessageWidget extends StatelessWidget {
-  const SendMessageWidget({super.key});
+  const SendMessageWidget({super.key, required this.message});
+  final MessageModel message;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,7 @@ class SendMessageWidget extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 70, left: 5, top: 5),
                     child: Text(
-                      'Merhaba Nasılsın ?',
+                      message.text,
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 14,
@@ -35,7 +38,7 @@ class SendMessageWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        '22.02',
+                        formatMessageTime(message.time),
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 12,

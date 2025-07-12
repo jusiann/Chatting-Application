@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
 import 'package:mobile/features/chat/views/widgets/avatar_group_widget.dart';
 import 'package:mobile/features/chat/views/widgets/contact_card_widget.dart';
 
-class GroupPage extends StatefulWidget {
+class GroupPage extends ConsumerStatefulWidget {
   GroupPage({super.key});
 
   @override
-  State<GroupPage> createState() => _GroupPageState();
+  ConsumerState<GroupPage> createState() => _GroupPageState();
 }
 
-class _GroupPageState extends State<GroupPage> {
+class _GroupPageState extends ConsumerState<GroupPage> {
   final List<UserModel> groupMember = [];
+  /*
   final List<UserModel> users = [
     UserModel(
       name: 'Taner Çevik',
@@ -24,9 +27,10 @@ class _GroupPageState extends State<GroupPage> {
       department: 'Elektrik-Elektronik Mühendisliği',
     ),
   ];
-
+  */
   @override
   Widget build(BuildContext context) {
+    final List<UserModel> userList = ref.read(userServiceProvider).contactUsers;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF910811),
@@ -85,21 +89,21 @@ class _GroupPageState extends State<GroupPage> {
           Divider(thickness: 1),
           Expanded(
             child: ListView.builder(
-              itemCount: users.length,
+              itemCount: userList.length,
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
                     setState(() {
-                      if (!users[index].selected) {
-                        users[index].selected = true;
-                        groupMember.add(users[index]);
+                      if (!userList[index].selected) {
+                        userList[index].selected = true;
+                        groupMember.add(userList[index]);
                       } else {
-                        users[index].selected = false;
-                        groupMember.remove(users[index]);
+                        userList[index].selected = false;
+                        groupMember.remove(userList[index]);
                       }
                     });
                   },
-                  child: ContactCard(user: users[index]),
+                  child: ContactCard(user: userList[index]),
                 );
               },
             ),
