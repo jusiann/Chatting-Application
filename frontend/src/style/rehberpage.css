@@ -1,0 +1,84 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Inter, sans-serif;
+    background-color: #f9f9f9;
+}
+
+.rehber-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: #f9f9f9;
+}
+
+.Sidebar {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.rehber-content {
+    flex: 1;
+    margin-left: 90px;
+    padding: 20px 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: #f9f9f9;
+    overflow-y: auto;
+    box-sizing: border-box;
+    scrollbar-width: none;
+}
+
+.rehber-content::-webkit-scrollbar {
+    display: none;
+}
+
+.button-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.button-row button:first-child {
+    margin-left: 5px;
+}
+
+.sortbar-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+}
+
+.person-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+.rehber-card {
+    background-color: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.rehber-right-panel {
+    flex: 1;
+    background-color: #f3d8db;
+    border-radius: 30px;
+    margin: 20px 25px 20px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 26px;
+    font-weight: 600;
+    color: #910811;
+    min-width: 400px;
+}
