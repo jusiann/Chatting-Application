@@ -1,0 +1,145 @@
+.anaekran-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+
+.anaekran-content {
+    flex: none;
+    margin-left: 90px;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+    overflow: hidden;
+}
+
+
+.anaekran-person-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    padding-right: 5px;
+    overflow: hidden;
+}
+
+.anaekran-person-list::-webkit-scrollbar {
+    display: none;
+}
+
+
+.anaekran-chat-panel {
+    flex: 1;
+    height: 100vh;
+    background-color: #f3d8db;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+
+.messagetopbar-container {
+    width: 100%;
+    height: 75px;
+    background-color: #7d0a16;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+}
+
+.messagetopbar-container>* {
+    width: 810px;
+    max-width: 100%;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+
+.anaekran-messages {
+    flex: 1;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 810px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+
+.sendbox-container {
+    width: 100%;
+    height: 75px;
+    background-color: #e7e9eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+
+.sendbox-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background-color: #e7e9eb;
+    height: 75px;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.sendbox-container .sendbox-container {
+    width: 810px;
+    max-width: 100%;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    box-sizing: border-box;
+}
+
+.sendbox-input {
+    flex: 1;
+    height: 40px;
+    border: none;
+    border-radius: 20px;
+    padding: 0 15px;
+    outline: none;
+    font-size: 16px;
+    font-family: Inter, sans-serif;
+    background-color: white;
+}
+
+.sendbox-icon,
+.sendbox-attachment,
+.sendbox-send {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+*::-webkit-scrollbar {
+    display: none;
+}
