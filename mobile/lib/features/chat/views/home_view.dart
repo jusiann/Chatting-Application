@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/providers.dart';
-import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/views/chat_view.dart';
 import 'package:mobile/features/chat/views/contact_view.dart';
 

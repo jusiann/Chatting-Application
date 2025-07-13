@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/authentication/controllers/login_controller.dart';
 import 'package:mobile/features/authentication/views/register_view.dart';
-import 'package:mobile/features/chat/controllers/user_service.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});

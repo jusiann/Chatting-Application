@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
@@ -16,7 +15,6 @@ class ContactUsers {
 
 @Riverpod(keepAlive: true)
 class UserService extends _$UserService {
-  final _storage = FlutterSecureStorage();
   @override
   ContactUsers build() {
     return ContactUsers();

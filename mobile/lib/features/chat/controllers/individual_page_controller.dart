@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:mobile/features/chat/models/message_model.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 Future<List<MessageModel>> fetchMessages(int id, String token) async {
   try {
