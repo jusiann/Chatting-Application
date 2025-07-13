@@ -6,6 +6,7 @@ class UserModel {
   String? status;
   String? department;
   String? avatar;
+  String? time;
   bool selected;
 
   UserModel({
@@ -16,6 +17,7 @@ class UserModel {
     this.status,
     this.department,
     this.avatar,
+    this.time,
     this.selected = false,
   });
 

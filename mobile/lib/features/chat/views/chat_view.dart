@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
-import 'package:mobile/features/chat/controllers/individual_page_controller.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/views/individual_view.dart';
@@ -13,7 +12,6 @@ class ChatPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(userServiceProvider);
-    final authState = ref.read(authControllerProvider.notifier);
     List<ChatModel> chats = userState.messageUsers;
 
     if (ref.read(userServiceProvider).messageUsers.isEmpty) {
@@ -25,16 +23,11 @@ class ChatPage extends ConsumerWidget {
       },
       child: ListView.builder(
         itemBuilder: (context, index) => InkWell(
-          onTap: () async {
-            final messages = await fetchMessages(
-              chats[index].id,
-              authState.token ?? 'no_token',
-            );
+          onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    IndividualPage(chat: chats[index], messages: messages),
+                builder: (_) => IndividualPage(chat: chats[index]),
               ),
             );
           },

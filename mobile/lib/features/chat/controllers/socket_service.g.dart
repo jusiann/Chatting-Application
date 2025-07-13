@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user_service.dart';
+part of 'socket_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$userServiceHash() => r'6f334b8a9269a882eaf6a29d0a46d80b8539ba4a';
+String _$socketServiceHash() => r'84dbaa3eb6aa3f77706feaed5e313fc03da9343d';
 
-/// See also [UserService].
-@ProviderFor(UserService)
-final userServiceProvider =
-    NotifierProvider<UserService, ContactUsers>.internal(
-      UserService.new,
-      name: r'userServiceProvider',
+/// See also [SocketService].
+@ProviderFor(SocketService)
+final socketServiceProvider =
+    NotifierProvider<SocketService, MySocket>.internal(
+      SocketService.new,
+      name: r'socketServiceProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$userServiceHash,
+          : _$socketServiceHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$UserService = Notifier<ContactUsers>;
+typedef _$SocketService = Notifier<MySocket>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

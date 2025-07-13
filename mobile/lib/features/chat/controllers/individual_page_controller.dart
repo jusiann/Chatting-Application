@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:mobile/features/chat/models/message_model.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 Future<List<MessageModel>> fetchMessages(int id, String token) async {
   try {
@@ -25,5 +26,27 @@ Future<List<MessageModel>> fetchMessages(int id, String token) async {
   } catch (err) {
     print(err);
     throw Exception('Mesajlar alınamadı. $err');
+  }
+}
+
+Future<MessageModel> sendMessage({
+  required String text,
+  required int id,
+  required String token,
+}) async {
+  final url = Uri.parse('http://192.168.1.9:5001/api/messages/send/$id');
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'Application/json',
+    },
+    body: jsonEncode({'text': text}),
+  );
+  if (response.statusCode == 200) {
+    final messageJson = jsonDecode(response.body);
+    return MessageModel.fromJson(messageJson);
+  } else {
+    throw Exception('Mesaj gonderilirken hata olustu.');
   }
 }

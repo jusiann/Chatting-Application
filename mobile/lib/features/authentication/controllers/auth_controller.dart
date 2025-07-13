@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/features/authentication/models/auth_user_model.dart';
-import 'package:mobile/features/chat/controllers/user_service.dart';
+import 'package:mobile/features/chat/controllers/socket_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 part 'auth_controller.g.dart';
@@ -12,16 +13,22 @@ part 'auth_controller.g.dart';
 class AuthState {
   final AuthUserModel? authUser;
   final bool isLoggedIn;
-  AuthState({required this.isLoggedIn, this.authUser});
+  final bool isChecking;
+  AuthState({
+    required this.isLoggedIn,
+    this.authUser,
+    required this.isChecking,
+  });
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AuthController extends _$AuthController {
   final _storage = FlutterSecureStorage();
+  Timer? _refreshTimer;
 
   @override
   AuthState build() {
-    return AuthState(isLoggedIn: false);
+    return AuthState(isLoggedIn: false, isChecking: true);
   }
 
   String? _token;
@@ -32,7 +39,9 @@ class AuthController extends _$AuthController {
     if (_token != null && !JwtDecoder.isExpired(_token!)) {
       final decoded = JwtDecoder.decode(_token!);
       final user = AuthUserModel.fromJwt(decoded);
-      state = AuthState(isLoggedIn: true, authUser: user);
+      ref.read(socketServiceProvider.notifier).connect(_token!);
+      _startTokenRefreshTimer(_token!);
+      state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
     } else {
       final refreshToken = await _storage.read(key: 'refreshToken');
       if (refreshToken != null) {
@@ -52,10 +61,16 @@ class AuthController extends _$AuthController {
           await _storage.write(key: 'refreshToken', value: refreshToken);
           final decodedToken = JwtDecoder.decode(accessToken);
           final user = AuthUserModel.fromJwt(decodedToken);
-          state = (AuthState(isLoggedIn: true, authUser: user));
+          state = (AuthState(
+            isLoggedIn: true,
+            authUser: user,
+            isChecking: false,
+          ));
+          ref.read(socketServiceProvider.notifier).connect(accessToken);
+          _startTokenRefreshTimer(accessToken);
         } else {}
       } else {
-        state = AuthState(isLoggedIn: false, authUser: null);
+        state = AuthState(isLoggedIn: false, authUser: null, isChecking: false);
       }
     }
   }
@@ -80,10 +95,12 @@ class AuthController extends _$AuthController {
       await _storage.write(key: 'refreshToken', value: data['refreshToken']);
       final decoded = JwtDecoder.decode(data['accessToken']);
       final user = AuthUserModel.fromJwt(decoded);
-      state = AuthState(isLoggedIn: true, authUser: user);
+      _startTokenRefreshTimer(data['accessToken']);
+      state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
+      ref.read(socketServiceProvider.notifier).connect(data['accessToken']);
     }
     if (response.statusCode != 200) {
-      dynamic? data = jsonDecode(response.body);
+      dynamic data = jsonDecode(response.body);
       String message = data['message'] ?? 'bir hata olustu';
 
       Fluttertoast.showToast(
@@ -99,6 +116,24 @@ class AuthController extends _$AuthController {
 
   Future<void> logout() async {
     await _storage.deleteAll();
-    state = AuthState(isLoggedIn: false);
+    _token = null;
+    state = AuthState(isLoggedIn: false, isChecking: false);
+  }
+
+  void _startTokenRefreshTimer(String token) {
+    _refreshTimer?.cancel();
+
+    final expiryDate = JwtDecoder.getExpirationDate(token);
+    final now = DateTime.now();
+    final refreshTime = expiryDate.difference(now) - Duration(minutes: 1);
+
+    if (refreshTime.isNegative) {
+      checkLoginStatus();
+      return;
+    }
+
+    _refreshTimer = Timer(refreshTime, () async {
+      await checkLoginStatus();
+    });
   }
 }

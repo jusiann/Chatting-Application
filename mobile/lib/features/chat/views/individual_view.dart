@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mobile/features/authentication/controllers/auth_controller.dart';
+import 'package:mobile/features/chat/controllers/individual_page_controller.dart';
+import 'package:mobile/features/chat/controllers/message_controller.dart';
+import 'package:mobile/features/chat/controllers/socket_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/models/message_model.dart';
 import 'package:mobile/features/chat/views/camera_view.dart';
@@ -10,39 +14,60 @@ import 'package:mobile/features/chat/views/widgets/send_message_widget.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class IndividualPage extends ConsumerStatefulWidget {
-  const IndividualPage({super.key, required this.chat, required this.messages});
+  const IndividualPage({super.key, required this.chat});
   final ChatModel chat;
-  final List<MessageModel> messages;
 
   @override
   ConsumerState<IndividualPage> createState() => _IndividualPageState();
 }
 
-class _IndividualPageState extends ConsumerState<IndividualPage> {
+class _IndividualPageState extends ConsumerState<IndividualPage>
+    with WidgetsBindingObserver {
   bool _showemoji = false;
   final _controller = TextEditingController();
   IO.Socket? socket;
+  ScrollController _scrollController = ScrollController();
 
-  /* @override
+  @override
   void initState() {
-    super.initState();
-    connect();
-  } */
-
-  void connect() {
-    socket = IO.io("http://192.168.1.9:5001", <String, dynamic>{
-      "transports": ["websocket"],
-      "autoConnect": "false",
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final token = ref.read(authControllerProvider.notifier).token!;
+      final fetchedMessages = await fetchMessages(widget.chat.id, token);
+      ref
+          .read(messageControllerProvider.notifier)
+          .setInitialMessages(fetchedMessages);
+      ref
+          .read(messageControllerProvider.notifier)
+          .listenSocket(ref.read(socketServiceProvider.notifier));
     });
-    if (socket != null) {
-      socket!.connect();
-      socket!.onConnect((data) => print("connected"));
-      socket!.emit("/test", "hello");
-    }
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    Future.delayed(Duration(milliseconds: 200), () {
+      if (mounted) {
+        _scrollController.animateTo(
+          0,
+          duration: Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final messages = ref.watch(messageControllerProvider);
     return PopScope(
       canPop: !_showemoji,
       onPopInvokedWithResult: (didPop, result) {
@@ -56,6 +81,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage> {
       },
 
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
         appBar: AppBar(
           leading: IconButton(
@@ -139,11 +165,21 @@ class _IndividualPageState extends ConsumerState<IndividualPage> {
             children: [
               Expanded(
                 child: ListView.builder(
-                  itemBuilder: (context, index) =>
-                      widget.messages[index].senderid == widget.chat.id
-                      ? ReceivedMessageWidget(message: widget.messages[index])
-                      : SendMessageWidget(message: widget.messages[index]),
-                  itemCount: widget.messages.length,
+                  reverse: true,
+                  controller: _scrollController,
+                  padding: EdgeInsets.only(bottom: 10),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  itemBuilder: (context, index) {
+                    final reversedIndex = messages.length - 1 - index;
+                    final message = messages[reversedIndex];
+                    if (message.senderid == widget.chat.id) {
+                      return ReceivedMessageWidget(message: message);
+                    } else {
+                      return SendMessageWidget(message: message);
+                    }
+                  },
+                  itemCount: messages.length,
                 ),
               ),
               Align(
@@ -222,7 +258,50 @@ class _IndividualPageState extends ConsumerState<IndividualPage> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              if (_controller.text.isNotEmpty) {
+                                ref
+                                    .read(socketServiceProvider.notifier)
+                                    .emit('message', {
+                                      'text': _controller.text,
+                                      'time': DateTime.now().toString(),
+                                      'senderid': ref
+                                          .read(authControllerProvider)
+                                          .authUser!
+                                          .id,
+                                      'receiverid': widget.chat.id,
+                                    });
+                                await sendMessage(
+                                  text: _controller.text,
+                                  id: widget.chat.id,
+                                  token:
+                                      ref
+                                          .read(authControllerProvider.notifier)
+                                          .token ??
+                                      'no_token',
+                                );
+
+                                ref
+                                    .read(messageControllerProvider.notifier)
+                                    .addMessages(
+                                      MessageModel(
+                                        text: _controller.text,
+                                        time: DateTime.now().toString(),
+                                        senderid: ref
+                                            .read(authControllerProvider)
+                                            .authUser!
+                                            .id,
+                                        receiverid: widget.chat.id,
+                                      ),
+                                    );
+                                _controller.clear();
+                                _scrollController.animateTo(
+                                  0,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                );
+                              }
+                            },
                             icon: Transform.rotate(
                               angle: 3.14 * 3 / 2,
                               child: CircleAvatar(

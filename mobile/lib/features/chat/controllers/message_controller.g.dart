@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user_service.dart';
+part of 'message_controller.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$userServiceHash() => r'6f334b8a9269a882eaf6a29d0a46d80b8539ba4a';
+String _$messageControllerHash() => r'82c745a2a25e2133966c0ad79d3fbc0ea8b9f591';
 
-/// See also [UserService].
-@ProviderFor(UserService)
-final userServiceProvider =
-    NotifierProvider<UserService, ContactUsers>.internal(
-      UserService.new,
-      name: r'userServiceProvider',
+/// See also [MessageController].
+@ProviderFor(MessageController)
+final messageControllerProvider =
+    AutoDisposeNotifierProvider<MessageController, List<MessageModel>>.internal(
+      MessageController.new,
+      name: r'messageControllerProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$userServiceHash,
+          : _$messageControllerHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$UserService = Notifier<ContactUsers>;
+typedef _$MessageController = AutoDisposeNotifier<List<MessageModel>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

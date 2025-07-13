@@ -1,3 +1,5 @@
+import 'package:mobile/features/chat/models/user_model.dart';
+
 class ChatModel {
   String name;
   String surname;
@@ -5,6 +7,7 @@ class ChatModel {
   String? icon;
   bool isGroup;
   String time;
+  String? lastSeen;
   String currentMessage;
   int id;
 
@@ -15,6 +18,7 @@ class ChatModel {
     this.icon,
     required this.isGroup,
     required this.time,
+    this.lastSeen,
     required this.currentMessage,
     required this.id,
   });
@@ -28,6 +32,18 @@ class ChatModel {
       time: json['last_message_time'],
       currentMessage: json['last_message'],
       id: json['id'],
+    );
+  }
+
+  factory ChatModel.fromUser(UserModel user) {
+    return ChatModel(
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      isGroup: false,
+      time: '12.00',
+      currentMessage: '',
+      id: user.id,
     );
   }
 }

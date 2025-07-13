@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
-import 'package:mobile/features/chat/views/individual_view.dart';
 
 class CustomCard extends StatelessWidget {
   const CustomCard({super.key, required this.chat});

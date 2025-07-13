@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/authentication/controllers/auth_controller.dart';
+import 'package:mobile/features/chat/controllers/individual_page_controller.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
+import 'package:mobile/features/chat/models/chat_model.dart';
+import 'package:mobile/features/chat/models/message_model.dart';
+import 'package:mobile/features/chat/views/individual_view.dart';
 import 'package:mobile/features/chat/views/widgets/contact_card_widget.dart';
 import 'package:mobile/features/chat/views/widgets/department_card_widget.dart';
 import 'package:mobile/features/chat/views/widgets/group_card_widget.dart';
@@ -60,7 +65,20 @@ class _ContactPageState extends ConsumerState<ContactPage> with RouteAware {
           } else if (index == 1) {
             return DepartmentCard();
           }
-          return ContactCard(user: userState.contactUsers[index - 2]);
+          return InkWell(
+            onTap: () {
+              ChatModel chat = ChatModel.fromUser(
+                userState.contactUsers[index - 2],
+              );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IndividualPage(chat: chat),
+                ),
+              );
+            },
+            child: ContactCard(user: userState.contactUsers[index - 2]),
+          );
         },
       ),
     );

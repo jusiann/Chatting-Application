@@ -1,14 +1,14 @@
-import 'package:flutter/foundation.dart';
-
 class MessageModel {
   String text;
   String time;
   int senderid;
   bool? status;
+  int receiverid;
   MessageModel({
     required this.text,
     required this.time,
     required this.senderid,
+    required this.receiverid,
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
@@ -16,6 +16,7 @@ class MessageModel {
       text: json['text'],
       time: json['createdat'],
       senderid: json['senderid'],
+      receiverid: json['receiverid'],
     );
   }
 }

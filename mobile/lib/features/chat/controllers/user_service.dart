@@ -14,7 +14,7 @@ class ContactUsers {
   ContactUsers({this.contactUsers = const [], this.messageUsers = const []});
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class UserService extends _$UserService {
   final _storage = FlutterSecureStorage();
   @override
@@ -27,7 +27,6 @@ class UserService extends _$UserService {
     var responseContact;
     var responseMessageUsers;
     final authController = ref.read(authControllerProvider.notifier);
-    await ref.read(authControllerProvider.notifier).checkLoginStatus();
     if (ref.read(authControllerProvider).isLoggedIn) {
       try {
         final accessToken = authController.token;

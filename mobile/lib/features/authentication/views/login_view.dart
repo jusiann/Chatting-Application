@@ -22,7 +22,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void initState() {
     super.initState();
     Future.microtask(() async {
-      await ref.read(authControllerProvider.notifier).checkLoginStatus();
+      /* await ref.read(authControllerProvider.notifier).checkLoginStatus(); */
     });
   }
 
@@ -154,9 +154,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 _emailController.text,
                                 _passwordController.text,
                               );
-                          await ref
-                              .read(userServiceProvider.notifier)
-                              .fetchUsers();
                         },
                         style: FilledButton.styleFrom(
                           backgroundColor: Color(0xFF910811),
