@@ -1,39 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/authentication/controllers/auth_controller.dart';
+import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
+import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
+import 'package:mobile/features/chat/views/individual_view.dart';
 import 'package:mobile/features/chat/views/widgets/custom_card_widget.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends ConsumerWidget {
   const ChatPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    List<ChatModel> chats = [
-      ChatModel(
-        name: 'Arş. Gör. Derya Kaya',
-        isGroup: false,
-        time: '22.02',
-        currentMessage: 'Görüşürüz.',
-      ),
-      ChatModel(
-        name: 'Mehmet Özkan',
-        isGroup: false,
-        time: '06.30',
-        currentMessage: 'Anlaşıldı',
-      ),
-      ChatModel(
-        name: 'Doç. Dr. Emre Tanrıverdi',
-        isGroup: false,
-        time: '14.43',
-        currentMessage: 'Haha bende öyle düşünüyorum',
-      ),
-    ];
-    return Scaffold(
-      body: ListView(
-        children: [
-          CustomCard(chat: chats[0]),
-          CustomCard(chat: chats[1]),
-          CustomCard(chat: chats[2]),
-        ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unReadCount = ref.watch(unreadMessageControllerProvider);
+    final userState = ref.watch(userServiceProvider);
+    List<ChatModel> chats = userState.messageUsers;
+
+    if (ref.read(userServiceProvider).messageUsers.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
+    return RefreshIndicator(
+      onRefresh: () async {
+        await ref.read(userServiceProvider.notifier).fetchUsers();
+      },
+      child: ListView.builder(
+        itemBuilder: (context, index) => InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => IndividualPage(chat: chats[index]),
+              ),
+            );
+          },
+          child: CustomCard(
+            chat: chats[index],
+            unRead: unReadCount[chats[index].id],
+          ),
+        ),
+        itemCount: chats.length,
       ),
     );
   }

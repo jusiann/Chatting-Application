@@ -5,6 +5,4 @@ final homeShellProvider = ChangeNotifierProvider<HomeState>((ref) {
   return HomeState(navBarIndex: 0);
 });
 
-/*final navBarIndex = StateProvider<int>((ref) {
-  return 0;
-});      Kullanılabilir.*/
+final openChatIdProvider = StateProvider<int?>((ref) => null);
