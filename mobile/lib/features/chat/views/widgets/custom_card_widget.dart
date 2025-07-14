@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 
-class CustomCard extends StatelessWidget {
-  const CustomCard({super.key, required this.chat});
+class CustomCard extends ConsumerWidget {
+  const CustomCard({super.key, required this.chat, this.unRead});
   final ChatModel chat;
+  final int? unRead;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.read(authControllerProvider).authUser!.id;
     return Column(
       children: [
         ListTile(
@@ -31,10 +35,17 @@ class CustomCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          trailing: Text(formatMessageTime(chat.time)),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(formatStringTime(chat.time)),
+              SizedBox(height: 3),
+              unReadCountWidget(unRead),
+            ],
+          ),
           subtitle: Row(
             children: [
-              Icon(Icons.done_all, size: 18),
+              currentTextIcon(currentUser, chat.senderid!, chat.messageStatus!),
               SizedBox(width: 5),
               Text(
                 chat.currentMessage,

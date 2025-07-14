@@ -3,28 +3,31 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mobile/features/chat/models/message_model.dart';
 
-Future<List<MessageModel>> fetchMessages(int id, String token) async {
-  try {
-    final url = Uri.parse('http://192.168.1.9:5001/api/messages/$id');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final List<MessageModel> messages = data
-          .map<MessageModel>((message) => MessageModel.fromJson(message))
-          .toList();
-      return messages;
-    } else {
-      throw Exception('mesajlar alınamadı');
-    }
-  } catch (err) {
-    print(err);
-    throw Exception('Mesajlar alınamadı. $err');
+Future<List<MessageModel>> fetchMessagesFromDb({
+  required int otherUserId,
+  required String token,
+  required int page,
+  required int pageSize,
+}) async {
+  final uri = Uri.parse(
+    'http://192.168.1.9:5001/api/messages/$otherUserId/$page/$pageSize',
+  );
+
+  final response = await http.get(
+    uri,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+  print('STATUS CODE : ${response.statusCode}');
+  print('RESPONSE: ${response.body}');
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonList = jsonDecode(response.body);
+    return jsonList.map((json) => MessageModel.fromJson(json)).toList();
+  } else {
+    print(response.body);
+    throw Exception('Mesajlar yüklenirken hata oluştu.');
   }
 }
 

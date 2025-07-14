@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
+import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
 import 'package:mobile/features/chat/controllers/individual_page_controller.dart';
 import 'package:mobile/features/chat/controllers/message_controller.dart';
+import 'package:mobile/features/chat/controllers/providers.dart';
 import 'package:mobile/features/chat/controllers/socket_service.dart';
+import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
-import 'package:mobile/features/chat/models/message_model.dart';
 import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/features/chat/views/widgets/emoji_select_widget.dart';
 import 'package:mobile/features/chat/views/widgets/received_message_widget.dart';
@@ -32,14 +34,51 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final token = ref.read(authControllerProvider.notifier).token!;
-      final fetchedMessages = await fetchMessages(widget.chat.id, token);
-      ref
+      await ref
           .read(messageControllerProvider.notifier)
-          .setInitialMessages(fetchedMessages);
+          .fetchMore(widget.chat.id);
+      final currentUserId = ref.read(authControllerProvider).authUser!.id;
+      final messages = ref
+          .watch(messageControllerProvider.notifier)
+          .forChat(widget.chat.id, currentUserId);
+      final unreadIds = messages
+          .where((m) => m.senderid == widget.chat.id && m.status != 'read')
+          .map((m) => m.id)
+          .toList();
+      if (unreadIds.isNotEmpty) {
+        ref.read(socketServiceProvider.notifier).emit('message_read', {
+          'ids': unreadIds,
+          'readerId': currentUserId,
+        });
+      }
       ref
-          .read(messageControllerProvider.notifier)
-          .listenSocket(ref.read(socketServiceProvider.notifier));
+          .read(unreadMessageControllerProvider.notifier)
+          .clearUnread(widget.chat.id);
+
+      ref.read(openChatIdProvider.notifier).state = widget.chat.id;
+    });
+
+    _scrollController.addListener(() async {
+      if (_scrollController.position.pixels <=
+          _scrollController.position.minScrollExtent + 100) {
+        await ref
+            .read(messageControllerProvider.notifier)
+            .fetchMore(widget.chat.id);
+        final currentUserId = ref.read(authControllerProvider).authUser!.id;
+        final messages = ref
+            .watch(messageControllerProvider.notifier)
+            .forChat(widget.chat.id, currentUserId);
+        final unreadIds = messages
+            .where((m) => m.senderid == widget.chat.id && m.status != 'read')
+            .map((m) => m.id)
+            .toList();
+        if (unreadIds.isNotEmpty) {
+          ref.read(socketServiceProvider.notifier).emit('message_read', {
+            'ids': unreadIds,
+            'readerId': currentUserId,
+          });
+        }
+      }
     });
 
     super.initState();
@@ -47,6 +86,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
 
   @override
   void dispose() {
+    _scrollController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -67,6 +107,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = ref.watch(authControllerProvider).authUser!.id;
     final messages = ref.watch(messageControllerProvider);
     return PopScope(
       canPop: !_showemoji,
@@ -77,6 +118,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
           });
           return;
         }
+        ref.read(openChatIdProvider.notifier).state = null;
         if (!didPop) Navigator.of(context).pop(result);
       },
 
@@ -118,7 +160,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                         ),
                       ),
                       Text(
-                        widget.chat.time,
+                        formatStringTime(widget.chat.time),
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 12,
@@ -260,40 +302,15 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                           IconButton(
                             onPressed: () async {
                               if (_controller.text.isNotEmpty) {
+                                final msg = {
+                                  'text': _controller.text,
+                                  'time': DateTime.now().toIso8601String(),
+                                  'senderid': currentUserId,
+                                  'receiverid': widget.chat.id,
+                                };
                                 ref
                                     .read(socketServiceProvider.notifier)
-                                    .emit('message', {
-                                      'text': _controller.text,
-                                      'time': DateTime.now().toString(),
-                                      'senderid': ref
-                                          .read(authControllerProvider)
-                                          .authUser!
-                                          .id,
-                                      'receiverid': widget.chat.id,
-                                    });
-                                await sendMessage(
-                                  text: _controller.text,
-                                  id: widget.chat.id,
-                                  token:
-                                      ref
-                                          .read(authControllerProvider.notifier)
-                                          .token ??
-                                      'no_token',
-                                );
-
-                                ref
-                                    .read(messageControllerProvider.notifier)
-                                    .addMessages(
-                                      MessageModel(
-                                        text: _controller.text,
-                                        time: DateTime.now().toString(),
-                                        senderid: ref
-                                            .read(authControllerProvider)
-                                            .authUser!
-                                            .id,
-                                        receiverid: widget.chat.id,
-                                      ),
-                                    );
+                                    .emit('message', msg);
                                 _controller.clear();
                                 _scrollController.animateTo(
                                   0,

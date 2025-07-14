@@ -17,13 +17,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final auth = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() async {
-      /* await ref.read(authControllerProvider.notifier).checkLoginStatus(); */
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

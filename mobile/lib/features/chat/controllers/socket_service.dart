@@ -1,3 +1,6 @@
+import 'package:mobile/features/chat/controllers/message_controller.dart';
+import 'package:mobile/features/chat/models/chat_model.dart';
+import 'package:mobile/features/chat/models/message_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 part 'socket_service.g.dart';
@@ -26,10 +29,8 @@ class SocketService extends _$SocketService {
     print('[SOCKET] Yeni bağlantı kuruluyor');
     _token = token;
 
-    // Eski bağlantıyı kapat
     _socket?.disconnect();
 
-    // Yeni bağlantı
     _socket = IO.io(
       'http://192.168.1.9:5001',
       IO.OptionBuilder()
@@ -39,9 +40,28 @@ class SocketService extends _$SocketService {
           .build(),
     );
 
-    // Event'ler
     _socket!.onConnect((_) => print('[SOCKET] Bağlandı'));
     _socket!.onDisconnect((_) => print('[SOCKET] Bağlantı koptu'));
+
+    _socket!.on('message', (data) {
+      final msg = MessageModel.fromJson(data);
+      ref.read(messageControllerProvider.notifier).addFromSocket(msg);
+      ref.read(messageControllerProvider.notifier).handleIncomingMessages(data);
+    });
+
+    _socket!.on('message_delivered', (data) {
+      final msgId = data['id'];
+      final deliveredAt = data['deliveredAt'];
+      ref
+          .read(messageControllerProvider.notifier)
+          .markAsDelivered(msgId, deliveredAt);
+    });
+
+    _socket!.on('message_read', (data) {
+      final msgId = data['id'];
+      final readAt = data['readAt'];
+      ref.read(messageControllerProvider.notifier).markAsRead(msgId, readAt);
+    });
 
     // State güncelle
     state = MySocket(socket: _socket);

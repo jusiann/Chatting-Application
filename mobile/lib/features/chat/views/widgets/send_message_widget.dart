@@ -8,6 +8,7 @@ class SendMessageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final status = message.status;
     return Align(
       alignment: Alignment.centerRight,
       child: ConstrainedBox(
@@ -46,7 +47,7 @@ class SendMessageWidget extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 5),
-                      Icon(Icons.done_all, color: Colors.white, size: 20),
+                      buildStatusIcon(status),
                     ],
                   ),
                 ],

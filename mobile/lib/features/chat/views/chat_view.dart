@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/authentication/controllers/auth_controller.dart';
+import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/views/individual_view.dart';
@@ -10,6 +12,7 @@ class ChatPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final unReadCount = ref.watch(unreadMessageControllerProvider);
     final userState = ref.watch(userServiceProvider);
     List<ChatModel> chats = userState.messageUsers;
 
@@ -30,7 +33,10 @@ class ChatPage extends ConsumerWidget {
               ),
             );
           },
-          child: CustomCard(chat: chats[index]),
+          child: CustomCard(
+            chat: chats[index],
+            unRead: unReadCount[chats[index].id],
+          ),
         ),
         itemCount: chats.length,
       ),

@@ -5,7 +5,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/features/authentication/models/auth_user_model.dart';
+import 'package:mobile/features/chat/controllers/message_controller.dart';
 import 'package:mobile/features/chat/controllers/socket_service.dart';
+import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
+import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 part 'auth_controller.g.dart';
@@ -36,42 +39,58 @@ class AuthController extends _$AuthController {
 
   Future<void> checkLoginStatus() async {
     _token ??= await _storage.read(key: 'accessToken');
-    if (_token != null && !JwtDecoder.isExpired(_token!)) {
-      final decoded = JwtDecoder.decode(_token!);
-      final user = AuthUserModel.fromJwt(decoded);
-      ref.read(socketServiceProvider.notifier).connect(_token!);
-      _startTokenRefreshTimer(_token!);
-      state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
-    } else {
-      final refreshToken = await _storage.read(key: 'refreshToken');
-      if (refreshToken != null) {
-        final response = await http.post(
-          Uri.parse('http://192.168.1.9:5001/api/auth/refresh'),
-          headers: {
-            'Authorization': 'Bearer $refreshToken',
-            'Content-Type': 'application/json',
-          },
-        );
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          final accessToken = data['accessToken'];
-          final refreshToken = data['refreshToken'];
-          await _storage.write(key: 'accessToken', value: accessToken);
-          _token = accessToken;
-          await _storage.write(key: 'refreshToken', value: refreshToken);
-          final decodedToken = JwtDecoder.decode(accessToken);
-          final user = AuthUserModel.fromJwt(decodedToken);
-          state = (AuthState(
-            isLoggedIn: true,
-            authUser: user,
-            isChecking: false,
-          ));
-          ref.read(socketServiceProvider.notifier).connect(accessToken);
-          _startTokenRefreshTimer(accessToken);
-        } else {}
-      } else {
-        state = AuthState(isLoggedIn: false, authUser: null, isChecking: false);
+    if (_token != null) {
+      final remainingTime = JwtDecoder.getRemainingTime(_token!);
+      final isStillValid = !JwtDecoder.isExpired(_token!);
+
+      if (isStillValid && remainingTime > Duration(minutes: 1)) {
+        final decoded = JwtDecoder.decode(_token!);
+        final user = AuthUserModel.fromJwt(decoded);
+        ref.read(socketServiceProvider.notifier).connect(_token!);
+        _startTokenRefreshTimer(_token!);
+        await markDeliveredMessages();
+        await ref
+            .read(unreadMessageControllerProvider.notifier)
+            .fetchUnreadCounts(_token!);
+        state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
+        return;
       }
+    }
+
+    final refreshToken = await _storage.read(key: 'refreshToken');
+    if (refreshToken != null) {
+      final response = await http.post(
+        Uri.parse('http://192.168.1.9:5001/api/auth/refresh'),
+        headers: {
+          'Authorization': 'Bearer $refreshToken',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final accessToken = data['accessToken'];
+        final refreshToken = data['refreshToken'];
+        await _storage.write(key: 'accessToken', value: accessToken);
+        _token = accessToken;
+        await _storage.write(key: 'refreshToken', value: refreshToken);
+        final decodedToken = JwtDecoder.decode(accessToken);
+        final user = AuthUserModel.fromJwt(decodedToken);
+        await ref
+            .read(unreadMessageControllerProvider.notifier)
+            .fetchUnreadCounts(_token!);
+        state = (AuthState(
+          isLoggedIn: true,
+          authUser: user,
+          isChecking: false,
+        ));
+        ref.read(socketServiceProvider.notifier).connect(accessToken);
+        _startTokenRefreshTimer(accessToken);
+        await markDeliveredMessages();
+        return;
+      } else {}
+    } else {
+      state = AuthState(isLoggedIn: false, authUser: null, isChecking: false);
+      return;
     }
   }
 
@@ -96,8 +115,13 @@ class AuthController extends _$AuthController {
       final decoded = JwtDecoder.decode(data['accessToken']);
       final user = AuthUserModel.fromJwt(decoded);
       _startTokenRefreshTimer(data['accessToken']);
+      _token = data['accessToken'];
+      await ref
+          .read(unreadMessageControllerProvider.notifier)
+          .fetchUnreadCounts(_token!);
       state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
       ref.read(socketServiceProvider.notifier).connect(data['accessToken']);
+      await markDeliveredMessages();
     }
     if (response.statusCode != 200) {
       dynamic data = jsonDecode(response.body);
@@ -117,7 +141,11 @@ class AuthController extends _$AuthController {
   Future<void> logout() async {
     await _storage.deleteAll();
     _token = null;
-    state = AuthState(isLoggedIn: false, isChecking: false);
+    state = AuthState(isLoggedIn: false, isChecking: false, authUser: null);
+    ref.invalidate(socketServiceProvider);
+    ref.invalidate(messageControllerProvider);
+    ref.invalidate(userServiceProvider);
+    ref.invalidate(unreadMessageControllerProvider);
   }
 
   void _startTokenRefreshTimer(String token) {
@@ -135,5 +163,21 @@ class AuthController extends _$AuthController {
     _refreshTimer = Timer(refreshTime, () async {
       await checkLoginStatus();
     });
+  }
+
+  Future<void> markDeliveredMessages() async {
+    final uri = Uri.parse(
+      'http://192.168.1.9:5001/api/messages/mark-delivered',
+    );
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $_token',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+    }
   }
 }

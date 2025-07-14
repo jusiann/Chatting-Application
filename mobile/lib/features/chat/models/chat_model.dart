@@ -10,6 +10,8 @@ class ChatModel {
   String? lastSeen;
   String currentMessage;
   int id;
+  int? senderid;
+  String? messageStatus;
 
   ChatModel({
     required this.name,
@@ -21,6 +23,8 @@ class ChatModel {
     this.lastSeen,
     required this.currentMessage,
     required this.id,
+    this.senderid,
+    this.messageStatus,
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +36,8 @@ class ChatModel {
       time: json['last_message_time'],
       currentMessage: json['last_message'],
       id: json['id'],
+      senderid: json['message_sender'],
+      messageStatus: json['message_status'],
     );
   }
 

@@ -11,6 +11,15 @@ class ContactUsers {
   List<UserModel> contactUsers;
   List<ChatModel> messageUsers;
   ContactUsers({this.contactUsers = const [], this.messageUsers = const []});
+  ContactUsers copyWith({
+    List<UserModel>? contactUsers,
+    List<ChatModel>? messageUsers,
+  }) {
+    return ContactUsers(
+      contactUsers: contactUsers ?? this.contactUsers,
+      messageUsers: messageUsers ?? this.messageUsers,
+    );
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -70,5 +79,20 @@ class UserService extends _$UserService {
         }
       }
     }
+  }
+
+  void updateChat(ChatModel updatedChat) {
+    print('updateChat fonksiyonu Calisti..');
+    final updatedList = List<ChatModel>.from(state.messageUsers);
+    final index = state.messageUsers.indexWhere(
+      (chat) => chat.id == updatedChat.id,
+    );
+    if (index != -1) {
+      updatedList[index] = updatedChat;
+    } else {
+      updatedList.add(updatedChat);
+    }
+    updatedList.sort((a, b) => b.time.compareTo(a.time));
+    state = state.copyWith(messageUsers: updatedList);
   }
 }

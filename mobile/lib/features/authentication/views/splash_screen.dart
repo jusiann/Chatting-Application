@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -10,14 +9,6 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() async {
-      await ref.read(authControllerProvider.notifier).checkLoginStatus();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
