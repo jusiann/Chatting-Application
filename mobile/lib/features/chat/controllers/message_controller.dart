@@ -130,11 +130,11 @@ class MessageController extends _$MessageController {
             .firstWhere((u) => u.id == senderId);
       }
       model = ChatModel(
-        name: user!.name,
-        surname: user!.surname,
-        email: user!.email,
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
         isGroup: false,
-        time: data['createdat'],
+        time: DateTime.parse(data['createdat']),
         currentMessage: data['text'],
         id: senderId,
         senderid: data['senderid'],
@@ -151,7 +151,7 @@ class MessageController extends _$MessageController {
         surname: user.surname,
         email: user.email,
         isGroup: false,
-        time: data['createdat'],
+        time: DateTime.parse(data['createdat']),
         currentMessage: data['text'],
         id: user.id,
         senderid: data['senderid'],

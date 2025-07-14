@@ -6,6 +6,7 @@ String formatMessageTime(DateTime dateTime) {
   final difference = now.difference(dateTime);
 
   if (difference.inDays == 0) {
+    print(dateTime);
     return DateFormat.Hm().format(dateTime);
   } else if (difference.inDays == 1) {
     return "Dün ${DateFormat.Hm().format(dateTime)}";
@@ -24,6 +25,7 @@ String formatStringTime(String time) {
   final difference = now.difference(dateTime);
 
   if (difference.inDays == 0) {
+    print(dateTime);
     return DateFormat.Hm().format(dateTime);
   } else if (difference.inDays == 1) {
     return "Dün ${DateFormat.Hm().format(dateTime)}";

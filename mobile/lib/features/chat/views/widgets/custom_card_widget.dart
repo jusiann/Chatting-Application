@@ -38,7 +38,7 @@ class CustomCard extends ConsumerWidget {
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(formatStringTime(chat.time)),
+              Text(formatMessageTime(chat.time)),
               SizedBox(height: 3),
               unReadCountWidget(unRead),
             ],

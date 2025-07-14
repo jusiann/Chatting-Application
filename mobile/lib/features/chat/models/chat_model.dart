@@ -6,7 +6,7 @@ class ChatModel {
   String email;
   String? icon;
   bool isGroup;
-  String time;
+  DateTime time;
   String? lastSeen;
   String currentMessage;
   int id;
@@ -33,7 +33,7 @@ class ChatModel {
       surname: json['surname'],
       email: json['email'],
       isGroup: false,
-      time: json['last_message_time'],
+      time: DateTime.parse(json['last_message_time']),
       currentMessage: json['last_message'],
       id: json['id'],
       senderid: json['message_sender'],
@@ -47,7 +47,7 @@ class ChatModel {
       surname: user.surname,
       email: user.email,
       isGroup: false,
-      time: '12.00',
+      time: DateTime.parse(DateTime.now().toString()),
       currentMessage: '',
       id: user.id,
     );

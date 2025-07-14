@@ -160,7 +160,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                         ),
                       ),
                       Text(
-                        formatStringTime(widget.chat.time),
+                        formatMessageTime(widget.chat.time),
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 12,
