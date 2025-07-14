@@ -1,0 +1,57 @@
+.message-topbar-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.message-topbar-wrapper {
+    width: 810px;
+    height: 75px;
+    border-radius: 30px;
+    background-color: #910811;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+.message-topbar-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.message-topbar-image {
+    width: 50px;
+    height: 50px;
+    background-color: #d9d9d9;
+    border-radius: 50%;
+}
+
+.message-topbar-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    color: white;
+    font-family: "Inter", sans-serif;
+}
+
+.message-topbar-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.message-topbar-status {
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.message-topbar-icons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 0 15px;
+}
