@@ -3,6 +3,8 @@ import Sidebar from "../components/Sidebar";
 import Searchbar from "../components/Searchbar";
 import ContactCard from "../components/contactCard";
 import { ChevronDown } from "lucide-react";
+import GroupCancelButton from "../components/groupCancelButton";
+import GroupApprovalButton from "../components/groupApprovalButton";
 
 function Gruppage() {
     return (
@@ -35,27 +37,28 @@ function Gruppage() {
 
                 </div>
             </div>
+            <div className="grouppage-right-panel-container">
+                <div className="gruppage-right-panel">
+                    <div className="group-image-placeholder">
+                        <div className="group-image-circle">Grup<br />Simgesi Ekle</div>
+                    </div>
 
-            <div className="gruppage-right-panel">
-                <div className="group-image-placeholder">
-                    <div className="group-image-circle">Grup<br />Simgesi Ekle</div>
-                </div>
+                    <input type="text" className="group-name-input" placeholder="Grup adını giriniz" />
 
-                <input type="text" className="group-name-input" placeholder="Grup adını giriniz" />
+                    <div className="selected-members-title">Seçili üyeler</div>
 
-                <div className="selected-members-title">Seçili üyeler</div>
+                    <div className="selected-members-list">
+                        <ContactCard name="İsmail Yıldız" title="Yazılım Uzmanı" image="" />
+                        <ContactCard name="Zeynep Aksoy" title="Akademik Danışman" image="" />
+                        <ContactCard name="Büşra Kar" title="Eğitim Fakültesi Sekreteri" image="" />
+                        <ContactCard name="Barış Çetin" title="Mühendislik Fakültesi Asistanı" image="" />
+                        <ContactCard name="Nehir Yılmaz" title="Rektörlük Sekreteri" image="" />
+                    </div>
 
-                <div className="selected-members-list">
-                    <ContactCard name="İsmail Yıldız" title="Yazılım Uzmanı" image="" />
-                    <ContactCard name="Zeynep Aksoy" title="Akademik Danışman" image="" />
-                    <ContactCard name="Büşra Kar" title="Eğitim Fakültesi Sekreteri" image="" />
-                    <ContactCard name="Barış Çetin" title="Mühendislik Fakültesi Asistanı" image="" />
-                    <ContactCard name="Nehir Yılmaz" title="Rektörlük Sekreteri" image="" />
-                </div>
-
-                <div className="group-action-buttons">
-                    <button className="cancel-btn">❌ İptal et</button>
-                    <button className="create-btn">✅ Grubu oluştur</button>
+                    <div className="group-action-buttons">
+                        <GroupCancelButton />
+                        <GroupApprovalButton text={"Grubu oluştur"}/>
+                    </div>
                 </div>
             </div>
         </div>

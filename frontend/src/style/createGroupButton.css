@@ -8,13 +8,13 @@ body {
 }
 
 .createGroupButton {
-    width: 161px;
+    width: 100%;
 
-    height: 45px;
+    height: 55px;
 
     display: flex;
     align-items: center;
-
+    justify-content: flex-start;
     gap: 18px;
 
     opacity: 1;
@@ -29,9 +29,6 @@ body {
 }
 
 .createGroupButton-text {
-    width: 98px;
-
-    height: 19px;
 
     font-family: Inter;
 
@@ -41,21 +38,7 @@ body {
 
     font-size: 16px;
 
-    line-height: 100%;
-
-    letter-spacing: 0%;
-
-    text-align: center;
-
-    vertical-align: middle;
-
     color: #222222;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
 
 }
 

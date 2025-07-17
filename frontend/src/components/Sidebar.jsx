@@ -4,12 +4,20 @@ import {MessageSquareMore , Contact , Settings , User } from "lucide-react";
 const Sidebar = () => {
     return <div className="Sidebar">
         <div className="topIcons">
-            <MessageSquareMore />
-            <Contact />
+            <button className="sidebarButton">
+                <MessageSquareMore size={25} />
+            </button>
+            <button className="sidebarButton">
+                <Contact size={25} />
+            </button>
         </div>
         <div className="bottomIcons">
-            <Settings />
-            <User />
+            <button className="sidebarButton">
+                <Settings size={25} />
+            </button>
+            <button className="sidebarButton">
+                <User size={25} />
+            </button>
         </div>
     </div>
 }

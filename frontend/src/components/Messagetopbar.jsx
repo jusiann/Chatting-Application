@@ -16,8 +16,12 @@ const MessageTopBar = () => {
                     </div>
                 </div>
                 <div className="message-topbar-icons">
-                    <Search color="white" size={20} />
-                    <MoreVertical color="white" size={20} />
+                    <button className="message-topbar-icon">
+                        <Search color="white" size={20} />
+                    </button>
+                    <button className="message-topbar-icon">
+                        <MoreVertical color="white" size={20} />
+                    </button>
                 </div>
             </div>
         </div>

@@ -1,5 +1,4 @@
 .searchbar {
-    width: 480px;
     height: 84px;
     background-color: white;
     border-radius: 18px;
@@ -10,13 +9,13 @@
     border: 1.5px solid #e6eaef;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
     box-sizing: border-box;
+    margin-top: 10px;
+    width: 100%;
 }
 
-.logo {
-    width: 64px;
-    height: 64px;
+.searchLogo {
     border-radius: 50%;
-    object-fit: cover;
+    width: 50px;
 }
 
 .input-area {

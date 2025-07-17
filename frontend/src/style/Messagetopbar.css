@@ -1,16 +1,16 @@
 .message-topbar-container {
-    width: 100vw;
     height: 100vh;
     display: flex;
+    width: 100%;
     justify-content: center;
     align-items: center;
 }
 
 .message-topbar-wrapper {
-    width: 810px;
     height: 75px;
     border-radius: 30px;
-    background-color: #910811;
+    width: 100%;
+    background-color: var(--rumeli-brand-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -47,6 +47,12 @@
 .message-topbar-status {
     font-size: 12px;
     font-weight: 400;
+}
+.message-topbar-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: white;
 }
 
 .message-topbar-icons {

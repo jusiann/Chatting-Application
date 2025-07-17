@@ -4,26 +4,27 @@ body {
     padding: 0;
     overflow: hidden;
     font-family: Inter, sans-serif;
+    display: flex;
+    height: 100vh;
+    align-items: center;
 }
 
 .gruppage-container {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: center;
     width: 100vw;
     height: 100vh;
     background-color: #f9f9f9;
-    padding: 0 40px 20px 0;
     box-sizing: border-box;
-    gap: 60px;
+    gap: 20px;
 }
 
 .gruppage-content {
     flex: none;
-    margin-left: 90px;
-    padding: 0 25px;
     display: flex;
+    height: 100%;;
     flex-direction: column;
     gap: 20px;
     background-color: #f9f9f9;
@@ -39,12 +40,16 @@ body {
     background-color: white;
     border-radius: 16px;
     padding: 20px 30px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    border: 1.5px solid #e6eaef;
     display: flex;
     flex-direction: column;
     gap: 15px;
     width: 480px;
     align-self: flex-start;
+    flex: 1;
+    margin-bottom: 10px;
+    box-sizing: border-box;
 }
 
 .group-header {
@@ -84,6 +89,19 @@ body {
     display: none;
 }
 
+.grouppage-right-panel-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    align-self: stretch;;
+    background-color: white;
+    border-radius: 30px;;
+    margin: 10px 10px 10px 0;;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    border: 1.5px solid #e6eaef;
+}
+
 .gruppage-right-panel {
     width: 480px;
     background-color: #ffffff;
@@ -93,7 +111,7 @@ body {
     flex-direction: column;
     gap: 20px;
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
-    margin-top: 60px;
+    height: 600px;
 }
 
 .group-image-placeholder {
@@ -149,6 +167,7 @@ body {
     justify-content: space-between;
     gap: 12px;
     margin-top: 10px;
+    padding: 0 20px;;
 }
 
 .cancel-btn,
