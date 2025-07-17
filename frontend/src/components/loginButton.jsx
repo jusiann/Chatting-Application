@@ -1,9 +1,10 @@
 import "../style/loginButton.css";
-
-const LoginButton = () => {
+import { LockKeyhole } from "lucide-react";
+const LoginButton = ({ onClick }) => {
     return (
-        <button className="loginButton">
+        <button className="loginButton" onClick={onClick}>
             <span>Giriş yap</span>
+            <LockKeyhole />
         </button>
     );
 };
