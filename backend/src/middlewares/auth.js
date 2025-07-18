@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import client from "../lib/db.js";
+import logger from "../utils/logger.js";
+
 
 export const createToken = async (user, res) => {
     const payload = {
