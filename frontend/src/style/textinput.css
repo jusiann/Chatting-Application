@@ -1,8 +1,4 @@
 .textinput {
-    position: absolute;
-    top: 270px;
-    left: 520px;
-    width: 400px;
     height: 64px;
     background-color: #f5f7fa;
     border-radius: 15px;
@@ -16,7 +12,8 @@
 .icon {
     width: 24px;
     height: 24px;
-    color: #444;
+    color: #777777;
+    position: absolute;
 }
 
 .textinput input {
@@ -26,4 +23,5 @@
     font-size: 16px;
     color: #333;
     flex: 1;
+    padding-left: 40px; /* Adjusted for icon space */
 }

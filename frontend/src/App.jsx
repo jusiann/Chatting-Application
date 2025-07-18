@@ -1,16 +1,31 @@
-import GroupCancelButton from "./components/groupCancelButton.jsx";
-import CreateGroupButton from "./components/createGroupButton.jsx";
-import GroupApprovalButton from "./components/groupApprovalButton.jsx";
 
-import './App.css';
+import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import RehberPage from "./pages/RehberPage";
+import GrupPage from "./pages/GrupPage"
+import AnaekranPage from "./pages/AnaekranPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import Textinput from './components/Textinput';
+import { User } from 'lucide-react';
+import DepartmanPage from './pages/DepartmanPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
-
   return (
-    <>
-    <GroupApprovalButton />
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/home" element={<AnaekranPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/rehber" element={<RehberPage />} />
+        <Route path="/grup" element={<GrupPage />} />
+        <Route path="/departman" element={<DepartmanPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

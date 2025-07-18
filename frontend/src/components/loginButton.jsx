@@ -1,10 +1,9 @@
 import "../style/loginButton.css";
-
-const LoginButton = () => {
+const LoginButton = ({ onClick, text = "Giriş yap" , type = "button"}) => {
     return (
-        <div className="loginButton">
-            <span>Giriş yap</span>
-        </div>
+        <button className="loginButton" onClick={onClick} type={type}>
+            <span>{text}</span>
+        </button>
     );
 };
 

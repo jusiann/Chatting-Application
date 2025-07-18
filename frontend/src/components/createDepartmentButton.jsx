@@ -3,12 +3,12 @@ import { Building } from "lucide-react";
 
 const CreateDepartmentButton = () => {
     return (
-        <div className="createDepartmentButton">
+        <button className="createDepartmentButton">
             <div className="logo-area">
-                <Building className="logo" />
+                <Building className="logo-group" />
             </div>
             <span className="createDepartmentButton-text">Departman Mesajı</span>
-        </div>
+        </button>
     );
 };
 

@@ -8,38 +8,25 @@ body {
 }
 
 .groupCancelButton {
-    width: 152px;
-
-    height: 40px;
-
-    border: 1px solid #910811;
-
-    padding-top: 5px;
-
-    padding-right: 20px;
-
-    padding-bottom: 5px;
-
-    padding-left: 20px;
-
-    box-sizing: border-box;
+    background-color: white;
     display: flex;
     align-items: center;
-    gap: 22px;
-
-    border-radius: 10px;
-
-    background-color: #ffffff;
-
-    opacity: 1;
-
-    text-align: center;
+    padding: 10px 30px 10px 30px;
+    gap: 20px;
+    border-radius: 20px;
+    cursor: pointer;    
+    border: 1px solid #910811;
+    color: #910811;
+}
+.groupCancelButton:hover{
+    background-color: #910811;
+    color: white;
+}
+.groupCancelButton:active{
+    background-color: hsl(356, 90%, 40%);
 }
 
 .groupCancelButton span {
-    width: 60px;
-
-    height: 22px;
 
     font-family: Inter;
 
@@ -49,15 +36,13 @@ body {
 
     font-size: 18px;
 
-    line-height: 100%;
+ 
 
     letter-spacing: 0%;
 
     text-align: center;
 
     vertical-align: middle;
-
-    color: #910811;
 
     white-space: nowrap;
 
@@ -69,10 +54,6 @@ body {
 
 .groupCancelButton svg {
     width: 30px;
-
-    height: 30px;
-
-    color: #910811;
 
     flex-shrink: 0;
 

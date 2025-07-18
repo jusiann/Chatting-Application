@@ -1,11 +1,11 @@
 import "../style/textinput.css";
 import { Mail } from "lucide-react";
 
-const Textinput = () => {
+const Textinput = ({icon: Icon = Mail, placeholder = "Email adresinizi giriniz", type = "text", width = "400px"}) => {
     return (
-        <div className="textinput">
-            <Mail className="icon" />
-            <input type="email" placeholder="Email adresinizi giriniz" />
+        <div className="textinput" style={{ width }}>
+            <Icon className="icon" />
+            <input type={type} placeholder={placeholder} />
         </div>
     );
 };

@@ -1,12 +1,12 @@
 import "../style/groupApprovalButton.css";
 import { CheckCircle } from "lucide-react";
 
-const GroupApprovalButton = () => {
+const GroupApprovalButton = ({text}) => {
     return (
-        <div className="groupApprovalButton">
-            <span>Onayla</span>
-            <CheckCircle />
-        </div>
+        <button className="groupApprovalButton">
+                <span>{text}</span>
+                <CheckCircle />
+        </button>
     );
 };
 

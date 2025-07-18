@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "cookie-parser": "^1.4.7"
+    "cookie-parser": "^1.4.7",
+    "vite": "^7.0.4"
   }
 }

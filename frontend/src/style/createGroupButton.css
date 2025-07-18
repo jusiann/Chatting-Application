@@ -1,87 +1,26 @@
-body {
+.createGroupButton{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 55px;
+    gap: 20px;
+    border-radius: 25px;
+    border: none;
+    background-color: white;
+    cursor: pointer;
     padding: 0;
-    margin: 0;
+}
+
+.createGroupButton:hover{
+    background-color: #f0f0f0;
+}
+
+.createGroupButton-icon{
     display: flex;
+    align-items: center;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-.createGroupButton {
-    width: 161px;
-
-    height: 45px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 18px;
-
-    opacity: 1;
-
-}
-
-.createGroupButton-text {
-    width: 98px;
-
-    height: 19px;
-
-    font-family: Inter;
-
-    font-weight: 500;
-
-    font-style: normal;
-
-    font-size: 16px;
-
-    line-height: 100%;
-
-    letter-spacing: 0%;
-
-    text-align: center;
-
-    vertical-align: middle;
-
-    color: #222222;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-}
-
-.logo-area {
-    width: 45px;
-
-    height: 45px;
-
-    background-color: #910811;
-
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-
-    display: flex;
-    justify-content: center;
-
-    align-items: center;
-
-    opacity: 1;
-
-}
-
-.logo {
-    width: 21px;
-
-    height: 21px;
-
-    position: relative;
-    top: 1px;
-
-    left: 2px;
-
-    color: #FFFFFF;
-
-    opacity: 1;
-
+    background-color: var(--rumeli-color);
 }

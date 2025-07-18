@@ -1,15 +1,17 @@
 import "../style/createGroupButton.css";
 import { Users } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
-const CreateGroupButton = () => {
+const CreateGroupButton = ({logo: Logo = Users, onClick = "/grup", text = "Grup Oluştur"}) => {
+    const navigate = useNavigate();
     return (
-        <div className="createGroupButton">
-            <div className="logo-area">
-                <Users className="logo" />
+        <button className="createGroupButton" onClick={() => navigate(onClick)}>
+            <div className="createGroupButton-icon">
+                <Logo className="logo-group" />
             </div>
-            <span className="createGroupButton-text">Grup Oluştur</span>
-        </div>
+            <p className="createGroupButton-text">{text}</p>
+        </button>
     );
-};
+};  
 
 export default CreateGroupButton;
