@@ -5,68 +5,57 @@ import crypto from "crypto";
 import moment from "moment";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
+import {ApiError} from "../middlewares/error.js";
 
-export const signUp = async (req ,res) => {
+export const signUp = async (req, res, next) => {
     try {
         const {name, surname, email, password} = req.body;
+        
         if (!name || !surname || !email || !password)
-            return res.status(400).json({
-                success: false,
-                message: "Name, Surname, Email and Password are required."
-            });
+            throw new ApiError("Name, Surname, Email and Password are required.", 400);
 
         const checkUser = await client.query(
-            "SELECT * FROM users WHERE email = $1",
+            `SELECT * FROM users WHERE email = $1`,
             [email]
         );
 
         if(checkUser.rows.length > 0)
-            return res.status(400).json({
-                success: false,
-                message: "Email already exists!"
-            });
+            throw new ApiError("Email already exists!", 400);
 
         const hashedPassword = await bcrypt.hash(password, 8);
         // console.log("Hashed Password: ", hashedPassword);
 
-        await client.query(
-            "INSERT INTO users (name, surname, email, password) VALUES ($1, $2, $3, $4)",
+        await client.query(`
+            INSERT INTO users (name, surname, email, password) 
+            VALUES ($1, $2, $3, $4)`,
             [name, surname, email, hashedPassword]
         );
 
         res.status(201).json({
             success: true,
-            message: "User created!!"
+            message: "User created successfully!"
         });
     } catch (error) {
-        console.error("Signup error:", error);
-        res.status(500).json({
-            success: false,
-            message: "User cannot created!!"
-        });
+        next(error);
     }
 };
 
-export const signIn = async (req, res) => {
-    try {
+export const signIn = async (req, res, next) => {
+   try {
         const { email, password } = req.body;
+        
         if (!email || !password)
-            return res.status(400).json({
-                success: false,
-                message: "Email and Password are required."
-            });
+            throw new ApiError("Email and Password are required.", 400);
 
-        const checkUser = await client.query(
-            "SELECT * FROM users WHERE email = $1",
+        const checkUser = await client.query(`
+            SELECT * FROM users 
+            WHERE email = $1`,
             [email]
         );
 
         if (checkUser.rows.length === 0)
-            return res.status(400).json({
-                success: false,
-                message: "Email or Password is wrong!"
-            });
-
+            throw new ApiError("Email or Password is incorrect!", 401);
+        
         const user = checkUser.rows[0];
         // console.log("Request password:", password);
         // console.log("DB password hash:", user.password);
@@ -74,102 +63,81 @@ export const signIn = async (req, res) => {
         const comparePassword = await bcrypt.compare(password, user.password);
 
         if (!comparePassword)
-            return res.status(401).json({
-                success: false,
-                message: "Password is wrong!"
-            });
+            throw new ApiError("Email or Password is incorrect!", 401);
 
         await createToken(user, res);
     } catch (error) {
-        console.error("Signin error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Signin failed!"
-        });
+        next(error);
     }
 };
 
-export const forgetPassword = async (req, res) => {
+export const forgetPassword = async (req, res, next) => {
     try {
         const {email} = req.body;
         if (!email)
-            return res.status(400).json({
-                success: false,
-                message: "Email is required."
-            });
+            throw new ApiError("Email is required.", 400);
 
-        const checkUser = await client.query(
-            "SELECT id, name, surname, email FROM users WHERE email = $1",
+        const checkUser = await client.query(`
+            SELECT id, name, surname, email FROM users 
+            WHERE email = $1`,
             [email]
         );
 
-        if(!checkUser.rows.length > 0)
-            return res.status(400).json({
-                success: false,
-                message: "User does not exist!"
-            });
-
+        if(!checkUser.rows.length > 0) 
+            throw new ApiError("User does not exist!", 404);
+    
         const resetCode = crypto.randomBytes(16).toString("hex");
         // console.log("User: ", checkUser.rows[0]);
         // console.log("Reset Code: ", resetCode);
 
         const resetTime = new Date().toISOString();
 
-        await client.query(
-            "UPDATE users SET reset_code = $1, reset_time = $2 WHERE email = $3",
+        await client.query(`
+            UPDATE users SET reset_code = $1, reset_time = $2 
+            WHERE email = $3`,
             [resetCode, resetTime, email]
         );
 
         const mailText = `
-            Merhaba ${checkUser.name},\n
-            Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:\n\n
-            Bu bağlantı 15 dakika boyunca geçerlidir.\n
-            Eğer bu işlemi siz başlatmadıysanız bu mesajı yok sayabilirsiniz.
-            `;
+            Merhaba ${checkUser.rows[0].name},\n
+            Şifrenizi sıfırlamak için aşağıdaki kodu kullanın:\n
+            ${resetCode}\n
+            Bu kod 15 dakika boyunca geçerlidir.\n
+            Eğer bu işlemi siz başlatmadıysanız bu mesajı yok sayabilirsiniz.`;
 
         await sendEmail(email, "Şifre Sıfırlama Talebi", mailText);
 
         res.status(200).json({
             success: true,
-            message: "Reset code generated.",
+            message: "Reset code sent to your email.",
             reset_code: resetCode
         });
     } catch (error) {
-        console.error("Forget password error:", error);
-        res.status(500).json({
-            success: false,
-            message: "Forget password failed!"
-        });
+        next(error);
     }
 };
 
-export const checkResetCode = async (req, res) => {
+export const checkResetCode = async (req, res, next) => {
     try {
         const { email, reset_code } = req.body;
         if (!email || !reset_code)
-            return res.status(400).json({
-                success: false,
-                message: "Email and reset code are required."
-            });
+            throw new ApiError("Email and reset code are required.", 400);
 
-        const userCheck = await client.query(
-            "SELECT id, email, reset_code, reset_time FROM users WHERE email = $1",
+        const userCheck = await client.query(`
+            SELECT id, email, reset_code, reset_time FROM users 
+            WHERE email = $1`,
             [email]
         );
 
         if (userCheck.rows.length === 0)
-            return res.status(404).json({
-                success: false,
-                message: "User not found!"
-            });
+            throw new ApiError("User not found!", 404);
+        
 
         const user = userCheck.rows[0];
 
         if (!user.reset_code || !user.reset_time)
-            return res.status(400).json({
-                success: false,
-                message: "No active password reset request found for this user."
-            });
+            throw new ApiError("No active password reset request found.", 400);
+        
 
         const timeDB = moment.utc(user.reset_time);
         const timeNow = moment.utc();
@@ -180,19 +148,16 @@ export const checkResetCode = async (req, res) => {
         // console.log("Difference in minutes:", differenceInMinutes);
 
         if (differenceInMinutes >= process.env.RESETCODE_EXPIRES_IN)
-            return res.status(401).json({
-                success: false,
-                message: "Reset code expired! Please request a new one."
-            });
+            throw new ApiError("Reset code has expired! Please request a new one.", 401);
+        
 
         if (String(user.reset_code) !== String(reset_code))
-            return res.status(400).json({
-                success: false,
-                message: "Reset code does not match!",
-            });
+            throw new ApiError("Invalid reset code!", 400);
+        
 
-        await client.query(
-            "UPDATE users SET reset_code = NULL, reset_time = NULL WHERE id = $1",
+        await client.query(`
+            UPDATE users SET reset_code = NULL, reset_time = NULL 
+            WHERE id = $1`,
             [user.id]
         );
 
@@ -208,93 +173,78 @@ export const checkResetCode = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            message: "Reset code verified successfully. You can now set a new password.",
+            message: "Reset code verified successfully.",
             token: token
         });
     } catch (error) {
-        console.error("Error in checkResetCode:", error);
-        res.status(500).json({
-            success: false,
-            message: "An internal server error occurred. Please try again later."
-        });
+        next(error);
     }
 };
 
-export const changePassword = async (req, res) => {
+export const changePassword = async (req, res, next) => {
     try {
         const {email, password} = req.body;
         if (!email || !password)
-            return res.status(400).json({
-                success: false,
-                message: "Email, Password and Token are required."
-            });
+            throw new ApiError("Email, Password and Token are required.", 400);
+        
 
         const token = req.cookies.token;
         const decoded = jwt.verify(token, process.env.JWT_TEMPORARY_KEY);
+        
         if(decoded.type !== "reset")
-            return res.status(401).json({
-                success: false,
-                message: "Invalid token!"
-            });
-        // console.log("Decoded: ", decoded);
+            throw new ApiError("Invalid token type!", 401);
 
         const hashedPassword = await bcrypt.hash(password, 8);
-        await client.query(
-            "UPDATE users SET password = $1, reset_code = NULL, reset_time = NULL WHERE id = $2",
+        await client.query(`
+            UPDATE users SET password = $1, reset_code = NULL, reset_time = NULL 
+            WHERE id = $2`,
             [hashedPassword, decoded.sub]
         );
 
         res.status(200).json({
             success: true,
-            message: "Password has been changed successfully!"
+            message: "Password changed successfully!"
         });
     } catch (error) {
-        console.error("Reset password error:", error);
-        res.status(400).json({
-            success: false,
-            message: "Invalid token or other error."
-        });
+        if(error instanceof jwt.JsonWebTokenError)
+            next(new ApiError("Invalid or expired token", 401));
+        else
+            next(error);
     }
 };
 
-export const changePasswordAuthenticated = async (req, res) => {
+export const changePasswordAuthenticated = async (req, res, next) => {
     try {
         const {currentPassword, newPassword} = req.body;
         if (!currentPassword || !newPassword)
-            return res.status(400).json({
-                success: false,
-                message: "Current password and new password are required."
-            });
+            throw new ApiError("Current password and new password are required.", 400);
 
         const user = req.user;
-        const checkUser = await client.query(
-            "SELECT password FROM users WHERE id = $1",
+        const checkUser = await client.query(`
+            SELECT password FROM users 
+            WHERE id = $1`,
             [user.id]
         );
 
         const dbPassword = checkUser.rows[0].password;
         const comparePassword = await bcrypt.compare(currentPassword, dbPassword);
+        
         if (!comparePassword)
-            return res.status(401).json({
-                success: false,
-                message: "Current password is wrong!"
-            });
+            throw new ApiError("Current password is incorrect!", 401);
+        
 
         const hashedPassword = await bcrypt.hash(newPassword, 8);
-        await client.query(
-            "UPDATE users SET password = $1 WHERE id = $2",
+        await client.query(`
+            UPDATE users SET password = $1 
+            WHERE id = $2`,
             [hashedPassword, user.id]
         );
 
         res.status(200).json({
             success: true,
-            message: "Password has been changed successfully!"
+            message: "Password changed successfully!"
         });
     } catch (error) {
-        console.error("Change password authenticated error:", error);
-        res.status(401).json({
-            success: false,
-            message: "Authentication failed!"
-        })
+        next(error);
     }
 };

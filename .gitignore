@@ -15,4 +15,6 @@ ios/Pods/
 # Alt dizinlerdeki tüm modules klasörleri
 **/node_modules/
 
+.idea/
+
 

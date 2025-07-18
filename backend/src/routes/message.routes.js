@@ -8,4 +8,4 @@ router.get("/users", verifyToken, getUsersForSidebar);
 router.get("/:id", verifyToken, getMessages);
 router.post("/send/:id", verifyToken, sendMessage);
 
-export default router
+export default router;
