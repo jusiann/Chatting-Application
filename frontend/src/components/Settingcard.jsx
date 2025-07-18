@@ -1,17 +1,17 @@
 import { KeyRound } from "lucide-react";
 import "../style/settingcard.css";
 
-const SettingCard = () => {
+const SettingCard = ({ icon: Icon = KeyRound, title = "Hesap", subtitle = "Güvenlik bildirimleri, Hesap bilgileri" }) => {
     return (
-        <div className="page-wrapper">
+        <button className="page-wrapper">
             <div className="setting-card">
-                <KeyRound className="key-icon" />
+                <Icon className="key-icon" />
                 <div className="text-content">
-                    <div className="title">Hesap</div>
-                    <div className="subtitle">Güvenlik bildirimleri, Hesap bilgileri</div>
+                    <div className="title">{title}</div>
+                    <div className="subtitle">{subtitle}</div>
                 </div>
             </div>
-        </div>
+        </button>
     );
 };
 
