@@ -9,6 +9,7 @@ import RegisterPage from "./pages/RegisterPage";
 import Textinput from './components/Textinput';
 import { User } from 'lucide-react';
 import DepartmanPage from './pages/DepartmanPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/rehber" element={<RehberPage />} />
         <Route path="/grup" element={<GrupPage />} />
         <Route path="/departman" element={<DepartmanPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </BrowserRouter>
   );

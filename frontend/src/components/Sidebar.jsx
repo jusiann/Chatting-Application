@@ -14,7 +14,7 @@ const Sidebar = () => {
             </button>
         </div>
         <div className="bottomIcons">
-            <button className="sidebarButton">
+            <button className="sidebarButton" onClick={() => navigate("/settings")}>
                 <Settings size={25} />
             </button>
             <button className="sidebarButton">
