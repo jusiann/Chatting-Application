@@ -33,6 +33,7 @@
 .icon {
     width: 20px;
     height: 20px;
+    position: absolute;
     color: #444;
 }
 
@@ -40,6 +41,7 @@
     border: none;
     background: transparent;
     outline: none;
+    padding-left: 40px;
     font-size: 15px;
     color: #333;
     flex: 1;

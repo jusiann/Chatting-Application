@@ -18,7 +18,7 @@ body {
     height: 100vh;
     background-color: #f9f9f9;
     box-sizing: border-box;
-    gap: 20px;
+    gap: 30px;
 }
 
 .gruppage-content {
@@ -30,6 +30,7 @@ body {
     background-color: #f9f9f9;
     overflow-y: scroll;
     scrollbar-width: none;
+    width: 500px;
 }
 
 .gruppage-content::-webkit-scrollbar {
@@ -45,7 +46,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 480px;
+    width: 500px;
     align-self: flex-start;
     flex: 1;
     margin-bottom: 10px;

@@ -26,13 +26,13 @@ function Gruppage() {
                     </div>
 
                     <div className="group-person-list">
-                        <ContactCard name="Prof. Dr. Taner Çevik" title="Bilgisayar Mühendisliği" image="" />
-                        <ContactCard name="Doç. Dr. Emre Tanrıverdi" title="Elektrik-Elektronik Mühendisliği" image="" />
-                        <ContactCard name="Dr. Öğr. Üyesi Cemal Acar" title="Endüstri Mühendisliği" image="" />
-                        <ContactCard name="Esra Demir" title="Fakülte Sekreteri" image="" />
-                        <ContactCard name="Mehmet Özkan" title="Öğrenci İşleri" image="" />
-                        <ContactCard name="Gizem Tok" title="Kütüphane Sorumlusu" image="" />
-                        <ContactCard name="Derya Kaya" title="Makine Mühendisliği" image="" />
+                        <ContactCard name="Prof. Dr. Taner Çevik" title="Bilgisayar Mühendisliği" />
+                        <ContactCard name="Doç. Dr. Emre Tanrıverdi" title="Elektrik-Elektronik Mühendisliği" />
+                        <ContactCard name="Dr. Öğr. Üyesi Cemal Acar" title="Endüstri Mühendisliği" />
+                        <ContactCard name="Esra Demir" title="Fakülte Sekreteri" />
+                        <ContactCard name="Mehmet Özkan" title="Öğrenci İşleri" />
+                        <ContactCard name="Gizem Tok" title="Kütüphane Sorumlusu" />
+                        <ContactCard name="Derya Kaya" title="Makine Mühendisliği" />
                     </div>
 
                 </div>
@@ -48,11 +48,11 @@ function Gruppage() {
                     <div className="selected-members-title">Seçili üyeler</div>
 
                     <div className="selected-members-list">
-                        <ContactCard name="İsmail Yıldız" title="Yazılım Uzmanı" image="" />
-                        <ContactCard name="Zeynep Aksoy" title="Akademik Danışman" image="" />
-                        <ContactCard name="Büşra Kar" title="Eğitim Fakültesi Sekreteri" image="" />
-                        <ContactCard name="Barış Çetin" title="Mühendislik Fakültesi Asistanı" image="" />
-                        <ContactCard name="Nehir Yılmaz" title="Rektörlük Sekreteri" image="" />
+                        <ContactCard name="İsmail Yıldız" title="Yazılım Uzmanı"  />
+                        <ContactCard name="Zeynep Aksoy" title="Akademik Danışman"  />
+                        <ContactCard name="Büşra Şahin" title="Eğitim Fakültesi Sekreteri"  />
+                        <ContactCard name="Barış Çetin" title="Mühendislik Fakültesi Asistanı"  />
+                        <ContactCard name="Nehir Yılmaz" title="Rektörlük Sekreteri"  />
                     </div>
 
                     <div className="group-action-buttons">

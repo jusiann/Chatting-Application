@@ -1,142 +1,34 @@
-body {
-    padding: 0;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-.contactCard {
-    width: 470px;
-
-    height: 50px;
-
+.contactCard{
     display: flex;
     align-items: center;
-
-    gap: 5px;
-
-    opacity: 1;
-    border-radius: 25px;
-    padding: 5px 10px 5px 0;
-
-    cursor: pointer;
-
-}
-.contactCard:hover{
-    background-color: hsl(0, 0%, 95%);
+    justify-content: space-between;
 }
 
-.image-area {
+.contact-image-and-texts{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+.contact-image{
     width: 50px;
-
     height: 50px;
-
-    opacity: 1;
-
     border-radius: 50%;
-
-    overflow: hidden;
-
-}
-
-.image-area img {
-    width: 100%;
-    height: 100%;
     object-fit: cover;
-
 }
 
-.text-area {
-    width: 100%;
-
-    height: 15px;
-
-    display: flex;
-    justify-content: space-between;
-
-    align-items: center;
-
-    opacity: 1;
-
-}
-
-.title-text {
-    width: 100%;
-
-    height: 15px;
-
-    display: flex;
-    align-items: center;
-
-    justify-content: space-between;
-
-    opacity: 1;
-
-}
-.Name{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.Name span:nth-child(1) {
-    width: auto;
-
-    height: 15px;
-
-    font-family: Inter;
-    font-weight: 500;
-    font-style: normal;
-    font-size: 11px;
-
-    line-height: 100%;
-    letter-spacing: 0%;
-    text-align: center;
-    vertical-align: middle;
+.contact-name{
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
     color: #000000;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-.Name span:nth-child(2) {
-    width: 8px;
-
-    height: 15px;
-
-    font-family: Inter;
-    font-weight: 500;
-    font-style: normal;
-    font-size: 10px;
-
-    line-height: 100%;
-    letter-spacing: 0%;
-    text-align: center;
-    vertical-align: middle;
-    color: #000000;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.title-text span:nth-child(2) {
-    width: auto;
-
-    height: 10px;
-
-    font-family: Inter;
-    font-weight: 500;
-    font-style: normal;
-    font-size: 7px;
-
-    line-height: 100%;
-    letter-spacing: 0%;
-    text-align: center;
-    vertical-align: middle;
-    color: #874347;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.contact-title{
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--rumeli-color);
 }

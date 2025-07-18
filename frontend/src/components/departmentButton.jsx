@@ -1,11 +1,11 @@
 import "../style/departmentButton.css";
 import { Building } from "lucide-react";
 
-const DepartmentButton = () => {
+const DepartmentButton = ({text = "Bilgisayar mühendisliği"}) => {
     return (
         <button className="departmentButton">
-            <Building />
-            <span>Bilgisayar mühendisliği</span>
+            <Building className="departmentButton-icon"/>
+            <p>{text}</p>
         </button>
     );
 };

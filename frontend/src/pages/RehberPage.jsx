@@ -5,7 +5,7 @@ import CreateGroupButton from "../components/createGroupButton";
 import CreateDepartmentButton from "../components/createDepartmentButton";
 import SortBar from "../components/sortBar";
 import Personcard from "../components/Personcard";
-import { Building, Building2 } from "lucide-react";
+import { Building } from "lucide-react";
 
 function RehberPage() {
     return (
@@ -18,7 +18,7 @@ function RehberPage() {
                 <div className="rehber-card">
                     <div className="button-row">
                         <CreateGroupButton text="Grup Oluştur" />
-                        <CreateDepartmentButton text="Departman Mesajı" />
+                        <CreateGroupButton text="Departman Mesajı" logo={Building} onClick="/departman"/>
                         <div className="divider"/>
                     </div>
 
@@ -38,7 +38,7 @@ function RehberPage() {
                         <Personcard
                             name="Taner Çevik"
                             title="Toplantı 11:00"
-                            image="tanerCevik.jpg"
+                            image="src/assets/tanerCevik.jpg"
                         />
                         <Personcard
                             name="Doç. Dr. Emre Tanrıverdi"
