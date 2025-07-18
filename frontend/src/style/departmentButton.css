@@ -1,92 +1,26 @@
-body {
-    padding: 0;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-
-    align-items: center;
-    min-height: 100vh;
-
-}
-
 .departmentButton {
-    width: 470px;
-
-    height: 55px;
-
-    border: 1px solid #E6EAEF;
-
-    padding: 10px;
-
-    box-sizing: border-box;
     display: flex;
     align-items: center;
-
-    gap: 50px;
-
-    background-color: #ffffff;
-
-    opacity: 1;
-
-    position: relative;
-
-    text-align: center;
+    justify-content: flex-start;
+    gap: 20px;
+    width: 100%;
+    height: 50px;
+    border: none;
     cursor: pointer;
-}
-.departmentButton:hover{
-    background-color: hsl(0, 0%, 95%);
+    background-color: white;
 }
 
-.departmentButton span {
-    width: 175px;
+.departmentButton:hover {
+    background-color: #f0f0f0;
+}
 
-    height: 19px;
+.departmentButton-icon {
+    width: 30px;
+    height: 30px;
+    color: var(--rumeli-color);
+}
 
-    font-family: Inter;
-
-    font-weight: 700;
-
-    font-style: normal;
-
+.departmentButton p{
+    font-family: 'Inter', sans-serif;
     font-size: 16px;
-
-    line-height: 100%;
-
-    letter-spacing: 0%;
-
-
-    text-align: center;
-
-    vertical-align: middle;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    color: #000000;
-
-    margin: 0 auto;
-
-}
-
-
-.departmentButton svg {
-    width: 32.08px;
-
-    height: 29.17px;
-
-    color: #910811;
-
-    position: absolute;
-
-    top: 50%;
-
-    left: 1.46px;
-
-    transform: translateY(-50%);
-
-    flex-shrink: 0;
-
 }

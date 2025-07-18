@@ -5,7 +5,7 @@ const CreateDepartmentButton = () => {
     return (
         <button className="createDepartmentButton">
             <div className="logo-area">
-                <Building className="logo" />
+                <Building className="logo-group" />
             </div>
             <span className="createDepartmentButton-text">Departman Mesajı</span>
         </button>

@@ -1,37 +1,26 @@
 
 import './App.css'
-import Textinput from './components/Textinput'
-import Searchbar from './components/Searchbar'
-import SettingCard from './components/Settingcard'
-import Sendbox from './components/Sendbox'
-import Settinguser from './components/Settinguser'
-import MessageTopBar from './components/Messagetopbar'
-import Personcard from './components/Personcard'
-import MessageSended from './components/Messagesended'
-import MessageReceived from './components/Messagereceived'
-import GroupApprovalButton from './components/groupApprovalButton'
-import ContactCard from './components/contactCard'
-import CreateDepartmentButton from './components/createDepartmentButton'
-import CreateGroupButton from './components/createGroupButton'
-import DepartmentButton from './components/departmentButton'
-import GroupCancelButton from './components/groupCancelButton'
-import LoginButton from './components/loginButton'
-import RememberMe from './components/rememberMe'
-import SearchBar from './components/Searchbar'
-import Sidebar from './components/Sidebar'
-import SortBar from './components/sortBar'
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import RehberPage from "./pages/RehberPage";
 import GrupPage from "./pages/GrupPage"
 import AnaekranPage from "./pages/AnaekranPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import Textinput from './components/Textinput';
+import { User } from 'lucide-react';
+import DepartmanPage from './pages/DepartmanPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AnaekranPage />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/home" element={<AnaekranPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/rehber" element={<RehberPage />} />
         <Route path="/grup" element={<GrupPage />} />
+        <Route path="/departman" element={<DepartmanPage />} />
       </Routes>
     </BrowserRouter>
   );

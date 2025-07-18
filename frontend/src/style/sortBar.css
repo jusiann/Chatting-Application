@@ -8,9 +8,9 @@ body {
 }
 
 .sortBar {
-    width: 470px;
 
     height: 24px;
+    width: 100%;
 
     display: flex;
     justify-content: space-between;

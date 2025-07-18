@@ -1,0 +1,91 @@
+.register-page{
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.register-left-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    align-self: stretch;
+    background-color: #f0f0f0;
+}
+
+.register-right-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 1000px;
+    gap: 18px;
+}   
+
+.register-logo{
+    height: 150px;
+    width: auto;
+}
+
+.register-texts{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+h1, p {
+    margin: 0;
+    padding: 0;
+}
+
+.register-title{
+    font-size: 2.5rem;
+    color: var(--rumeli-color);
+    font-family: 'Inter', sans-serif;
+}
+
+.register-description{
+    font-size: 1.2rem;
+    color: #777777;
+    font-family: 'Inter', sans-serif;
+}
+
+.register-form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+}
+
+.name-surname-container{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    gap: 20px;
+}
+
+.register-login-link{
+    font-family: 'Inter', sans-serif;
+}
+
+.register-login-link a{
+    color: var(--rumeli-color);
+    text-decoration: none;
+}
+
+.welcome-title{
+    font-size: 2rem;
+    color: var(--rumeli-color);
+    font-family: 'Inter', sans-serif;
+}
+
+.welcome-subtitle{
+    font-size: 1.2rem;
+    color: #777777;
+    font-family: 'Inter', sans-serif;
+}

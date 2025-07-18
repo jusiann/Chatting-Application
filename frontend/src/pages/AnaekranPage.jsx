@@ -28,7 +28,7 @@ const AnaekranPage = () => {
             </div>
 
             <div className="anaekran-chat-panel">
-                <div className="messagetopbar-container">
+                <div className="messagetopbar-container-home">
                     <Messagetopbar name="Arş. Gör. Derya Kaya" status="Son görülme : Bugün 22:02" image="" />
                 </div>
 

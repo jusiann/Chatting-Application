@@ -1,21 +1,14 @@
 import "../style/contactCard.css";
 import tanerCevik from "../assets/tanerCevik.jpg";
 
-const ContactCard = () => {
+const ContactCard = ({name = "Prof. Dr. Taner Çevik", title = "Bilgisayar Mühendisliği Bölüm Başkanı", image = "src/assets/tanerCevik.jpg"}) => {
     return (
         <div className="contactCard">
-            <div className="image-area">
-                <img src={tanerCevik} alt="Taner Çevik" />
+            <div className="contact-image-and-texts">
+                <img src={image} alt="Contact" className="contact-image" />
+                <p className="contact-name">{name}</p>
             </div>
-            <div className="text-area">
-                <div className="title-text">
-                    <div className="Name">
-                        <span>Prof. Dr. Taner Çevik</span>
-                        <span>~</span>
-                    </div>
-                    <span>Bilgisayar Mühendisliği Bölüm Başkanı</span>
-                </div>
-            </div>
+            <p className="contact-title">{title}</p>
         </div>
     );
 };
