@@ -1,12 +1,16 @@
 import jwt from 'jsonwebtoken';
 import client from "../lib/db.js";
 import logger from "../utils/logger.js";
+import { title } from 'process';
 
 
 export const createToken = async (user, res) => {
     const payload = {
-        sub: user.id,
-        name: user.name
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        title: user.title,
+        department: user.department,
     }
 
     const token = await jwt.sign(payload, process.env.JWT_SECRET_KEY, {
