@@ -9,10 +9,10 @@ import {ApiError} from "../middlewares/error.js";
 
 export const signUp = async (req, res, next) => {
     try {
-        const {name, surname, email, password} = req.body;
-        
-        if (!name || !surname || !email || !password)
-            throw new ApiError("Name, Surname, Email and Password are required.", 400);
+        const {fullname, email, password, title, department} = req.body;
+
+        if (!fullname || !email || !password )
+            throw new ApiError("Fullname, Email, Password are required.", 400);
 
         const checkUser = await client.query(
             `SELECT * FROM users WHERE email = $1`,
@@ -25,15 +25,22 @@ export const signUp = async (req, res, next) => {
         const hashedPassword = await bcrypt.hash(password, 8);
         // console.log("Hashed Password: ", hashedPassword);
 
-        await client.query(`
-            INSERT INTO users (name, surname, email, password) 
-            VALUES ($1, $2, $3, $4)`,
-            [name, surname, email, hashedPassword]
+        const result = await client.query(`
+            INSERT INTO users (fullname, email, password, title, department) 
+            VALUES ($1, $2, $3, $4, $5) returning *`,
+            [fullname, email, hashedPassword, title, department]
         );
 
         res.status(201).json({
             success: true,
-            message: "User created successfully!"
+            message: "User created successfully!",
+            user: {
+                id: result.rows[0].id,
+                fullname: result.rows[0].fullname,
+                email: result.rows[0].email,
+                title: result.rows[0].title,
+                department: result.rows[0].department
+            }
         });
     } catch (error) {
         next(error);
@@ -78,7 +85,7 @@ export const forgetPassword = async (req, res, next) => {
             throw new ApiError("Email is required.", 400);
 
         const checkUser = await client.query(`
-            SELECT id, name, surname, email FROM users 
+            SELECT id, fullname, email FROM users 
             WHERE email = $1`,
             [email]
         );
@@ -99,7 +106,7 @@ export const forgetPassword = async (req, res, next) => {
         );
 
         const mailText = `
-            Merhaba ${checkUser.rows[0].name},\n
+            Merhaba ${checkUser.rows[0].fullname},\n
             Şifrenizi sıfırlamak için aşağıdaki kodu kullanın:\n
             ${resetCode}\n
             Bu kod 15 dakika boyunca geçerlidir.\n
