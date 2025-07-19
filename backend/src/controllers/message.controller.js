@@ -3,45 +3,57 @@ import moment from "moment";
 import { ApiError } from "../middlewares/error.js";
 import logger from "../utils/logger.js";
 
-export const getUsersForSidebar = async (req, res, next) => {
+export const getUsers = async (req, res) => {
+    try{
+        const currentUser = req.user;
+        const users = await client.query(`select id, fullname, email, title, department, profilepic from users where id != $1`,[currentUser.id]);
+        return res.status(200).json(users.rows);
+    }
+    catch(err){
+        console.log(err);
+        return res.status(401).json({message:'Token çözülürken bir sorun oluştu.'});
+    }
+}
+
+export const getMessagesUsers = async (req, res) => {
     try {
-        const id = req.user.id;
-        const usersList = await client.query(`
-            SELECT id, name, surname, email FROM users 
-            WHERE id != $1`,
-            [id]
-        );
-
-        const usersWithMessages = [];
-
-        for(const user of usersList.rows) {
-            const lastMessages = await client.query(`
-                SELECT content, created_at, sender_id
-                FROM messages
-                WHERE (sender_id = $1 AND receiver_id = $2)
-                OR (sender_id = $2 AND receiver_id = $1)
-                ORDER BY created_at DESC
-                LIMIT 1`,
-                [id, user.id]
-            );
-
-            const lastMessage = lastMessages.rows[0];
-            usersWithMessages.push({
-                ...user,
-                lastMessage: lastMessage ? {
-                    sender_id: lastMessage.sender_id,
-                    content: lastMessage.content,
-                    created_at: moment(lastMessage.created_at).format("HH:mm")
-                } : null
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            users: usersWithMessages
-        });
-    } catch (error) {
-        next(error);
+        const currentUser = req.user;
+        const users = await client.query(`WITH ranked_messages AS (
+                                            SELECT *,
+                                                    CASE
+                                                    WHEN sender_id = $1 THEN receiver_id
+                                                    ELSE sender_id
+                                                    END AS chat_partner_id,
+                                                    ROW_NUMBER() OVER (
+                                                    PARTITION BY CASE
+                                                                    WHEN sender_id = $1 THEN receiver_id
+                                                                    ELSE sender_id
+                                                                    END
+                                                    ORDER BY createdat DESC
+                                                    ) AS rn
+                                            FROM messages
+                                            WHERE senderid = $1 OR receiverid = $1
+                                            )
+                                            SELECT 
+                                            u.id,
+                                            u.fullname,
+                                            u.title,
+                                            u.department,
+                                            u.email,
+                                            u.profilepic,
+                                            r.content AS last_message,
+                                            r.created_at AS last_message_time,
+                                            r.sender_id AS message_sender,
+                                            r.status AS message_status
+                                            FROM ranked_messages r
+                                            JOIN users u ON u.id = r.chat_partner_id
+                                            WHERE r.rn = 1
+                                            ORDER BY r.createdat DESC;`, [currentUser.id]);
+        return res.status(200).json(users.rows);
+    } 
+    catch (err) {
+        console.log(err);
+        return res.status(400).json({message: err});
     }
 };
 
