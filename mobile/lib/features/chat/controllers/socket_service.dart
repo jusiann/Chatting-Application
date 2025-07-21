@@ -1,5 +1,4 @@
 import 'package:mobile/features/chat/controllers/message_controller.dart';
-import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/models/message_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -35,7 +34,10 @@ class SocketService extends _$SocketService {
       'http://192.168.1.9:5001',
       IO.OptionBuilder()
           .setTransports(['websocket'])
+          .enableAutoConnect()
           .enableReconnection()
+          .setReconnectionDelay(500)
+          .setReconnectionAttempts(10)
           .setExtraHeaders({'Authorization': 'Bearer $token'})
           .build(),
     );
@@ -51,7 +53,7 @@ class SocketService extends _$SocketService {
 
     _socket!.on('message_delivered', (data) {
       final msgId = data['id'];
-      final deliveredAt = data['deliveredAt'];
+      final deliveredAt = data['delivered_At'];
       ref
           .read(messageControllerProvider.notifier)
           .markAsDelivered(msgId, deliveredAt);

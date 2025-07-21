@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -19,18 +20,31 @@ class CustomCard extends ConsumerWidget {
           leading: CircleAvatar(
             backgroundColor: Colors.blueGrey,
             radius: 25,
-            child: SvgPicture.asset(
-              chat.isGroup
-                  ? 'assets/svg_files/groups.svg'
-                  : 'assets/svg_files/person.svg',
-              height: 40,
-            ),
+            child: chat.profilepic != null
+                ? CachedNetworkImage(
+                    imageUrl: chat.profilepic!,
+                    imageBuilder: (context, imageProvider) => CircleAvatar(
+                      radius: 25,
+                      backgroundImage: imageProvider,
+                    ),
+                    placeholder: (context, url) => CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Colors.grey.shade200,
+                      child: SvgPicture.asset(
+                        'assets/svg_files/person.svg',
+                        height: 40,
+                      ),
+                    ),
+                  )
+                : SvgPicture.asset('assets/svg_files/person.svg', width: 40),
           ),
           title: Text(
-            '${chat.name} ${chat.surname}',
+            chat.title != null
+                ? '${chat.title!} ${chat.fullname}'
+                : chat.fullname,
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 16,
+              fontSize: 14,
               color: Colors.black,
               fontWeight: FontWeight.w500,
             ),
@@ -49,7 +63,7 @@ class CustomCard extends ConsumerWidget {
               SizedBox(width: 5),
               Text(
                 chat.currentMessage,
-                style: TextStyle(fontFamily: 'Inter', fontSize: 14),
+                style: TextStyle(fontFamily: 'Inter', fontSize: 13),
               ),
             ],
           ),

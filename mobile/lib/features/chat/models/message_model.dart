@@ -21,10 +21,10 @@ class MessageModel {
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
-      text: json['text'],
-      time: DateTime.parse(json['createdat']),
-      senderid: json['senderid'],
-      receiverid: json['receiverid'],
+      text: json['content'],
+      time: DateTime.parse(json['created_at']),
+      senderid: json['sender_id'],
+      receiverid: json['receiver_id'],
       id: json['id'],
       status: json['status'] ?? 'sent',
       deliveredAt: json['delivered_at'],
@@ -34,10 +34,10 @@ class MessageModel {
 
   Map<String, dynamic> toJson() => {
     if (id != null) 'id': id,
-    'text': text,
+    'content': text,
     'time': time,
-    'senderid': senderid,
-    'receiverid': receiverid,
+    'sender_id': senderid,
+    'receiver_id': receiverid,
     'status': status,
     'delivered_at': deliveredAt,
     'read_at': readAt,
@@ -45,10 +45,10 @@ class MessageModel {
 
   factory MessageModel.fromMap(Map<String, dynamic> map) {
     return MessageModel(
-      text: map['text'],
-      time: DateTime.parse(map['time']),
-      senderid: map['senderid'],
-      receiverid: map['receiverid'],
+      text: map['content'],
+      time: DateTime.parse(map['created_at']),
+      senderid: map['sender_id'],
+      receiverid: map['receiver_id'],
       id: map['id'],
       status: map['status'] ?? 'sent',
       deliveredAt: map['delivered_at'],

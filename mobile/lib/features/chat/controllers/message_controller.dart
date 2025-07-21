@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/individual_page_controller.dart';
 import 'package:mobile/features/chat/controllers/providers.dart';
@@ -98,7 +96,7 @@ class MessageController extends _$MessageController {
 
   void handleIncomingMessages(dynamic data) async {
     final currentUserId = ref.read(authControllerProvider).authUser!.id;
-    final senderId = (data['senderid'] as int);
+    final senderId = (data['sender_id'] as int);
     final openChatId = ref.read(openChatIdProvider);
 
     final isChatOpen =
@@ -130,31 +128,33 @@ class MessageController extends _$MessageController {
             .firstWhere((u) => u.id == senderId);
       }
       model = ChatModel(
-        name: user.name,
-        surname: user.surname,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+        profilepic: user.profilepic,
         isGroup: false,
-        time: DateTime.parse(data['createdat']),
-        currentMessage: data['text'],
+        time: DateTime.parse(data['created_at']),
+        currentMessage: data['content'],
         id: senderId,
-        senderid: data['senderid'],
+        senderid: data['sender_id'],
         messageStatus: data['status'],
       );
     } else {
-      final newId = data['receiverid'];
+      final newId = data['receiver_id'];
       final user = ref
           .read(userServiceProvider)
           .contactUsers
           .firstWhere((u) => u.id == newId);
       model = ChatModel(
-        name: user.name,
-        surname: user.surname,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
+        profilepic: user.profilepic,
         isGroup: false,
-        time: DateTime.parse(data['createdat']),
-        currentMessage: data['text'],
+        time: DateTime.parse(data['created_at']),
+        currentMessage: data['content'],
         id: user.id,
-        senderid: data['senderid'],
+        senderid: data['sender_id'],
         messageStatus: data['status'],
       );
     }
