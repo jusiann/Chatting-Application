@@ -78,20 +78,20 @@ export const sendMessage = async (req, res) => {
             });
         }
 
-        const checkOtherUser = await client.query(`
-            SELECT id FROM users WHERE id = $1`,
+        const checkOtherUser = await client.query(
+            "SELECT id FROM users WHERE id = $1",
             [otherID]
         );
 
-        if (checkOtherUser.rows.length === 0)
+        if (checkOtherUser.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Recipient not found."
             });
+        }
 
-        const resultMessage = await client.query(`
-            INSERT INTO messages (sender_id, receiver_id, content, status, created_at) 
-            VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        const resultMessage = await client.query(
+            "INSERT INTO messages (sender_id, receiver_id, content, status, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING *",
             [userId, otherID, content, 'unread', moment().format()]
         );
 
@@ -120,12 +120,13 @@ export const markDelivered = async (req, res) => {
             [userId]
         );
 
-        if(result.rows.length === 0)
+        if(result.rows.length === 0) {
             return res.status(200).json({
                 success: true,
                 message: "No new messages to mark as delivered.",
                 deliveredMessageIds: []
             });
+        }
         
         res.status(200).json({
             success: true,
@@ -155,8 +156,9 @@ export const unreadCount = async (req, res) => {
         );
 
         const unreadCountBySender = {};
-        for(const row of result.rows)
+        for(const row of result.rows) {
             unreadCountBySender[row.sender_id] = parseInt(row.count);
+        }
 
         res.status(200).json({
             success: true,

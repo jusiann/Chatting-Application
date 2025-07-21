@@ -4,6 +4,7 @@ import path from "path";
 import {signUp, signIn, forgetPassword, checkResetCode, changePassword, changePasswordAuthenticated, refreshToken, changeName, changeTitle, changeProfilePicture} from "../controllers/auth.controller.js";
 import {verifyToken} from "../middlewares/auth.js";
 
+
 const router = express.Router();
 
 const storage = multer.diskStorage({

@@ -11,25 +11,24 @@ export const signUp = async (req, res, next) => {
     try {
         const {first_name, last_name, email, password, title, department} = req.body;
 
-        if (!first_name || !last_name || !email || !password)
+        if (!first_name || !last_name || !email || !password) {
             throw new ApiError("First name, Last name, Email and Password are required.", 400);
-        
+        }
 
-        const checkUser = await client.query(`
-            SELECT * FROM users 
-            WHERE email = $1`,
+        const checkUser = await client.query(
+            `SELECT * FROM users WHERE email = $1`,
             [email]
         );
 
-        if(checkUser.rows.length > 0)
+        if(checkUser.rows.length > 0) {
             throw new ApiError("Email already exists!", 400);
-        
+        }
 
         const hashedPassword = await bcrypt.hash(password, 8);
 
         const result = await client.query(`
             INSERT INTO users (first_name, last_name, email, password, title, department) 
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            VALUES ($1, $2, $3, $4, $5, $6) returning *`,
             [first_name, last_name, email, hashedPassword, title, department]
         );
 
@@ -54,8 +53,9 @@ export const signIn = async (req, res, next) => {
    try {
         const { email, password } = req.body;
         
-        if (!email || !password)
+        if (!email || !password) {
             throw new ApiError("Email and Password are required.", 400);
+        }
 
         const checkUser = await client.query(`
             SELECT * FROM users 
@@ -63,14 +63,17 @@ export const signIn = async (req, res, next) => {
             [email]
         );
 
-        if (checkUser.rows.length === 0)
+        if (checkUser.rows.length === 0) {
             throw new ApiError("Email or Password is incorrect!", 401);
+        }
         
         const user = checkUser.rows[0];
+
         const comparePassword = await bcrypt.compare(password, user.password);
 
-        if (!comparePassword)
+        if (!comparePassword) {
             throw new ApiError("Email or Password is incorrect!", 401);
+        }
 
         await createToken(user, res);
     } catch (error) {
@@ -82,9 +85,9 @@ export const forgetPassword = async (req, res, next) => {
     try {
         const {email} = req.body;
 
-        if (!email)
+        if (!email) {
             throw new ApiError("Email is required.", 400);
-        
+        }
 
         const checkUser = await client.query(`
             SELECT id, first_name, last_name, email FROM users 
@@ -92,12 +95,13 @@ export const forgetPassword = async (req, res, next) => {
             [email]
         );
 
-        if(!checkUser.rows.length > 0)
+        if(!checkUser.rows.length > 0) {
             throw new ApiError("User does not exist!", 404);
-        
+        }
     
         const resetCode = crypto.randomBytes(16).toString("hex");
         const resetTime = new Date().toISOString();
+
         await client.query(`
             UPDATE users SET reset_code = $1, reset_time = $2 
             WHERE email = $3`,
@@ -127,8 +131,9 @@ export const checkResetCode = async (req, res, next) => {
     try {
         const { email, reset_code } = req.body;
 
-        if (!email || !reset_code)
+        if (!email || !reset_code) {
             throw new ApiError("Email and reset code are required.", 400);
+        }
 
         const userCheck = await client.query(`
             SELECT id, email, reset_code, reset_time FROM users 
@@ -136,23 +141,28 @@ export const checkResetCode = async (req, res, next) => {
             [email]
         );
 
-        if (userCheck.rows.length === 0)
+        if (userCheck.rows.length === 0) {
             throw new ApiError("User not found!", 404);
-        
+        }
+
         const user = userCheck.rows[0];
 
-        if (!user.reset_code || !user.reset_time)
+        if (!user.reset_code || !user.reset_time) {
             throw new ApiError("No active password reset request found.", 400);
-        
+        }
+
         const timeDB = moment.utc(user.reset_time);
         const timeNow = moment.utc();
-        const differenceInMinutes = timeNow.diff(timeDB, 'minutes');
-        if (differenceInMinutes >= process.env.RESETCODE_EXPIRES_IN)
-            throw new ApiError("Reset code has expired! Please request a new one.", 401);
 
-        if (String(user.reset_code) !== String(reset_code))
+        const differenceInMinutes = timeNow.diff(timeDB, 'minutes');
+
+        if (differenceInMinutes >= process.env.RESETCODE_EXPIRES_IN) {
+            throw new ApiError("Reset code has expired! Please request a new one.", 401);
+        }
+
+        if (String(user.reset_code) !== String(reset_code)) {
             throw new ApiError("Invalid reset code!", 400);
-        
+        }
 
         await client.query(`
             UPDATE users SET reset_code = NULL, reset_time = NULL 
@@ -166,17 +176,15 @@ export const checkResetCode = async (req, res, next) => {
             type: "reset"
         };
 
-        const temporary_token = jwt.sign(
-            payload, process.env.JWT_TEMPORARY_KEY, 
-            {
-                expiresIn: process.env.JWT_TEMPORARY_EXPIRES_IN || '5m'
-            });
+        const temporary_token = jwt.sign(payload, process.env.JWT_TEMPORARY_KEY, {
+            expiresIn: process.env.JWT_TEMPORARY_EXPIRES_IN || '5m'
+        });
 
         res.cookie('temporary_token', temporary_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: 5 * 60 * 1000
+            maxAge: 5 * 60 * 1000 // 5 minutes
         });
 
         res.status(200).json({
@@ -193,13 +201,16 @@ export const changePassword = async (req, res, next) => {
     try {
         const {email, password} = req.body;
 
-        if (!email || !password)
+        if (!email || !password) {
             throw new ApiError("Email, Password and Temporary Token are required.", 400);
+        }
         
         const temporary_token = req.cookies.temporary_token;
         const decoded = jwt.verify(temporary_token, process.env.JWT_TEMPORARY_KEY);
-        if(decoded.type !== "reset")
+        
+        if(decoded.type !== "reset") {
             throw new ApiError("Invalid temporary token type!", 401);
+        }
 
         const hashedPassword = await bcrypt.hash(password, 8);
         await client.query(`
@@ -226,9 +237,10 @@ export const changePasswordAuthenticated = async (req, res, next) => {
         const {currentPassword, newPassword} = req.body;
         const userId = req.user.id;
 
-        if (!currentPassword || !newPassword)
+        if (!currentPassword || !newPassword) {
             throw new ApiError("Current password and new password are required.", 400);
-        
+        }
+
         const user = req.user;
         const checkUser = await client.query(`
             SELECT password FROM users 
@@ -238,8 +250,10 @@ export const changePasswordAuthenticated = async (req, res, next) => {
 
         const dbPassword = checkUser.rows[0].password;
         const comparePassword = await bcrypt.compare(currentPassword, dbPassword);
-        if (!comparePassword)
+        
+        if (!comparePassword) {
             throw new ApiError("Current password is incorrect!", 401);
+        }
 
         const hashedPassword = await bcrypt.hash(newPassword, 8);
         await client.query(`
@@ -261,20 +275,24 @@ export const refreshToken = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
         const refresh_token = authHeader?.split(' ')[1];
-        if (!refresh_token) 
+
+        if (!refresh_token) {
             throw new ApiError("Refresh token is required.", 401);
+        }
 
         const decoded = await jwt.verify(refresh_token, process.env.JWT_REFRESH_KEY || 'refresh_key');
-        const user = await client.query(`
-            SELECT id, first_name, last_name, email, title, department, profile_pic FROM users 
-            WHERE id = $1`,
+        
+        const user = await client.query(
+            "SELECT id, first_name, last_name, email, title, department, profile_pic FROM users WHERE id = $1",
             [decoded.id]
         );
 
-        if (!user.rows[0])
+        if (!user.rows[0]) {
             throw new ApiError("User not found.", 404);
-        
+        }
+
         await createToken(user.rows[0], res);
+
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
             next(new ApiError("Refresh token has expired.", 401));
@@ -293,8 +311,7 @@ export const changeName = async (req, res, next) => {
             throw new ApiError("First name and last name are required.", 400);
 
         const updatedUser = await client.query(`
-            UPDATE users SET first_name = $1, last_name = $2 
-            WHERE id = $3 RETURNING *`,
+            UPDATE users SET first_name = $1, last_name = $2 WHERE id = $3 RETURNING *`,
             [first_name, last_name, req.user.id]
         );
 
@@ -302,6 +319,7 @@ export const changeName = async (req, res, next) => {
             throw new ApiError("Failed to update user name.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({
@@ -321,8 +339,7 @@ export const changeTitle = async (req, res, next) => {
             throw new ApiError("Title is required.", 400);
 
         const updatedUser = await client.query(`
-            UPDATE users SET title = $1 
-            WHERE id = $2 RETURNING *`,
+            UPDATE users SET title = $1 WHERE id = $2 RETURNING *`,
             [title, userId]
         );
 
@@ -330,6 +347,7 @@ export const changeTitle = async (req, res, next) => {
             throw new ApiError("Failed to update user title.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({
@@ -344,21 +362,25 @@ export const changeTitle = async (req, res, next) => {
 export const changeProfilePicture = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        if (!req.file)
+        
+        if (!req.file) {
             throw new ApiError("Profile picture is required.", 400);
+        }
 
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!allowedTypes.includes(req.file.mimetype))
+        if (!allowedTypes.includes(req.file.mimetype)) {
             throw new ApiError("Only JPG, JPEG and PNG files are allowed.", 400);
+        }
 
-        const maxSize = 10 * 1024 * 1024;
-        if (req.file.size > maxSize)
-            throw new ApiError("File size cannot exceed 10MB.", 400);
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (req.file.size > maxSize) {
+            throw new ApiError("File size cannot exceed 5MB.", 400);
+        }
 
         const profilePicPath = req.file.path;
+
         const updatedUser = await client.query(`
-            UPDATE users SET profile_pic = $1 
-            WHERE id = $2 RETURNING *`,
+            UPDATE users SET profile_pic = $1 WHERE id = $2 RETURNING *`,
             [profilePicPath, userId]
         );
 
@@ -366,6 +388,7 @@ export const changeProfilePicture = async (req, res, next) => {
             throw new ApiError("Failed to update user profile picture.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({

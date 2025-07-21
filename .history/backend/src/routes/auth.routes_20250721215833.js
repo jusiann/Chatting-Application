@@ -4,6 +4,7 @@ import path from "path";
 import {signUp, signIn, forgetPassword, checkResetCode, changePassword, changePasswordAuthenticated, refreshToken, changeName, changeTitle, changeProfilePicture} from "../controllers/auth.controller.js";
 import {verifyToken} from "../middlewares/auth.js";
 
+
 const router = express.Router();
 
 const storage = multer.diskStorage({
@@ -19,7 +20,7 @@ const storage = multer.diskStorage({
 const upload = multer({ 
     storage: storage,
     limits: {
-        fileSize: 10 * 1024 * 1024
+        fileSize: 5 * 1024 * 1024 // 5MB limit
     }
 });
 
@@ -29,6 +30,7 @@ router.post("/refresh-token", refreshToken);
 router.post("/forget-password", forgetPassword);
 router.post("/check-reset-code", checkResetCode);
 router.post("/change-password", changePassword);
+
 router.post("/change-password-auth", verifyToken, changePasswordAuthenticated);
 router.put("/change-name", verifyToken, changeName);
 router.put("/change-title", verifyToken, changeTitle);

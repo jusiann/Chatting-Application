@@ -6,32 +6,38 @@ import moment from "moment";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
 import {ApiError} from "../middlewares/error.js";
+import logger from "../utils/logger.js";
 
 export const signUp = async (req, res, next) => {
     try {
         const {first_name, last_name, email, password, title, department} = req.body;
+        logger.info(`Attempting to register new user: ${email}`);
 
-        if (!first_name || !last_name || !email || !password)
+        if (!first_name || !last_name || !email || !password) {
+            logger.warn(`Registration failed - Missing required fields for user: ${email}`);
             throw new ApiError("First name, Last name, Email and Password are required.", 400);
-        
+        }
 
-        const checkUser = await client.query(`
-            SELECT * FROM users 
-            WHERE email = $1`,
+        const checkUser = await client.query(
+            `SELECT * FROM users WHERE email = $1`,
             [email]
         );
 
-        if(checkUser.rows.length > 0)
+        if(checkUser.rows.length > 0) {
+            logger.warn(`Registration failed - Email already exists: ${email}`);
             throw new ApiError("Email already exists!", 400);
-        
+        }
 
         const hashedPassword = await bcrypt.hash(password, 8);
+        // console.log("Hashed Password: ", hashedPassword);
 
         const result = await client.query(`
             INSERT INTO users (first_name, last_name, email, password, title, department) 
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            VALUES ($1, $2, $3, $4, $5, $6) returning *`,
             [first_name, last_name, email, hashedPassword, title, department]
         );
+
+        logger.info(`User registered successfully: ${email}`);
 
         res.status(201).json({
             success: true,
@@ -46,6 +52,7 @@ export const signUp = async (req, res, next) => {
             }
         });
     } catch (error) {
+        logger.error(`Registration error for ${req.body.email}: ${error.message}`);
         next(error);
     }
 };
@@ -53,9 +60,12 @@ export const signUp = async (req, res, next) => {
 export const signIn = async (req, res, next) => {
    try {
         const { email, password } = req.body;
+        logger.info(`Login attempt for user: ${email}`);
         
-        if (!email || !password)
+        if (!email || !password) {
+            logger.warn(`Login failed - Missing credentials for user: ${email}`);
             throw new ApiError("Email and Password are required.", 400);
+        }
 
         const checkUser = await client.query(`
             SELECT * FROM users 
@@ -63,17 +73,26 @@ export const signIn = async (req, res, next) => {
             [email]
         );
 
-        if (checkUser.rows.length === 0)
+        if (checkUser.rows.length === 0) {
+            logger.warn(`Login failed - User not found: ${email}`);
             throw new ApiError("Email or Password is incorrect!", 401);
+        }
         
         const user = checkUser.rows[0];
+        // console.log("Request password:", password);
+        // console.log("DB password hash:", user.password);
+
         const comparePassword = await bcrypt.compare(password, user.password);
 
-        if (!comparePassword)
+        if (!comparePassword) {
+            logger.warn(`Login failed - Invalid password for user: ${email}`);
             throw new ApiError("Email or Password is incorrect!", 401);
+        }
 
         await createToken(user, res);
+        logger.info(`User logged in successfully: ${email}`);
     } catch (error) {
+        logger.error(`Login error for ${req.body.email}: ${error.message}`);
         next(error);
     }
 };
@@ -81,10 +100,12 @@ export const signIn = async (req, res, next) => {
 export const forgetPassword = async (req, res, next) => {
     try {
         const {email} = req.body;
+        logger.info(`Password reset requested for user: ${email}`);
 
-        if (!email)
+        if (!email) {
+            logger.warn(`Password reset failed - Email not provided`);
             throw new ApiError("Email is required.", 400);
-        
+        }
 
         const checkUser = await client.query(`
             SELECT id, first_name, last_name, email FROM users 
@@ -92,12 +113,17 @@ export const forgetPassword = async (req, res, next) => {
             [email]
         );
 
-        if(!checkUser.rows.length > 0)
+        if(!checkUser.rows.length > 0) {
+            logger.warn(`Password reset failed - User not found: ${email}`);
             throw new ApiError("User does not exist!", 404);
-        
+        }
     
         const resetCode = crypto.randomBytes(16).toString("hex");
+        // console.log("User: ", checkUser.rows[0]);
+        // console.log("Reset Code: ", resetCode);
+
         const resetTime = new Date().toISOString();
+
         await client.query(`
             UPDATE users SET reset_code = $1, reset_time = $2 
             WHERE email = $3`,
@@ -112,6 +138,7 @@ export const forgetPassword = async (req, res, next) => {
             Eğer bu işlemi siz başlatmadıysanız bu mesajı yok sayabilirsiniz.`;
 
         await sendEmail(email, "Şifre Sıfırlama Talebi", mailText);
+        logger.info(`Reset code sent successfully to: ${email}`);
 
         res.status(200).json({
             success: true,
@@ -119,6 +146,7 @@ export const forgetPassword = async (req, res, next) => {
             reset_code: resetCode
         });
     } catch (error) {
+        logger.error(`Password reset error for ${req.body.email}: ${error.message}`);
         next(error);
     }
 };
@@ -126,9 +154,12 @@ export const forgetPassword = async (req, res, next) => {
 export const checkResetCode = async (req, res, next) => {
     try {
         const { email, reset_code } = req.body;
+        logger.info(`Verifying reset code for user: ${email}`);
 
-        if (!email || !reset_code)
+        if (!email || !reset_code) {
+            logger.warn(`Reset code verification failed - Missing required fields for: ${email}`);
             throw new ApiError("Email and reset code are required.", 400);
+        }
 
         const userCheck = await client.query(`
             SELECT id, email, reset_code, reset_time FROM users 
@@ -136,22 +167,37 @@ export const checkResetCode = async (req, res, next) => {
             [email]
         );
 
-        if (userCheck.rows.length === 0)
+        if (userCheck.rows.length === 0) {
+            logger.warn(`Reset code verification failed - User not found: ${email}`);
             throw new ApiError("User not found!", 404);
-        
+        }
+
         const user = userCheck.rows[0];
 
-        if (!user.reset_code || !user.reset_time)
+        if (!user.reset_code || !user.reset_time) {
+            logger.warn(`Reset code verification failed - No active reset request for: ${email}`);
             throw new ApiError("No active password reset request found.", 400);
+        }
         
+
         const timeDB = moment.utc(user.reset_time);
         const timeNow = moment.utc();
-        const differenceInMinutes = timeNow.diff(timeDB, 'minutes');
-        if (differenceInMinutes >= process.env.RESETCODE_EXPIRES_IN)
-            throw new ApiError("Reset code has expired! Please request a new one.", 401);
+        // console.log("timeDB (UTC):", timeDB.format());
+        // console.log("timeNow (UTC):", timeNow.format());
 
-        if (String(user.reset_code) !== String(reset_code))
+        const differenceInMinutes = timeNow.diff(timeDB, 'minutes');
+        // console.log("Difference in minutes:", differenceInMinutes);
+
+        if (differenceInMinutes >= process.env.RESETCODE_EXPIRES_IN) {
+            logger.warn(`Reset code verification failed - Code expired for: ${email}`);
+            throw new ApiError("Reset code has expired! Please request a new one.", 401);
+        }
+        
+
+        if (String(user.reset_code) !== String(reset_code)) {
+            logger.warn(`Reset code verification failed - Invalid code for: ${email}`);
             throw new ApiError("Invalid reset code!", 400);
+        }
         
 
         await client.query(`
@@ -166,17 +212,8 @@ export const checkResetCode = async (req, res, next) => {
             type: "reset"
         };
 
-        const temporary_token = jwt.sign(
-            payload, process.env.JWT_TEMPORARY_KEY, 
-            {
-                expiresIn: process.env.JWT_TEMPORARY_EXPIRES_IN || '5m'
-            });
-
-        res.cookie('temporary_token', temporary_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 5 * 60 * 1000
+        const temporary_token = jwt.sign(payload, process.env.JWT_TEMPORARY_KEY, {
+            expiresIn: process.env.JWT_TEMPORARY_EXPIRES_IN || '5m'
         });
 
         res.status(200).json({
@@ -185,6 +222,7 @@ export const checkResetCode = async (req, res, next) => {
             temporary_token: temporary_token
         });
     } catch (error) {
+        logger.error(`Reset code verification error for ${req.body.email}: ${error.message}`);
         next(error);
     }
 };
@@ -192,14 +230,14 @@ export const checkResetCode = async (req, res, next) => {
 export const changePassword = async (req, res, next) => {
     try {
         const {email, password} = req.body;
-
         if (!email || !password)
-            throw new ApiError("Email, Password and Temporary Token are required.", 400);
+            throw new ApiError("Email, Password and Token are required.", 400);
         
         const temporary_token = req.cookies.temporary_token;
         const decoded = jwt.verify(temporary_token, process.env.JWT_TEMPORARY_KEY);
+        
         if(decoded.type !== "reset")
-            throw new ApiError("Invalid temporary token type!", 401);
+            throw new ApiError("Invalid token type!", 401);
 
         const hashedPassword = await bcrypt.hash(password, 8);
         await client.query(`
@@ -208,14 +246,18 @@ export const changePassword = async (req, res, next) => {
             [hashedPassword, decoded.id]
         );
 
+        logger.info(`Password changed successfully for: ${email}`);
+
         res.status(200).json({
             success: true,
             message: "Password changed successfully!"
         });
     } catch (error) {
         if(error instanceof jwt.JsonWebTokenError) {
+            logger.error(`Password change failed - Token error for ${req.body.email}`);
             next(new ApiError("Invalid or expired token", 401));
         } else {
+            logger.error(`Password change error for ${req.body.email}: ${error.message}`);
             next(error);
         }
     }
@@ -225,10 +267,13 @@ export const changePasswordAuthenticated = async (req, res, next) => {
     try {
         const {currentPassword, newPassword} = req.body;
         const userId = req.user.id;
+        logger.info(`Authenticated password change requested for user ID: ${userId}`);
 
-        if (!currentPassword || !newPassword)
+        if (!currentPassword || !newPassword) {
+            logger.warn(`Authenticated password change failed - Missing passwords for user ID: ${userId}`);
             throw new ApiError("Current password and new password are required.", 400);
-        
+        }
+
         const user = req.user;
         const checkUser = await client.query(`
             SELECT password FROM users 
@@ -238,8 +283,12 @@ export const changePasswordAuthenticated = async (req, res, next) => {
 
         const dbPassword = checkUser.rows[0].password;
         const comparePassword = await bcrypt.compare(currentPassword, dbPassword);
-        if (!comparePassword)
+        
+        if (!comparePassword) {
+            logger.warn(`Authenticated password change failed - Invalid current password for user ID: ${userId}`);
             throw new ApiError("Current password is incorrect!", 401);
+        }
+        
 
         const hashedPassword = await bcrypt.hash(newPassword, 8);
         await client.query(`
@@ -248,11 +297,14 @@ export const changePasswordAuthenticated = async (req, res, next) => {
             [hashedPassword, user.id]
         );
 
+        logger.info(`Password changed successfully for authenticated user ID: ${userId}`);
+
         res.status(200).json({
             success: true,
             message: "Password changed successfully!"
         });
     } catch (error) {
+        logger.error(`Authenticated password change error for user ID ${req.user?.id}: ${error.message}`);
         next(error);
     }
 };
@@ -261,20 +313,24 @@ export const refreshToken = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
         const refresh_token = authHeader?.split(' ')[1];
-        if (!refresh_token) 
+
+        if (!refresh_token) {
             throw new ApiError("Refresh token is required.", 401);
+        }
 
         const decoded = await jwt.verify(refresh_token, process.env.JWT_REFRESH_KEY || 'refresh_key');
-        const user = await client.query(`
-            SELECT id, first_name, last_name, email, title, department, profile_pic FROM users 
-            WHERE id = $1`,
+        
+        const user = await client.query(
+            "SELECT id, first_name, last_name, email, title, department, profile_pic FROM users WHERE id = $1",
             [decoded.id]
         );
 
-        if (!user.rows[0])
+        if (!user.rows[0]) {
             throw new ApiError("User not found.", 404);
-        
+        }
+
         await createToken(user.rows[0], res);
+
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
             next(new ApiError("Refresh token has expired.", 401));
@@ -293,8 +349,7 @@ export const changeName = async (req, res, next) => {
             throw new ApiError("First name and last name are required.", 400);
 
         const updatedUser = await client.query(`
-            UPDATE users SET first_name = $1, last_name = $2 
-            WHERE id = $3 RETURNING *`,
+            UPDATE users SET first_name = $1, last_name = $2 WHERE id = $3 RETURNING *`,
             [first_name, last_name, req.user.id]
         );
 
@@ -302,6 +357,7 @@ export const changeName = async (req, res, next) => {
             throw new ApiError("Failed to update user name.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({
@@ -321,8 +377,7 @@ export const changeTitle = async (req, res, next) => {
             throw new ApiError("Title is required.", 400);
 
         const updatedUser = await client.query(`
-            UPDATE users SET title = $1 
-            WHERE id = $2 RETURNING *`,
+            UPDATE users SET title = $1 WHERE id = $2 RETURNING *`,
             [title, userId]
         );
 
@@ -330,6 +385,7 @@ export const changeTitle = async (req, res, next) => {
             throw new ApiError("Failed to update user title.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({
@@ -344,21 +400,27 @@ export const changeTitle = async (req, res, next) => {
 export const changeProfilePicture = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        if (!req.file)
+        
+        if (!req.file) {
             throw new ApiError("Profile picture is required.", 400);
+        }
 
+        // Dosya tipi kontrolü
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!allowedTypes.includes(req.file.mimetype))
+        if (!allowedTypes.includes(req.file.mimetype)) {
             throw new ApiError("Only JPG, JPEG and PNG files are allowed.", 400);
+        }
 
-        const maxSize = 10 * 1024 * 1024;
-        if (req.file.size > maxSize)
-            throw new ApiError("File size cannot exceed 10MB.", 400);
+        // Dosya boyutu kontrolü (5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (req.file.size > maxSize) {
+            throw new ApiError("File size cannot exceed 5MB.", 400);
+        }
 
         const profilePicPath = req.file.path;
+
         const updatedUser = await client.query(`
-            UPDATE users SET profile_pic = $1 
-            WHERE id = $2 RETURNING *`,
+            UPDATE users SET profile_pic = $1 WHERE id = $2 RETURNING *`,
             [profilePicPath, userId]
         );
 
@@ -366,6 +428,7 @@ export const changeProfilePicture = async (req, res, next) => {
             throw new ApiError("Failed to update user profile picture.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({

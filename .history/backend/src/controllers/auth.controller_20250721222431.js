@@ -271,10 +271,12 @@ export const refreshToken = async (req, res, next) => {
             [decoded.id]
         );
 
-        if (!user.rows[0])
+        if (!user.rows[0]) {
             throw new ApiError("User not found.", 404);
-        
+        }
+
         await createToken(user.rows[0], res);
+
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
             next(new ApiError("Refresh token has expired.", 401));
@@ -293,8 +295,7 @@ export const changeName = async (req, res, next) => {
             throw new ApiError("First name and last name are required.", 400);
 
         const updatedUser = await client.query(`
-            UPDATE users SET first_name = $1, last_name = $2 
-            WHERE id = $3 RETURNING *`,
+            UPDATE users SET first_name = $1, last_name = $2 WHERE id = $3 RETURNING *`,
             [first_name, last_name, req.user.id]
         );
 
@@ -302,6 +303,7 @@ export const changeName = async (req, res, next) => {
             throw new ApiError("Failed to update user name.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({
@@ -321,8 +323,7 @@ export const changeTitle = async (req, res, next) => {
             throw new ApiError("Title is required.", 400);
 
         const updatedUser = await client.query(`
-            UPDATE users SET title = $1 
-            WHERE id = $2 RETURNING *`,
+            UPDATE users SET title = $1 WHERE id = $2 RETURNING *`,
             [title, userId]
         );
 
@@ -330,6 +331,7 @@ export const changeTitle = async (req, res, next) => {
             throw new ApiError("Failed to update user title.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({
@@ -344,21 +346,25 @@ export const changeTitle = async (req, res, next) => {
 export const changeProfilePicture = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        if (!req.file)
+        
+        if (!req.file) {
             throw new ApiError("Profile picture is required.", 400);
+        }
 
         const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!allowedTypes.includes(req.file.mimetype))
+        if (!allowedTypes.includes(req.file.mimetype)) {
             throw new ApiError("Only JPG, JPEG and PNG files are allowed.", 400);
+        }
 
-        const maxSize = 10 * 1024 * 1024;
-        if (req.file.size > maxSize)
-            throw new ApiError("File size cannot exceed 10MB.", 400);
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (req.file.size > maxSize) {
+            throw new ApiError("File size cannot exceed 5MB.", 400);
+        }
 
         const profilePicPath = req.file.path;
+
         const updatedUser = await client.query(`
-            UPDATE users SET profile_pic = $1 
-            WHERE id = $2 RETURNING *`,
+            UPDATE users SET profile_pic = $1 WHERE id = $2 RETURNING *`,
             [profilePicPath, userId]
         );
 
@@ -366,6 +372,7 @@ export const changeProfilePicture = async (req, res, next) => {
             throw new ApiError("Failed to update user profile picture.", 400);
 
         const user = updatedUser.rows[0];
+
         await createToken(user, res);
 
         res.status(200).json({
