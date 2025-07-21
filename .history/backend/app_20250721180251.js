@@ -6,10 +6,10 @@ import cors from "cors";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import path from "path";
+import { fileURLToPath } from 'url';
 import authRoutes from "./src/routes/auth.routes.js";
 import messageRoutes from "./src/routes/message.routes.js";
 import { errorHandler } from "./src/middlewares/error.js";
-import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -40,6 +40,7 @@ app.use(cookieParser());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Health check
 app.get("/health", (req, res) => {
     console.log(`[API] GET /health [200] Health check`);
     res.status(200).json({ 
