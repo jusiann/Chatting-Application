@@ -3,12 +3,18 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import cors from "cors";
+import morgan from "morgan";
 import rateLimit from "express-rate-limit";
-import logger from "./src/utils/logger.js";
+import path from "path";
+import { fileURLToPath } from 'url';
 import authRoutes from "./src/routes/auth.routes.js";
 import messageRoutes from "./src/routes/message.routes.js";
+import { errorHandler } from "./src/middlewares/error.js";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 5001;
@@ -21,22 +27,27 @@ app.use(cors({
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100
+    max: process.env.RATE_LIMIT || 100
 });
 
 app.use(limiter);
+
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Health check
 app.get("/health", (req, res) => {
-    logger.api("GET", "/health", 200, "Health check");
+    console.log(`[API] GET /health [200] Health check`);
     res.status(200).json({ 
         status: "UP", 
         timestamp: new Date(),
-        environment: process.env.NODE_ENV || "Development"
+        environment: process.env.NODE_ENV || "Development",
+        version: process.env.npm_package_version
     });
 });
 
@@ -44,28 +55,24 @@ app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
 app.use((req, res) => {
-    logger.api(req.method, req.originalUrl, 404, "Not found");
+    console.log(`[API] ${req.method} ${req.originalUrl} [404] Not found`);
     res.status(404).json({
         success: false,
         message: "Endpoint not found"
     });
 });
 
-app.use((err, req, res, next) => {
-    logger.logError("EXPRESS", {
-        path: req.path,
-        method: req.method,
-        error: err.message
-    });
-    
-    res.status(err.status || 500).json({
-        success: false,
-        message: err.message || "Server error occurred",
-        error: process.env.NODE_ENV === "development" ? err : {}
+app.use(errorHandler);
+
+process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    app.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
     });
 });
 
 app.listen(port, () => {
-    logger.info(`Server running on port ${port}`);
-    logger.info(`Mode: ${process.env.NODE_ENV || "Development"}`);
+    console.log(`Server running on port ${port}`);
+    console.log(`Mode: ${process.env.NODE_ENV || "Development"}`);
 });
