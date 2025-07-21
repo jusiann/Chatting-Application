@@ -1,38 +1,38 @@
 import dotenv from "dotenv";
-dotenv.config();
 import nodemailer from 'nodemailer';
+import { ApiError } from "../middlewares/error.js";
 
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT),
-    secure: false,
+    secure: process.env.EMAIL_SECURE === 'true',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
     }
 });
 
-const sendEmail = async (to, subject, text) => {
+const sendEmail = async (to, subject, text, html = null) => {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+        throw new ApiError("Email configuration is missing", 500);
+    }
+
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_USER}>`,
         to: to,
         subject: subject,
-        text: text
+        text: text,
+        html: html || text
     };
-
-    console.log("Email Config:", {
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD ? "***" : "EMPTY",
-    });
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log("Email sent successfully!");
+        console.log("[EMAIL] Sent successfully to:", to);
     } catch (error) {
-        console.log("Failed to send email:", error)
+        console.error("[EMAIL] Failed to send:", error.message);
+        throw new ApiError("Failed to send email", 500);
     }
 };
 

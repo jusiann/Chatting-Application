@@ -1,5 +1,4 @@
 import {Client} from "pg";
-import logger from "../utils/logger.js";
 
 const client = new Client({
     user: "postgres",
@@ -10,8 +9,8 @@ const client = new Client({
 });
 
 client.connect()
-    .then(() => logger.info("Database connection successfull."))
-    .catch(err => logger.error("Database connection failed!", err));
+    .then(() => console.log("[DB] Database connection successful."))
+    .catch(err => console.error("[DB] Database connection failed!", err));
 
 export default client;
 

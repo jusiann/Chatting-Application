@@ -9,10 +9,10 @@ import {ApiError} from "../middlewares/error.js";
 
 export const signUp = async (req, res, next) => {
     try {
-        const {fullname, email, password, title, department} = req.body;
+        const {first_name, last_name, email, password, title, department} = req.body;
 
-        if (!fullname || !email || !password )
-            throw new ApiError("Fullname, Email, Password are required.", 400);
+        if (!first_name || !last_name || !email || !password)
+            throw new ApiError("First name, Last name, Email and Password are required.", 400);
 
         const checkUser = await client.query(
             `SELECT * FROM users WHERE email = $1`,
@@ -26,9 +26,9 @@ export const signUp = async (req, res, next) => {
         // console.log("Hashed Password: ", hashedPassword);
 
         const result = await client.query(`
-            INSERT INTO users (fullname, email, password, title, department) 
-            VALUES ($1, $2, $3, $4, $5) returning *`,
-            [fullname, email, hashedPassword, title, department]
+            INSERT INTO users (first_name, last_name, email, password, title, department) 
+            VALUES ($1, $2, $3, $4, $5, $6) returning *`,
+            [first_name, last_name, email, hashedPassword, title, department]
         );
 
         res.status(201).json({
@@ -36,7 +36,8 @@ export const signUp = async (req, res, next) => {
             message: "User created successfully!",
             user: {
                 id: result.rows[0].id,
-                fullname: result.rows[0].fullname,
+                first_name: result.rows[0].first_name,
+                last_name: result.rows[0].last_name,
                 email: result.rows[0].email,
                 title: result.rows[0].title,
                 department: result.rows[0].department
@@ -85,7 +86,7 @@ export const forgetPassword = async (req, res, next) => {
             throw new ApiError("Email is required.", 400);
 
         const checkUser = await client.query(`
-            SELECT id, fullname, email FROM users 
+            SELECT id, first_name, last_name, email FROM users 
             WHERE email = $1`,
             [email]
         );
@@ -106,7 +107,7 @@ export const forgetPassword = async (req, res, next) => {
         );
 
         const mailText = `
-            Merhaba ${checkUser.rows[0].fullname},\n
+            Merhaba ${checkUser.rows[0].first_name} ${checkUser.rows[0].last_name},\n
             Şifrenizi sıfırlamak için aşağıdaki kodu kullanın:\n
             ${resetCode}\n
             Bu kod 15 dakika boyunca geçerlidir.\n
@@ -174,14 +175,21 @@ export const checkResetCode = async (req, res, next) => {
             type: "reset"
         };
 
-        const token = jwt.sign(payload, process.env.JWT_TEMPORARY_KEY, {
+        const temporary_token = jwt.sign(payload, process.env.JWT_TEMPORARY_KEY, {
             expiresIn: process.env.JWT_TEMPORARY_EXPIRES_IN || '5m'
+        });
+
+        res.cookie('temporary_token', temporary_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 5 * 60 * 1000 // 5 minutes
         });
 
         res.status(200).json({
             success: true,
             message: "Reset code verified successfully.",
-            token: token
+            temporary_token: temporary_token
         });
     } catch (error) {
         next(error);
@@ -192,20 +200,19 @@ export const changePassword = async (req, res, next) => {
     try {
         const {email, password} = req.body;
         if (!email || !password)
-            throw new ApiError("Email, Password and Token are required.", 400);
+            throw new ApiError("Email, Password and Temporary Token are required.", 400);
         
-
-        const token = req.cookies.token;
-        const decoded = jwt.verify(token, process.env.JWT_TEMPORARY_KEY);
+        const temporary_token = req.cookies.temporary_token;
+        const decoded = jwt.verify(temporary_token, process.env.JWT_TEMPORARY_KEY);
         
         if(decoded.type !== "reset")
-            throw new ApiError("Invalid token type!", 401);
+            throw new ApiError("Invalid temporary token type!", 401);
 
         const hashedPassword = await bcrypt.hash(password, 8);
         await client.query(`
             UPDATE users SET password = $1, reset_code = NULL, reset_time = NULL 
             WHERE id = $2`,
-            [hashedPassword, decoded.sub]
+            [hashedPassword, decoded.id]
         );
 
         res.status(200).json({
