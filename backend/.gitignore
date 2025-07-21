@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Dependencies
-node_modules
+node_modules/
 dist
 dist-ssr
 *.local
@@ -28,3 +28,13 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Uploads
+uploads/
+uploads/*
+!uploads/.gitkeep
+
+# Runtime data
+pids
+*.pid
+*.seed

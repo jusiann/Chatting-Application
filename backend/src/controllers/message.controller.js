@@ -6,7 +6,7 @@ export const getUsers = async (req, res) => {
         const userId = req.user.id;
         const usersList = await client.query(
             "SELECT id, first_name, last_name, email, title, department, profile_pic FROM users WHERE id != $1",
-            [id]
+            [userId]
         );
 
         res.status(200).json({

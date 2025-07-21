@@ -262,3 +262,136 @@ export const changePasswordAuthenticated = async (req, res, next) => {
         next(error);
     }
 };
+
+export const refreshToken = async (req, res, next) => {
+    try {
+        const authHeader = req.headers['authorization'];
+        const refresh_token = authHeader?.split(' ')[1];
+
+        if (!refresh_token) {
+            throw new ApiError("Refresh token is required.", 401);
+        }
+
+        const decoded = await jwt.verify(refresh_token, process.env.JWT_REFRESH_KEY || 'refresh_key');
+        
+        const user = await client.query(
+            "SELECT id, first_name, last_name, email, title, department, profile_pic FROM users WHERE id = $1",
+            [decoded.id]
+        );
+
+        if (!user.rows[0]) {
+            throw new ApiError("User not found.", 404);
+        }
+
+        await createToken(user.rows[0], res);
+
+    } catch (error) {
+        if (error instanceof jwt.TokenExpiredError) {
+            next(new ApiError("Refresh token has expired.", 401));
+        } else if (error instanceof jwt.JsonWebTokenError) {
+            next(new ApiError("Invalid refresh token.", 403));
+        } else {
+            next(error);
+        }
+    }
+};
+
+export const changeName = async (req, res, next) => {
+    try {
+        const {first_name, last_name} = req.body;
+        if (!first_name || !last_name)
+            throw new ApiError("First name and last name are required.", 400);
+
+        const updatedUser = await client.query(`
+            UPDATE users SET first_name = $1, last_name = $2 WHERE id = $3 RETURNING *`,
+            [first_name, last_name, req.user.id]
+        );
+
+        if (updatedUser.rows.length === 0)
+            throw new ApiError("Failed to update user name.", 400);
+
+        const user = updatedUser.rows[0];
+
+        await createToken(user, res);
+
+        res.status(200).json({
+            success: true,
+            message: "Name changed successfully!"
+        })
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const changeTitle = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const {title} = req.body;
+        if (!title)
+            throw new ApiError("Title is required.", 400);
+
+        const updatedUser = await client.query(`
+            UPDATE users SET title = $1 WHERE id = $2 RETURNING *`,
+            [title, userId]
+        );
+
+        if (updatedUser.rows.length === 0)
+            throw new ApiError("Failed to update user title.", 400);
+
+        const user = updatedUser.rows[0];
+
+        await createToken(user, res);
+
+        res.status(200).json({
+            success: true,
+            message: "Title changed successfully!"
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const changeProfilePicture = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        
+        if (!req.file) {
+            throw new ApiError("Profile picture is required.", 400);
+        }
+
+        // Dosya tipi kontrolü
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!allowedTypes.includes(req.file.mimetype)) {
+            throw new ApiError("Only JPG, JPEG and PNG files are allowed.", 400);
+        }
+
+        // Dosya boyutu kontrolü (5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (req.file.size > maxSize) {
+            throw new ApiError("File size cannot exceed 5MB.", 400);
+        }
+
+        const profilePicPath = req.file.path;
+
+        const updatedUser = await client.query(`
+            UPDATE users SET profile_pic = $1 WHERE id = $2 RETURNING *`,
+            [profilePicPath, userId]
+        );
+
+        if (updatedUser.rows.length === 0)
+            throw new ApiError("Failed to update user profile picture.", 400);
+
+        const user = updatedUser.rows[0];
+
+        await createToken(user, res);
+
+        res.status(200).json({
+            success: true,
+            message: "Profile picture changed successfully!",
+            profile_pic: profilePicPath
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
