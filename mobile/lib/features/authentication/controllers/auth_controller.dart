@@ -47,7 +47,7 @@ class AuthController extends _$AuthController {
         final decoded = JwtDecoder.decode(_token!);
         final user = AuthUserModel.fromJwt(decoded);
         ref.read(socketServiceProvider.notifier).connect(_token!);
-        _startTokenRefreshTimer(_token!);
+        await _startTokenRefreshTimer(_token!);
         await markDeliveredMessages();
         await ref
             .read(unreadMessageControllerProvider.notifier)
@@ -84,7 +84,7 @@ class AuthController extends _$AuthController {
           isChecking: false,
         ));
         ref.read(socketServiceProvider.notifier).connect(accessToken);
-        _startTokenRefreshTimer(accessToken);
+        await _startTokenRefreshTimer(accessToken);
         await markDeliveredMessages();
         return;
       } else {}
@@ -114,7 +114,7 @@ class AuthController extends _$AuthController {
       await _storage.write(key: 'refreshToken', value: data['refreshToken']);
       final decoded = JwtDecoder.decode(data['accessToken']);
       final user = AuthUserModel.fromJwt(decoded);
-      _startTokenRefreshTimer(data['accessToken']);
+      await _startTokenRefreshTimer(data['accessToken']);
       _token = data['accessToken'];
       await ref
           .read(unreadMessageControllerProvider.notifier)
@@ -148,7 +148,17 @@ class AuthController extends _$AuthController {
     ref.invalidate(unreadMessageControllerProvider);
   }
 
-  void _startTokenRefreshTimer(String token) {
+  Future<void> changeUser() async {
+    _token = await _storage.read(key: 'accessToken');
+    final decoded = JwtDecoder.decode(_token!);
+    final user = AuthUserModel.fromJwt(decoded);
+    ref.read(socketServiceProvider.notifier).connect(_token!);
+    await _startTokenRefreshTimer(_token!);
+    state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
+    return;
+  }
+
+  Future<void> _startTokenRefreshTimer(String token) async {
     _refreshTimer?.cancel();
 
     final expiryDate = JwtDecoder.getExpirationDate(token);

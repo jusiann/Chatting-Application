@@ -4,6 +4,7 @@ import 'package:mobile/features/authentication/controllers/auth_controller.dart'
 import 'package:mobile/features/chat/controllers/providers.dart';
 import 'package:mobile/features/chat/views/chat_view.dart';
 import 'package:mobile/features/chat/views/contact_view.dart';
+import 'package:mobile/features/settings/views/settings_view.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
   HomeShell({super.key});
@@ -13,7 +14,7 @@ class HomeShell extends ConsumerStatefulWidget {
 }
 
 class _HomeShellState extends ConsumerState<HomeShell> {
-  final Map<int, String> pageName = {0: 'Sohbet', 1: 'Rehber'};
+  final Map<int, String> pageName = {0: 'Sohbet', 1: 'Rehber', 2: 'Ayarlar'};
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +59,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         ),
         body: IndexedStack(
           index: ref.watch(homeShellProvider).navBarIndex,
-          children: [ChatPage(), ContactPage()],
+          children: [ChatPage(), ContactPage(), SettingsView()],
         ),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: ref.watch(homeShellProvider).navBarIndex,
@@ -68,6 +69,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             BottomNavigationBarItem(
               icon: Icon(Icons.contact_emergency),
               label: 'Rehber',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Ayarlar',
             ),
           ],
         ),

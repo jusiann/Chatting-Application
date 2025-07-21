@@ -146,8 +146,8 @@ class _RegisterState extends State<RegisterPage> {
                       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: FilledButton(
                         onPressed: () {
-                          String name = _nameController.text;
-                          String surname = _surnameController.text;
+                          String firstName = _nameController.text;
+                          String lastName = _surnameController.text;
                           String email = _emailController.text;
                           String password = _passwordController.text;
                           String passwordRep = _passwordReplyController.text;
@@ -155,8 +155,8 @@ class _RegisterState extends State<RegisterPage> {
                             print('Şifreler eşleşmiyor.');
                           } else {
                             RegisterController.signupUser(
-                              name: name,
-                              surname: surname,
+                              firstName: firstName,
+                              lastName: lastName,
                               email: email,
                               password: password,
                             );
