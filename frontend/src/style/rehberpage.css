@@ -12,7 +12,7 @@ body {
     width: 100vw;
     background-color: #f9f9f9;
     gap: 30px;
-    align-items:center;
+    align-items: center;
 }
 
 .Sidebar {
@@ -88,7 +88,7 @@ body {
     color: #910811;
 }
 
-.divider{
+.divider {
     width: 100%;
     border-bottom: 2px solid var(--rumeli-color);
 }

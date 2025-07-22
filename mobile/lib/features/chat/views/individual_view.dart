@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
-import 'package:mobile/features/chat/controllers/individual_page_controller.dart';
 import 'package:mobile/features/chat/controllers/message_controller.dart';
 import 'package:mobile/features/chat/controllers/providers.dart';
 import 'package:mobile/features/chat/controllers/socket_service.dart';
@@ -13,6 +12,7 @@ import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/features/chat/views/widgets/emoji_select_widget.dart';
 import 'package:mobile/features/chat/views/widgets/received_message_widget.dart';
 import 'package:mobile/features/chat/views/widgets/send_message_widget.dart';
+// ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class IndividualPage extends ConsumerStatefulWidget {
@@ -28,7 +28,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
   bool _showemoji = false;
   final _controller = TextEditingController();
   IO.Socket? socket;
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -134,43 +134,41 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
           ),
           title: InkWell(
             onTap: () {},
-            child: Container(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    '${widget.chat.name} ${widget.chat.surname}',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  '${widget.chat.title ?? ''} ${widget.chat.fullname}',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Son görülme: ',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Son görülme: ',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
+                    Text(
+                      formatMessageTime(widget.chat.time),
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12,
+                        color: Colors.white,
                       ),
-                      Text(
-                        formatMessageTime(widget.chat.time),
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           actions: [
@@ -303,10 +301,10 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                             onPressed: () async {
                               if (_controller.text.isNotEmpty) {
                                 final msg = {
-                                  'text': _controller.text,
+                                  'content': _controller.text,
                                   'time': DateTime.now().toIso8601String(),
-                                  'senderid': currentUserId,
-                                  'receiverid': widget.chat.id,
+                                  'sender_id': currentUserId,
+                                  'receiver_id': widget.chat.id,
                                 };
                                 ref
                                     .read(socketServiceProvider.notifier)

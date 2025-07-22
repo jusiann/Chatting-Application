@@ -6,12 +6,15 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class RegisterController {
   static Future<void> signupUser({
-    String? name,
-    String? surname,
+    String? firstName,
+    String? lastName,
     String? email,
     String? password,
   }) async {
-    if (name == null || surname == null || email == null || password == null) {
+    if (firstName == null ||
+        lastName == null ||
+        email == null ||
+        password == null) {
       print('tüm alanların doldurulması zorunludur.');
     } else {
       final url = Uri.parse('http://192.168.1.9:5001/api/auth/signup');
@@ -19,8 +22,8 @@ class RegisterController {
         url,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'name': name,
-          'surname': surname,
+          'first_name': firstName,
+          'last_name': lastName,
           'email': email,
           'password': password,
         }),

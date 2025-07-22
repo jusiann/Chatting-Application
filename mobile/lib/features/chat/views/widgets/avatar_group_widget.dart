@@ -34,7 +34,10 @@ class AvatarGroup extends StatelessWidget {
               ),
             ],
           ),
-          Text(user.name, style: TextStyle(fontFamily: 'Inter', fontSize: 12)),
+          Text(
+            user.fullname,
+            style: TextStyle(fontFamily: 'Inter', fontSize: 12),
+          ),
         ],
       ),
     );

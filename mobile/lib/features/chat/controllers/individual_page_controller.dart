@@ -43,7 +43,7 @@ Future<MessageModel> sendMessage({
       'Authorization': 'Bearer $token',
       'Content-Type': 'Application/json',
     },
-    body: jsonEncode({'text': text}),
+    body: jsonEncode({'content': text}),
   );
   if (response.statusCode == 200) {
     final messageJson = jsonDecode(response.body);

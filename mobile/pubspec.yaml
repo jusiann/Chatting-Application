@@ -49,6 +49,9 @@ dependencies:
   go_router: ^16.0.0
   jwt_decoder: ^2.0.1
   intl: ^0.20.2
+  image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+  http_parser: ^4.1.2
 
 dev_dependencies:
   flutter_test:

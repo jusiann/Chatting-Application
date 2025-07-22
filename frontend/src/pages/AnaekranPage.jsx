@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Searchbar from "../components/Searchbar";
 import Personcard from "../components/Personcard";
@@ -6,9 +6,16 @@ import Messagetopbar from "../components/Messagetopbar";
 import Messagereceived from "../components/Messagereceived";
 import Messagesended from "../components/Messagesended";
 import Sendbox from "../components/Sendbox";
+import useConservationStore from "../store/conservation";
 import "../style/anaekranpage.css";
 
 const AnaekranPage = () => {
+    const { chatUsers, chatUsersFetch } = useConservationStore();
+
+    useEffect(() => {
+        chatUsersFetch();
+    }, []);
+
     return (
         <div className="anaekran-container">
             <Sidebar />
@@ -17,19 +24,20 @@ const AnaekranPage = () => {
                 <Searchbar />
 
                 <div className="anaekran-person-list">
-                    <Personcard name="Arş. Gör. Derya Kaya" message="Görüşürüz" time="22:02" image="" />
-                    <Personcard name="Mehmet Özkan" message="Anlaştık" time="06:30" image="" />
-                    <Personcard name="Doç. Dr. Emre Tanrıverdi" message="Haha bende öyle düşünüyorum" time="14:43" image="" />
-                    <Personcard name="Büşra Şahin" message="Haberleşiriz" time="21:30" image="" />
-                    <Personcard name="Dr. Öğr. Üyesi Cemal Acar" message="Evet ben de izledim" time="00:16" image="" />
-                    <Personcard name="Esra Demir" message="Olur, getiririm" time="17:50" image="" />
-                    <Personcard name="Ali Rıza Uçar" message="Uyuyordum" time="17:50" image="" />
+                    {Array.isArray(chatUsers) &&
+                        chatUsers.map((chatUser) => (
+                            <Personcard key={chatUser.id} chatUser={chatUser} />
+                        ))}
                 </div>
             </div>
 
             <div className="anaekran-chat-panel">
                 <div className="messagetopbar-container-home">
-                    <Messagetopbar name="Arş. Gör. Derya Kaya" status="Son görülme : Bugün 22:02" image="" />
+                    <Messagetopbar
+                        name="Arş. Gör. Derya Kaya"
+                        status="Son görülme : Bugün 22:02"
+                        image=""
+                    />
                 </div>
 
                 <div className="anaekran-messages">
@@ -40,7 +48,6 @@ const AnaekranPage = () => {
                     <Messagereceived text="Tabii, hemen gönderiyorum." time="19:20" />
                     <Messagesended text="Süper, teşekkürler! Görüşürüz 😊" time="22:02" />
                 </div>
-
 
                 <Sendbox />
             </div>
