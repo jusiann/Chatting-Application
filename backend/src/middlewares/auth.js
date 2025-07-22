@@ -21,7 +21,7 @@ import client from "../lib/db.js";
 //     sender_id INTEGER NOT NULL REFERENCES users(id),
 //     receiver_id INTEGER NOT NULL REFERENCES users(id),
 //     content TEXT NOT NULL,
-//     status VARCHAR(20) DEFAULT 'unread',
+//     status VARCHAR(20) DEFAULT 'sent',
 //     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 //     CONSTRAINT fk_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
 //     CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
@@ -42,9 +42,9 @@ export const createToken = async (user, res) => {
         expiresIn: process.env.JWT_EXPIRES_IN || '15m'
     });
 
-    const refresh_token = await jwt.sign(payload, process.env.JWT_REFRESH_KEY || 'refresh_key', {
+    const refresh_token = await jwt.sign(payload, process.env.JWT_REFRESH_KEY, {
         algorithm: 'HS512',
-        expiresIn: '7d'
+        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
     });
 
     res.cookie('access_token', access_token, {

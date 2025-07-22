@@ -16,5 +16,8 @@ ios/Pods/
 **/node_modules/
 
 .idea/
+.history/
+node_modules/
+
 
 

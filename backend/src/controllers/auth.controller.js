@@ -6,15 +6,14 @@ import moment from "moment";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
 import {ApiError} from "../middlewares/error.js";
+import { log } from "console";
 
 export const signUp = async (req, res, next) => {
     try {
         const {first_name, last_name, email, password, title, department} = req.body;
-
         if (!first_name || !last_name || !email || !password)
             throw new ApiError("First name, Last name, Email and Password are required.", 400);
         
-
         const checkUser = await client.query(`
             SELECT * FROM users 
             WHERE email = $1`,
@@ -24,9 +23,7 @@ export const signUp = async (req, res, next) => {
         if(checkUser.rows.length > 0)
             throw new ApiError("Email already exists!", 400);
         
-
         const hashedPassword = await bcrypt.hash(password, 8);
-
         const result = await client.query(`
             INSERT INTO users (first_name, last_name, email, password, title, department) 
             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
@@ -53,7 +50,6 @@ export const signUp = async (req, res, next) => {
 export const signIn = async (req, res, next) => {
    try {
         const { email, password } = req.body;
-        
         if (!email || !password)
             throw new ApiError("Email and Password are required.", 400);
 
@@ -68,7 +64,6 @@ export const signIn = async (req, res, next) => {
         
         const user = checkUser.rows[0];
         const comparePassword = await bcrypt.compare(password, user.password);
-
         if (!comparePassword)
             throw new ApiError("Email or Password is incorrect!", 401);
 
@@ -81,11 +76,9 @@ export const signIn = async (req, res, next) => {
 export const forgetPassword = async (req, res, next) => {
     try {
         const {email} = req.body;
-
         if (!email)
             throw new ApiError("Email is required.", 400);
         
-
         const checkUser = await client.query(`
             SELECT id, first_name, last_name, email FROM users 
             WHERE email = $1`,
@@ -95,7 +88,6 @@ export const forgetPassword = async (req, res, next) => {
         if(!checkUser.rows.length > 0)
             throw new ApiError("User does not exist!", 404);
         
-    
         const resetCode = crypto.randomBytes(16).toString("hex");
         const resetTime = new Date().toISOString();
         await client.query(`
@@ -126,7 +118,6 @@ export const forgetPassword = async (req, res, next) => {
 export const checkResetCode = async (req, res, next) => {
     try {
         const { email, reset_code } = req.body;
-
         if (!email || !reset_code)
             throw new ApiError("Email and reset code are required.", 400);
 
@@ -140,20 +131,20 @@ export const checkResetCode = async (req, res, next) => {
             throw new ApiError("User not found!", 404);
         
         const user = userCheck.rows[0];
-
         if (!user.reset_code || !user.reset_time)
             throw new ApiError("No active password reset request found.", 400);
         
         const timeDB = moment.utc(user.reset_time);
         const timeNow = moment.utc();
         const differenceInMinutes = timeNow.diff(timeDB, 'minutes');
-        if (differenceInMinutes >= process.env.RESETCODE_EXPIRES_IN)
+        // console.log(differenceInMinutes);
+        // console.log(process.env.RESETCODE_EXPIRES_IN);
+        if (differenceInMinutes <= parseInt(process.env.RESETCODE_EXPIRES_IN))
             throw new ApiError("Reset code has expired! Please request a new one.", 401);
 
         if (String(user.reset_code) !== String(reset_code))
             throw new ApiError("Invalid reset code!", 400);
         
-
         await client.query(`
             UPDATE users SET reset_code = NULL, reset_time = NULL 
             WHERE id = $1`,
@@ -192,7 +183,6 @@ export const checkResetCode = async (req, res, next) => {
 export const changePassword = async (req, res, next) => {
     try {
         const {email, password} = req.body;
-
         if (!email || !password)
             throw new ApiError("Email, Password and Temporary Token are required.", 400);
         
@@ -225,7 +215,6 @@ export const changePasswordAuthenticated = async (req, res, next) => {
     try {
         const {currentPassword, newPassword} = req.body;
         const userId = req.user.id;
-
         if (!currentPassword || !newPassword)
             throw new ApiError("Current password and new password are required.", 400);
         
@@ -264,7 +253,7 @@ export const refreshToken = async (req, res, next) => {
         if (!refresh_token) 
             throw new ApiError("Refresh token is required.", 401);
 
-        const decoded = await jwt.verify(refresh_token, process.env.JWT_REFRESH_KEY || 'refresh_key');
+        const decoded = await jwt.verify(refresh_token, process.env.JWT_REFRESH_KEY);
         const user = await client.query(`
             SELECT id, first_name, last_name, email, title, department, profile_pic FROM users 
             WHERE id = $1`,
@@ -274,15 +263,39 @@ export const refreshToken = async (req, res, next) => {
         if (!user.rows[0])
             throw new ApiError("User not found.", 404);
         
-        await createToken(user.rows[0], res);
+        const payload = {
+            id: user.rows[0].id,
+            first_name: user.rows[0].first_name,
+            last_name: user.rows[0].last_name,
+            email: user.rows[0].email,
+            title: user.rows[0].title,
+            department: user.rows[0].department,
+        };
+
+        const access_token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+            algorithm: 'HS512',
+            expiresIn: process.env.JWT_EXPIRES_IN || '15m'
+        });
+
+        res.cookie('access_token', access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000
+        });
+
+        return res.status(200).json({
+            success: true,
+            access_token: access_token,
+            message: "Token refreshed successfully!"
+        });
     } catch (error) {
-        if (error instanceof jwt.TokenExpiredError) {
+        if (error instanceof jwt.TokenExpiredError)
             next(new ApiError("Refresh token has expired.", 401));
-        } else if (error instanceof jwt.JsonWebTokenError) {
+        else if (error instanceof jwt.JsonWebTokenError)
             next(new ApiError("Invalid refresh token.", 403));
-        } else {
+        else 
             next(error);
-        }
     }
 };
 
@@ -344,34 +357,39 @@ export const changeTitle = async (req, res, next) => {
 export const changeProfilePicture = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        if (!req.file)
-            throw new ApiError("Profile picture is required.", 400);
+        if (!req.cloudinary)
+            throw new ApiError("Profile picture upload failed", 400);
 
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!allowedTypes.includes(req.file.mimetype))
-            throw new ApiError("Only JPG, JPEG and PNG files are allowed.", 400);
+        const currentUser = await client.query(
+            "SELECT profile_pic_id FROM users WHERE id = $1",
+            [userId]
+        );
 
-        const maxSize = 10 * 1024 * 1024;
-        if (req.file.size > maxSize)
-            throw new ApiError("File size cannot exceed 10MB.", 400);
 
-        const profilePicPath = req.file.path;
-        const updatedUser = await client.query(`
-            UPDATE users SET profile_pic = $1 
-            WHERE id = $2 RETURNING *`,
-            [profilePicPath, userId]
+        if (currentUser.rows[0]?.profile_pic_id)
+            try {
+                await deleteFromCloudinary(currentUser.rows[0].profile_pic_id);
+            } catch (error) {
+                console.error("Error deleting old profile picture:", error);
+            }
+        
+        const updatedUser = await client.query(
+            `UPDATE users 
+             SET profile_pic = $1
+             WHERE id = $2 
+             RETURNING id, first_name, last_name, email, title, department, profile_pic`,
+            [req.cloudinary.url, userId]
         );
 
         if (updatedUser.rows.length === 0)
             throw new ApiError("Failed to update user profile picture.", 400);
 
-        const user = updatedUser.rows[0];
-        await createToken(user, res);
+        await createToken(updatedUser.rows[0], res);
 
         res.status(200).json({
             success: true,
-            message: "Profile picture changed successfully!",
-            profile_pic: profilePicPath
+            message: "Profile picture updated successfully",
+            profile_pic: req.cloudinary.url
         });
 
     } catch (error) {

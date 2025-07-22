@@ -21,7 +21,6 @@ export const errorHandler = (err, req, res, next) => {
             stack: err.stack
         });
     } else {
-        // Production mode - don't leak error details
         res.status(err.statusCode).json({
             success: false,
             status: err.status,

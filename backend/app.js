@@ -8,8 +8,8 @@ import rateLimit from "express-rate-limit";
 import path from "path";
 import authRoutes from "./src/routes/auth.routes.js";
 import messageRoutes from "./src/routes/message.routes.js";
-import { errorHandler } from "./src/middlewares/error.js";
-import { fileURLToPath } from 'url';
+import {errorHandler} from "./src/middlewares/error.js";
+import {fileURLToPath} from 'url';
 
 dotenv.config();
 
@@ -32,7 +32,10 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+morgan.token('api-prefix', () => '[API]');
+app.use(morgan(process.env.NODE_ENV === 'production' 
+    ? ':api-prefix [:method] :url :status :res[content-length] - :response-time ms' 
+    : ':api-prefix [:method] :url :status :response-time ms'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -53,13 +56,13 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-app.use((req, res) => {
-    console.log(`[API] ${req.method} ${req.originalUrl} [404] Not found`);
-    res.status(404).json({
-        success: false,
-        message: "Endpoint not found"
-    });
-});
+// app.use((req, res) => {
+//     console.log(`[API] ${req.method} ${req.originalUrl} [404] Not found`);
+//     res.status(404).json({
+//         success: false,
+//         message: "Endpoint not found"
+//     });
+// });
 
 app.use(errorHandler);
 
@@ -72,6 +75,6 @@ process.on('SIGTERM', () => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-    console.log(`Mode: ${process.env.NODE_ENV || "Development"}`);
+    console.log(`[API] Server running on port ${port}`);
+    console.log(`[API] Mode: ${process.env.NODE_ENV || "Development"}`);
 });
