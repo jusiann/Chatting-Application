@@ -4,10 +4,18 @@ import Searchbar from "../components/Searchbar";
 import CreateGroupButton from "../components/createGroupButton";
 import CreateDepartmentButton from "../components/createDepartmentButton";
 import SortBar from "../components/sortBar";
-import Personcard from "../components/Personcard";
+import Rehbercard from "../components/Rehbercard";
 import { Building } from "lucide-react";
+import useConservationStore from "../store/conservation";
+import { useEffect } from "react";
 
 function RehberPage() {
+    const { contactUsers, contactUsersFetch } = useConservationStore();
+
+    useEffect(() => {
+        contactUsersFetch();
+    }, []);
+
     return (
         <div className="rehber-container">
             <Sidebar />
@@ -18,43 +26,20 @@ function RehberPage() {
                 <div className="rehber-card">
                     <div className="button-row">
                         <CreateGroupButton text="Grup Oluştur" />
-                        <CreateGroupButton text="Departman Mesajı" logo={Building} onClick="/departman"/>
-                        <div className="divider"/>
+                        <CreateGroupButton text="Departman Mesajı" logo={Building} onClick="/departman" />
+                        <div className="divider" />
                     </div>
 
                     <SortBar />
 
                     <div className="person-list">
-                        <Personcard
-                            name="Arş. Gör. Derya Kaya"
-                            title="Görüşürüz"
-                            image=""
-                        />
-                        <Personcard
-                            name="Arş. Gör. Emre Aksu"
-                            title="Çalışmaya devam"
-                            image=""
-                        />
-                        <Personcard
-                            name="Taner Çevik"
-                            title="Toplantı 11:00"
-                            image="src/assets/tanerCevik.jpg"
-                        />
-                        <Personcard
-                            name="Doç. Dr. Emre Tanrıverdi"
-                            title="Elektrik ve Elektronik Mühendisliği"
-                            image=""
-                        />
-                        <Personcard
-                            name="Prof. Dr. Taner Çevik"
-                            title="Bilgisayar Mühendisliği Bölüm Başkanı"
-                            image=""
-                        />
-                        <Personcard
-                            name="Dr. Öğr. Üyesi Cemal Acar"
-                            title="Endüstri Mühendisliği"
-                            image=""
-                        />
+                        {Array.isArray(contactUsers) &&
+                            contactUsers.map((contactUser) => (
+                                <Rehbercard
+                                    key={contactUser.id}
+                                    contactUser={contactUser}
+                                />
+                            ))}
                     </div>
                 </div>
             </div>
