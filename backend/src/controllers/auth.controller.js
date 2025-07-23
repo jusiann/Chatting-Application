@@ -137,9 +137,9 @@ export const checkResetCode = async (req, res, next) => {
         const timeDB = moment.utc(user.reset_time);
         const timeNow = moment.utc();
         const differenceInMinutes = timeNow.diff(timeDB, 'minutes');
-        // console.log(differenceInMinutes);
-        // console.log(process.env.RESETCODE_EXPIRES_IN);
-        if (differenceInMinutes <= parseInt(process.env.RESETCODE_EXPIRES_IN))
+        console.log(differenceInMinutes);
+        console.log(process.env.RESETCODE_EXPIRES_IN);
+        if (differenceInMinutes >= parseInt(process.env.RESETCODE_EXPIRES_IN))
             throw new ApiError("Reset code has expired! Please request a new one.", 401);
 
         if (String(user.reset_code) !== String(reset_code))
