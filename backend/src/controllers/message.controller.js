@@ -1,11 +1,18 @@
 import client from "../lib/db.js";
 import moment from "moment";
 
+const MESSAGE_STATUS = {
+    SENT: 'sent',
+    DELIVERED: 'delivered',
+    READ: 'read'
+};
+
 export const getUsers = async (req, res) => {
     try {
         const userId = req.user.id;
         const usersList = await client.query(`
-            SELECT id, first_name, last_name, email, title, department, profile_pic FROM users 
+            SELECT id, first_name, last_name, email, title, department, profile_pic 
+            FROM users 
             WHERE id != $1`,
             [userId]
         );
@@ -15,7 +22,7 @@ export const getUsers = async (req, res) => {
             users: usersList.rows
         });
     } catch (error) {
-        console.error("Get users error:", error);
+        console.error("[Users Error]:", error);
         res.status(500).json({
             success: false,
             message: "Failed to fetch users."
@@ -27,40 +34,52 @@ export const getMessages = async (req, res) => {
     try {
         const userId = req.user.id;
         const otherID = req.params.id;
-        if (!otherID)
+        if (!otherID) 
             return res.status(400).json({
                 success: false,
                 message: "Recipient ID is required."
             });
 
         await client.query(`
-            UPDATE messages SET status = 'read' 
-            WHERE sender_id = $1 AND receiver_id = $2 AND status = 'unread'`,
-            [otherID, userId]
+            UPDATE messages 
+            SET status = $1 
+            WHERE sender_id = $2 AND receiver_id = $3 AND status = $4`,
+            [MESSAGE_STATUS.READ, otherID, userId, MESSAGE_STATUS.SENT]
         );
 
-        const resultMessage = await client.query(`
-            SELECT * FROM messages 
-            WHERE (sender_id = $1 AND receiver_id = $2) OR (sender_id = $2 AND receiver_id = $1) 
-            ORDER BY created_at DESC`,
+        const messages = await client.query(`
+            SELECT 
+                m.*,
+                json_build_object(
+                    'id', s.id,
+                    'first_name', s.first_name,
+                    'last_name', s.last_name,
+                    'profile_pic', s.profile_pic
+                ) as sender,
+                json_build_object(
+                    'id', r.id,
+                    'first_name', r.first_name,
+                    'last_name', r.last_name,
+                    'profile_pic', r.profile_pic
+                ) as receiver
+            FROM messages m
+            JOIN users s ON m.sender_id = s.id
+            JOIN users r ON m.receiver_id = r.id
+            WHERE (m.sender_id = $1 AND m.receiver_id = $2) 
+               OR (m.sender_id = $2 AND m.receiver_id = $1)
+            ORDER BY m.created_at DESC`,
             [userId, otherID]
         );
 
-        if(resultMessage.rows.length === 0)
-            return res.status(404).json({
-                success: false,
-                message: "No messages found."
-            });
-        
         res.status(200).json({
             success: true,
-            messages: resultMessage.rows
+            messages: messages.rows
         });
     } catch (error) {
-        console.error("Get messages error:", error);
+        console.error("[Messages Error]:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to get messages."
+            message: "Failed to fetch messages."
         });
     }
 };
@@ -68,40 +87,69 @@ export const getMessages = async (req, res) => {
 export const sendMessage = async (req, res) => {
     try {
         const userId = req.user.id;
-        const otherID = req.params.id;
-        const {content} = req.body;
+        const receiverId = req.params.id;
+        const { content } = req.body;
 
-        if(!content || content.trim().length === 0) {
+        if (!content || content.trim().length === 0)
             return res.status(400).json({
                 success: false,
                 message: "Message content is required."
             });
-        }
 
-        const checkOtherUser = await client.query(`
+        const receiver = await client.query(`
             SELECT id FROM users WHERE id = $1`,
-            [otherID]
+            [receiverId]
         );
 
-        if (checkOtherUser.rows.length === 0)
+        if (receiver.rows.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Recipient not found."
             });
+        }
 
-        const resultMessage = await client.query(`
-            INSERT INTO messages (sender_id, receiver_id, content, status, created_at) 
-            VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [userId, otherID, content, 'unread', moment().format()]
+        const newMessage = await client.query(`
+            INSERT INTO messages (
+                sender_id, 
+                receiver_id, 
+                content, 
+                status, 
+                created_at
+            ) 
+            VALUES ($1, $2, $3, $4, $5) 
+            RETURNING *`,
+            [userId, receiverId, content, MESSAGE_STATUS.SENT, moment().format()]
+        );
+
+        const messageWithDetails = await client.query(`
+            SELECT 
+                m.*,
+                json_build_object(
+                    'id', s.id,
+                    'first_name', s.first_name,
+                    'last_name', s.last_name,
+                    'profile_pic', s.profile_pic
+                ) as sender,
+                json_build_object(
+                    'id', r.id,
+                    'first_name', r.first_name,
+                    'last_name', r.last_name,
+                    'profile_pic', r.profile_pic
+                ) as receiver
+            FROM messages m
+            JOIN users s ON m.sender_id = s.id
+            JOIN users r ON m.receiver_id = r.id
+            WHERE m.id = $1`,
+            [newMessage.rows[0].id]
         );
 
         res.status(201).json({
             success: true,
             message: "Message sent successfully.",
-            data: resultMessage.rows[0]
+            data: messageWithDetails.rows[0]
         });
     } catch (error) {
-        console.error("Send message error:", error);
+        console.error("[Send Message Error]:", error);
         res.status(500).json({
             success: false,
             message: "Failed to send message."
@@ -112,33 +160,58 @@ export const sendMessage = async (req, res) => {
 export const markDelivered = async (req, res) => {
     try {
         const userId = req.user.id;
-        const result = await client.query(`
-            UPDATE messages 
-            SET status = 'delivered', delivered_at = NOW()
-            WHERE receiver_id = $1 AND status = 'sent'
-            RETURNING id, sender_id, delivered_at`, 
-            [userId]
+        const undeliveredMessages = await client.query(`
+            SELECT DISTINCT ON (m.sender_id)
+                m.sender_id,
+                u.first_name,
+                u.last_name,
+                COUNT(*) OVER (PARTITION BY m.sender_id) as message_count
+            FROM messages m
+            JOIN users u ON m.sender_id = u.id
+            WHERE m.receiver_id = $1 
+            AND m.status = $2`,
+            [userId, MESSAGE_STATUS.SENT]
         );
 
-        if(result.rows.length === 0)
+        if (undeliveredMessages.rows.length === 0)
             return res.status(200).json({
                 success: true,
-                message: "No new messages to mark as delivered.",
-                deliveredMessageIds: []
+                message: "No new messages to deliver.",
+                data: {
+                    updated_count: 0,
+                    senders: []
+                }
             });
-        
+    
+        const updateResult = await client.query(`
+            UPDATE messages 
+            SET status = $1, delivered_at = NOW()
+            WHERE receiver_id = $2 
+            AND status = $3
+            RETURNING id`,
+            [MESSAGE_STATUS.DELIVERED, userId, MESSAGE_STATUS.SENT]
+        );
+
+        const senders = undeliveredMessages.rows.map(row => ({
+            id: row.sender_id,
+            name: `${row.first_name} ${row.last_name}`,
+            undelivered_count: parseInt(row.message_count)
+        }));
+
         res.status(200).json({
             success: true,
             message: "Messages marked as delivered successfully",
-            //deliveredMessageIds: result.rows.map(row => row.id),
-            senderIds: result.rows.map(row => row.sender_id),
-            deliveredAt: result.rows[0].delivered_at
+            data: {
+                total_updated: updateResult.rows.length,
+                senders: senders,
+                timestamp: new Date().toISOString()
+            }
         });
     } catch (error) {
-        console.error("Mark delivered error:", error);
+        console.error("[Mark Delivered Error]:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to mark message as delivered."
+            message: "Failed to mark messages as delivered."
         });
     }
 };
@@ -147,23 +220,40 @@ export const unreadCount = async (req, res) => {
     try {
         const userId = req.user.id;
         const result = await client.query(`
-            SELECT sender_id, COUNT(*) as count 
-            FROM messages 
-            WHERE receiver_id = $1 AND status = 'unread' 
-            GROUP BY sender_id`, 
-            [userId]
+            SELECT 
+                m.sender_id,
+                u.first_name,
+                u.last_name,
+                u.profile_pic,
+                COUNT(*) as unread_count
+            FROM messages m
+            JOIN users u ON m.sender_id = u.id
+            WHERE m.receiver_id = $1 
+            AND m.status = $2
+            GROUP BY m.sender_id, u.first_name, u.last_name, u.profile_pic`,
+            [userId, MESSAGE_STATUS.SENT]
         );
 
-        const unreadCountBySender = {};
-        for(const row of result.rows)
-            unreadCountBySender[row.sender_id] = parseInt(row.count);
+        const unreadMessages = result.rows.map(row => ({
+            sender: {
+                id: row.sender_id,
+                name: `${row.first_name} ${row.last_name}`,
+                profile_pic: row.profile_pic
+            },
+            count: parseInt(row.unread_count)
+        }));
+
+        const totalUnread = result.rows.reduce((sum, row) => sum + parseInt(row.unread_count), 0);
 
         res.status(200).json({
             success: true,
-            unreadCounts: unreadCountBySender
+            data: {
+                unread_messages: unreadMessages,
+                total_unread: totalUnread
+            }
         });
     } catch (error) {
-        console.error("Get unread count error:", error);
+        console.error("[Unread Count Error]:", error);
         res.status(500).json({
             success: false,
             message: "Failed to get unread message counts."
