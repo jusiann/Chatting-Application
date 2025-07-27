@@ -15,6 +15,7 @@ import {fileURLToPath} from 'url';
 import authRoutes from "./src/routes/auth.routes.js";
 import messageRoutes from "./src/routes/message.routes.js";
 import notificationRoutes from "./src/routes/notification.routes.js";
+import groupRoutes from "./src/routes/group.routes.js";
 
 // Middlewares
 import {errorHandler} from "./src/middlewares/error.js";
@@ -375,6 +376,7 @@ io.on('connection', (socket) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/groups", groupRoutes);
 
 // Error handling middleware (should be after all routes)
 app.use(errorHandler);
