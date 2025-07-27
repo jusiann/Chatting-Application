@@ -1,5 +1,6 @@
 import client from "../lib/db.js";
 import moment from "moment";
+import { ApiError } from "../middlewares/error.js";
 
 const MESSAGE_STATUS = {
     SENT: 'sent',
@@ -7,7 +8,7 @@ const MESSAGE_STATUS = {
     READ: 'read'
 };
 
-export const getUsers = async (req, res) => {
+export const getUsers = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const usersList = await client.query(`
@@ -16,29 +17,21 @@ export const getUsers = async (req, res) => {
             WHERE id != $1`,
             [userId]
         );
-
         res.status(200).json({
             success: true,
             users: usersList.rows
         });
     } catch (error) {
-        console.error("[Users Error]:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch users."
-        });
+        next(error);
     }
 };
 
-export const getMessages = async (req, res) => {
+export const getMessages = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const otherID = req.params.id;
-        if (!otherID) 
-            return res.status(400).json({
-                success: false,
-                message: "Recipient ID is required."
-            });
+        if (!otherID)
+            throw new ApiError("Recipient ID is required.", 400);
 
         await client.query(`
             UPDATE messages 
@@ -76,37 +69,26 @@ export const getMessages = async (req, res) => {
             messages: messages.rows
         });
     } catch (error) {
-        console.error("[Messages Error]:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch messages."
-        });
+        next(error);
     }
 };
 
-export const sendMessage = async (req, res) => {
+export const sendMessage = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const receiverId = req.params.id;
         const { content } = req.body;
 
         if (!content || content.trim().length === 0)
-            return res.status(400).json({
-                success: false,
-                message: "Message content is required."
-            });
+            throw new ApiError("Message content is required.", 400);
 
         const receiver = await client.query(`
-            SELECT id FROM users WHERE id = $1`,
+            SELECT id FROM users 
+            WHERE id = $1`,
             [receiverId]
         );
-
-        if (receiver.rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Recipient not found."
-            });
-        }
+        if (receiver.rows.length === 0)
+            throw new ApiError("Recipient not found.", 404);
 
         const newMessage = await client.query(`
             INSERT INTO messages (
@@ -149,15 +131,11 @@ export const sendMessage = async (req, res) => {
             data: messageWithDetails.rows[0]
         });
     } catch (error) {
-        console.error("[Send Message Error]:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to send message."
-        });
+        next(error);
     }
 };
 
-export const markDelivered = async (req, res) => {
+export const markDelivered = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const undeliveredMessages = await client.query(`
@@ -208,15 +186,11 @@ export const markDelivered = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("[Mark Delivered Error]:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to mark messages as delivered."
-        });
+        next(error);
     }
 };
 
-export const unreadCount = async (req, res) => {
+export const unreadCount = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const result = await client.query(`
@@ -253,10 +227,61 @@ export const unreadCount = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("[Unread Count Error]:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to get unread message counts."
+        next(error);
+    }
+};
+
+export const getLastMessages = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const usersList = await client.query(`
+            SELECT id, first_name, last_name, email, title, department, profile_pic 
+            FROM users 
+            WHERE id != $1`,
+            [userId]
+        );
+
+        if (!usersList.rows) 
+            throw new ApiError("No users found", 404);
+        
+
+        const usersWithLastMessage = await Promise.all(usersList.rows.map(async (user) => {
+            const lastMessage = await client.query(`
+                SELECT m.*, 
+                    json_build_object(
+                        'id', s.id,
+                        'first_name', s.first_name,
+                        'last_name', s.last_name
+                    ) as sender
+                FROM messages m
+                JOIN users s ON m.sender_id = s.id
+                WHERE (m.sender_id = $1 AND m.receiver_id = $2)
+                   OR (m.sender_id = $2 AND m.receiver_id = $1)
+                ORDER BY m.created_at DESC
+                LIMIT 1`,
+                [userId, user.id]
+            );
+
+            return {
+                id: user.id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                profile_pic: user.profile_pic,
+                lastMessage: lastMessage.rows[0] ? {
+                    id: lastMessage.rows[0].id,
+                    sender: lastMessage.rows[0].sender.id,
+                    content: lastMessage.rows[0].content,
+                    created_at: moment(lastMessage.rows[0].created_at).format("HH:mm"),
+                    status: lastMessage.rows[0].status
+                } : null
+            };
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: usersWithLastMessage
         });
+    } catch (error) {
+        next(error);
     }
 };

@@ -1,60 +1,55 @@
-import client, { NOTIFICATION_TYPES } from '../lib/db.js';
-import {ApiError} from '../middlewares/error.js';
+import client, {NOTIFICATION_TYPES} from '../lib/db.js';
+import { ApiError } from '../middlewares/error.js';
 
-export const createNotification = async ({userId, senderId, type, content, data = {}}) => {
-    try {
-        if (!Object.values(NOTIFICATION_TYPES).includes(type))
-            throw new ApiError(`Invalid notification type: ${type}`, 400);
-        
-        const userCheck = await client.query(
-            'SELECT id FROM users WHERE id = $1',
-            [userId]
+export const createNotification = async ({ userId, senderId, type, content, data = {} }) => {
+    if (!Object.values(NOTIFICATION_TYPES).includes(type))
+        throw new ApiError(`Invalid notification type: ${type}`, 400);
+    
+    const userCheck = await client.query(`
+        SELECT id FROM users 
+        WHERE id = $1`,
+        [userId]
+    );
+    if (userCheck.rows.length === 0)
+        throw new ApiError(`User not found with id: ${userId}`, 404);
+   
+    const result = await client.query(`
+        INSERT INTO notifications (
+            user_id, sender_id, type, content, data
+        ) VALUES ($1, $2, $3, $4, $5)
+        RETURNING 
+            id, 
+            user_id, 
+            sender_id, 
+            type, 
+            content, 
+            data, 
+            is_read, 
+            created_at`,
+        [userId, senderId, type, content, JSON.stringify(data)]
+    );
+
+    const notification = result.rows[0];
+    if (senderId) {
+        const senderDetails = await client.query(`
+            SELECT id, first_name, last_name, profile_pic 
+            FROM users 
+            WHERE id = $1`,
+            [senderId]
         );
 
-        if (userCheck.rows.length === 0)
-            throw new ApiError(`User not found with id: ${userId}`, 404);
-        
-        const result = await client.query(`
-            INSERT INTO notifications (
-                user_id, sender_id, type, content, data
-            ) VALUES ($1, $2, $3, $4, $5)
-            RETURNING 
-                id, 
-                user_id, 
-                sender_id, 
-                type, 
-                content, 
-                data, 
-                is_read, 
-                created_at`,
-            [userId, senderId, type, content, JSON.stringify(data)]
-        );
-
-        const notification = result.rows[0];
-        if (senderId) {
-            const senderDetails = await client.query(`
-                SELECT id, first_name, last_name, profile_pic 
-                FROM users 
-                WHERE id = $1`,
-                [senderId]
-            );
-            
-            if (senderDetails.rows.length > 0)
-                notification.sender = senderDetails.rows[0];
-        }
-
-        const userSocket = global.connectedUsers?.get(userId);
-        if (userSocket)
-            userSocket.emit('new_notification', notification);
-
-        return notification;
-    } catch (error) {
-        console.error('[Notification Error] Create:', error);
-        throw error instanceof ApiError ? error : new ApiError('Failed to create notification', 500);
+        if (senderDetails.rows.length > 0)
+            notification.sender = senderDetails.rows[0];
     }
+
+    const userSocket = global.connectedUsers?.get(userId);
+    if (userSocket)
+        userSocket.emit('new_notification', notification);
+    
+    return notification;
 };
 
-export const getNotifications = async (req, res) => {
+export const getNotifications = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const { limit = 20, offset = 0, unreadOnly = false } = req.query;
@@ -70,15 +65,16 @@ export const getNotifications = async (req, res) => {
             FROM notifications n
             LEFT JOIN users u ON n.sender_id = u.id
             WHERE n.user_id = $1`;
-
+        
         if (unreadOnly === 'true')
             query += ' AND n.is_read = false';
-
+        
         query += ' ORDER BY n.created_at DESC LIMIT $2 OFFSET $3';
+       
         const result = await client.query(query, [userId, limit, offset]);
-        const countResult = await client.query(
-            'SELECT COUNT(*) FROM notifications WHERE user_id = $1' + 
-            (unreadOnly === 'true' ? ' AND is_read = false' : ''),
+        const countResult = await client.query(`
+            SELECT COUNT(*) FROM notifications 
+            WHERE user_id = $1` + (unreadOnly === 'true' ? ' AND is_read = false' : ''),
             [userId]
         );
 
@@ -91,15 +87,11 @@ export const getNotifications = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('[Notification Error] Get:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch notifications'
-        });
+        next(error);
     }
 };
 
-export const markAsRead = async (req, res) => {
+export const markAsRead = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const { notificationIds } = req.body;
@@ -113,7 +105,7 @@ export const markAsRead = async (req, res) => {
             RETURNING *`,
             [notificationIds, userId]
         );
-
+        
         res.status(200).json({
             success: true,
             data: {
@@ -122,15 +114,11 @@ export const markAsRead = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('[Notification Error] Mark as read:', error);
-        res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.message || 'Failed to mark notifications as read'
-        });
+        next(error);
     }
 };
 
-export const deleteNotifications = async (req, res) => {
+export const deleteNotifications = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const { notificationIds } = req.body;
@@ -142,21 +130,17 @@ export const deleteNotifications = async (req, res) => {
             WHERE id = ANY($1) AND user_id = $2`,
             [notificationIds, userId]
         );
-
+        
         res.status(200).json({
             success: true,
             message: 'Notifications deleted successfully'
         });
     } catch (error) {
-        console.error('[Notification Error] Delete:', error);
-        res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.message || 'Failed to delete notifications'
-        });
+        next(error);
     }
 };
 
-export const getUnreadCount = async (req, res) => {
+export const getUnreadCount = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const result = await client.query(`
@@ -165,7 +149,7 @@ export const getUnreadCount = async (req, res) => {
             WHERE user_id = $1 AND is_read = false`,
             [userId]
         );
-
+        
         res.status(200).json({
             success: true,
             data: {
@@ -173,10 +157,6 @@ export const getUnreadCount = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('[Notification Error] Get unread count:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to get unread notification count'
-        });
+        next(error);
     }
 }; 
