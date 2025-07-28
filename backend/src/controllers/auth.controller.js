@@ -6,13 +6,57 @@ import moment from "moment";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
 import {ApiError} from "../middlewares/error.js";
-import { log } from "console";
+
+const validateEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+        throw new ApiError("Invalid email format. Please enter a valid email address.", 400);
+    }
+    
+    const allowedDomains = ['stu.rumeli.edu.tr'];
+    const domain = email.split('@')[1];
+    if (!allowedDomains.includes(domain)) {
+        throw new ApiError("Only Rumeli University email addresses (@stu.rumeli.edu.tr) are allowed to register.", 400);
+    }
+};
+
+const validatePassword = (password) => {
+    if (password.length < 8) {
+        throw new ApiError("Password must be at least 8 characters long.", 400);
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+        throw new ApiError("Password must contain at least one uppercase letter.", 400);
+    }
+    
+    if (!/[a-z]/.test(password)) {
+        throw new ApiError("Password must contain at least one lowercase letter.", 400);
+    }
+    
+    if (!/[0-9]/.test(password)) {
+        throw new ApiError("Password must contain at least one number.", 400);
+    }
+    
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        throw new ApiError("Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>).", 400);
+    }
+};
 
 export const signUp = async (req, res, next) => {
     try {
         const {first_name, last_name, email, password, title, department} = req.body;
+        
         if (!first_name || !last_name || !email || !password)
             throw new ApiError("First name, Last name, Email and Password are required.", 400);
+        
+        if (first_name.length < 2 || last_name.length < 2)
+            throw new ApiError("First name and Last name must be at least 2 characters long.", 400);
+            
+        if (!/^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]+$/.test(first_name) || !/^[a-zA-ZğüşıöçĞÜŞİÖÇ\s]+$/.test(last_name))
+            throw new ApiError("First name and Last name can only contain letters.", 400);
+
+        validateEmail(email);
+        validatePassword(password);
         
         const checkUser = await client.query(`
             SELECT * FROM users 
@@ -21,7 +65,7 @@ export const signUp = async (req, res, next) => {
         );
 
         if(checkUser.rows.length > 0)
-            throw new ApiError("Email already exists!", 400);
+            throw new ApiError("This email is already registered!", 400);
         
         const hashedPassword = await bcrypt.hash(password, 8);
         const result = await client.query(`
@@ -50,25 +94,66 @@ export const signUp = async (req, res, next) => {
 export const signIn = async (req, res, next) => {
    try {
         const { email, password } = req.body;
+        
         if (!email || !password)
             throw new ApiError("Email and Password are required.", 400);
-
+        
+        validateEmail(email);
         const checkUser = await client.query(`
             SELECT * FROM users 
             WHERE email = $1`,
             [email]
         );
-
         if (checkUser.rows.length === 0)
-            throw new ApiError("Email or Password is incorrect!", 401);
+            throw new ApiError("Invalid email or password!", 401);
         
         const user = checkUser.rows[0];
         const comparePassword = await bcrypt.compare(password, user.password);
         if (!comparePassword)
-            throw new ApiError("Email or Password is incorrect!", 401);
+            throw new ApiError("Invalid email or password!", 401);
+
+        if (user.failed_login_attempts >= 5 && user.last_failed_login) {
+            const lockoutDuration = 15;
+            const lastAttempt = new Date(user.last_failed_login);
+            const now = new Date();
+            const diffInMinutes = (now - lastAttempt) / 1000 / 60;
+
+            if (diffInMinutes < lockoutDuration) {
+                throw new ApiError(`Too many failed login attempts. Please try again in ${Math.ceil(lockoutDuration - diffInMinutes)} minutes.`, 429);
+            }
+        }
+
+        await client.query(`
+            UPDATE users 
+            SET failed_login_attempts = 0, 
+                last_failed_login = NULL 
+            WHERE id = $1`,
+            [user.id]
+        );
 
         await createToken(user, res);
     } catch (error) {
+        if (error.statusCode === 401) {
+            const user = await client.query(`
+                SELECT id, failed_login_attempts FROM users WHERE email = $1`,
+                [req.body.email]
+            );
+            
+            if (user.rows.length > 0) {
+                const remainingAttempts = 5 - (user.rows[0].failed_login_attempts + 1);
+                await client.query(`
+                    UPDATE users 
+                    SET failed_login_attempts = failed_login_attempts + 1,
+                        last_failed_login = NOW()
+                    WHERE id = $1`,
+                    [user.rows[0].id]
+                );
+                
+                if (remainingAttempts > 0) {
+                    error.message += ` ${remainingAttempts} attempts remaining.`;
+                }
+            }
+        }
         next(error);
     }
 };
@@ -137,8 +222,6 @@ export const checkResetCode = async (req, res, next) => {
         const timeDB = moment.utc(user.reset_time);
         const timeNow = moment.utc();
         const differenceInMinutes = timeNow.diff(timeDB, 'minutes');
-        console.log(differenceInMinutes);
-        console.log(process.env.RESETCODE_EXPIRES_IN);
         if (differenceInMinutes >= parseInt(process.env.RESETCODE_EXPIRES_IN))
             throw new ApiError("Reset code has expired! Please request a new one.", 401);
 
@@ -187,17 +270,41 @@ export const changePassword = async (req, res, next) => {
             throw new ApiError("Email, Password and Temporary Token are required.", 400);
         
         const temporary_token = req.cookies.temporary_token;
+        if (!temporary_token)
+            throw new ApiError("Temporary token is missing!", 401);
+
         const decoded = jwt.verify(temporary_token, process.env.JWT_TEMPORARY_KEY);
         if(decoded.type !== "reset")
             throw new ApiError("Invalid temporary token type!", 401);
 
-        const hashedPassword = await bcrypt.hash(password, 8);
-        await client.query(`
-            UPDATE users SET password = $1, reset_code = NULL, reset_time = NULL 
-            WHERE id = $2`,
-            [hashedPassword, decoded.id]
+        const userCheck = await client.query(
+            "SELECT id FROM users WHERE email = $1",
+            [email]
         );
 
+        if (userCheck.rows.length === 0)
+            throw new ApiError("User not found!", 404);
+
+        const userId = userCheck.rows[0].id;
+        if (userId !== decoded.sub)
+            throw new ApiError("Token does not match with the user!", 401);
+
+        const hashedPassword = await bcrypt.hash(password, 8);
+        const updateResult = await client.query(`
+            UPDATE users 
+            SET password = $1, 
+                reset_code = NULL, 
+                reset_time = NULL 
+            WHERE id = $2 AND email = $3
+            RETURNING id`,
+            [hashedPassword, userId, email]
+        );
+
+        if (updateResult.rows.length === 0)
+            throw new ApiError("Failed to update password.", 500);
+
+        res.clearCookie('temporary_token');
+        
         res.status(200).json({
             success: true,
             message: "Password changed successfully!"

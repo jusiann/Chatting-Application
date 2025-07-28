@@ -94,8 +94,8 @@ export const getNotifications = async (req, res, next) => {
 export const markAsRead = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const { notificationIds } = req.body;
-        if (!notificationIds || !Array.isArray(notificationIds))
+        const { notification_ids } = req.body;
+        if (!notification_ids || !Array.isArray(notification_ids))
             throw new ApiError('Notification IDs are required', 400);
         
         const result = await client.query(`

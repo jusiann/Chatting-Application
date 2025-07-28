@@ -71,36 +71,67 @@ export const sendGroupMessage = async (req, res, next) => {
 export const getUserGroupsWithLastMessages = async (req, res, next) => {
     try {
         const userId = req.user.id;
+
+        // Önce kullanıcının gruplarını al
         const groupsResult = await client.query(`
-            SELECT g.*,
-                json_build_object(
-                    'id', s.id,
-                    'first_name', s.first_name,
-                    'last_name', s.last_name
-                ) as sender
+            SELECT 
+                g.*,
+                u.first_name as creator_first_name,
+                u.last_name as creator_last_name
             FROM groups g
             JOIN group_members gm ON g.id = gm.group_id
+            JOIN users u ON g.created_by = u.id
             WHERE gm.user_id = $1
-            ORDER BY g.created_at DESC`,
+            ORDER BY g.updated_at DESC`,
             [userId]
         );
         
-        const groups = groupsResult.rows;
-        const groupIds = groups.map(g => g.id);
-        let lastMessages = [];
-        if (groupIds.length > 0) {
-            const lastMsgResult = await client.query(
-                `SELECT DISTINCT ON (group_id) * FROM group_messages
-                 WHERE group_id = ANY($1)
-                 ORDER BY group_id, created_at DESC`,
-                [groupIds]
-            );
-            lastMessages = lastMsgResult.rows;
+        if (groupsResult.rows.length === 0) {
+            return res.status(200).json({
+                success: true,
+                groups: []
+            });
         }
 
-        const groupsWithLastMsg = groups.map(g => ({
-            ...g,
-            last_message: lastMessages.find(m => m.group_id === g.id) || null
+        const groups = groupsResult.rows;
+        const groupIds = groups.map(g => g.id);
+
+        // Son mesajları al
+        const lastMessagesResult = await client.query(`
+            WITH RankedMessages AS (
+                SELECT 
+                    gm.*,
+                    u.first_name as sender_first_name,
+                    u.last_name as sender_last_name,
+                    ROW_NUMBER() OVER (PARTITION BY gm.group_id ORDER BY gm.created_at DESC) as rn
+                FROM group_messages gm
+                JOIN users u ON gm.sender_id = u.id
+                WHERE gm.group_id = ANY($1)
+            )
+            SELECT * FROM RankedMessages WHERE rn = 1`,
+            [groupIds]
+        );
+
+        // Grupları ve son mesajları birleştir
+        const groupsWithLastMsg = groups.map(group => ({
+            id: group.id,
+            name: group.name,
+            description: group.description,
+            created_by: {
+                id: group.created_by,
+                name: `${group.creator_first_name} ${group.creator_last_name}`
+            },
+            created_at: group.created_at,
+            updated_at: group.updated_at,
+            last_message: lastMessagesResult.rows.find(msg => msg.group_id === group.id) ? {
+                id: lastMessagesResult.rows.find(msg => msg.group_id === group.id).id,
+                content: lastMessagesResult.rows.find(msg => msg.group_id === group.id).content,
+                sender: {
+                    id: lastMessagesResult.rows.find(msg => msg.group_id === group.id).sender_id,
+                    name: `${lastMessagesResult.rows.find(msg => msg.group_id === group.id).sender_first_name} ${lastMessagesResult.rows.find(msg => msg.group_id === group.id).sender_last_name}`
+                },
+                created_at: lastMessagesResult.rows.find(msg => msg.group_id === group.id).created_at
+            } : null
         }));
         
         res.status(200).json({ 
@@ -108,6 +139,7 @@ export const getUserGroupsWithLastMessages = async (req, res, next) => {
             groups: groupsWithLastMsg 
         });
     } catch (error) {
+        console.error('Grup listesi alınırken hata:', error);
         next(error);
     }
 };
