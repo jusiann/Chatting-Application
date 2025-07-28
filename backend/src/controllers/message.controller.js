@@ -193,18 +193,22 @@ export const markDelivered = async (req, res, next) => {
 export const unreadCount = async (req, res, next) => {
     try {
         const userId = req.user.id;
+        
+        // Sadece gelen okunmamış mesajlar
         const result = await client.query(`
             SELECT 
                 m.sender_id,
                 u.first_name,
                 u.last_name,
                 u.profile_pic,
+                m.content,
                 COUNT(*) as unread_count
             FROM messages m
             JOIN users u ON m.sender_id = u.id
             WHERE m.receiver_id = $1 
             AND m.status = $2
-            GROUP BY m.sender_id, u.first_name, u.last_name, u.profile_pic`,
+            GROUP BY m.sender_id, u.first_name, u.last_name, u.profile_pic, m.content
+            ORDER BY MAX(m.created_at) DESC`,
             [userId, MESSAGE_STATUS.SENT]
         );
 
@@ -214,6 +218,7 @@ export const unreadCount = async (req, res, next) => {
                 name: `${row.first_name} ${row.last_name}`,
                 profile_pic: row.profile_pic
             },
+            content: row.content,
             count: parseInt(row.unread_count)
         }));
 

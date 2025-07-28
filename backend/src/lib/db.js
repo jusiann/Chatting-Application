@@ -32,11 +32,35 @@ const createUsersTable = async () => {
                 title VARCHAR(100),
                 department VARCHAR(100),
                 profile_pic TEXT,
+                profile_pic_id VARCHAR(100),
                 reset_code VARCHAR(32),
                 reset_time TIMESTAMP,
+                failed_login_attempts INTEGER DEFAULT 0,
+                last_failed_login TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // Eğer kolonlar yoksa ekle
+        await client.query(`
+            DO $$ 
+            BEGIN 
+                BEGIN
+                    ALTER TABLE users ADD COLUMN failed_login_attempts INTEGER DEFAULT 0;
+                EXCEPTION
+                    WHEN duplicate_column THEN 
+                        NULL;
+                END;
+                
+                BEGIN
+                    ALTER TABLE users ADD COLUMN last_failed_login TIMESTAMP;
+                EXCEPTION
+                    WHEN duplicate_column THEN 
+                        NULL;
+                END;
+            END $$;
+        `);
+
         await client.query(`
             CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
             CREATE INDEX IF NOT EXISTS idx_users_department ON users(department);
