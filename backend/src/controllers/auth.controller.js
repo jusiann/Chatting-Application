@@ -467,8 +467,9 @@ export const changeProfilePicture = async (req, res, next) => {
         if (!req.cloudinary)
             throw new ApiError("Profile picture upload failed", 400);
 
-        const currentUser = await client.query(
-            "SELECT profile_pic_id FROM users WHERE id = $1",
+        const currentUser = await client.query(`
+            SELECT profile_pic_id FROM users 
+            WHERE id = $1`,
             [userId]
         );
 
@@ -480,11 +481,11 @@ export const changeProfilePicture = async (req, res, next) => {
                 console.error("Error deleting old profile picture:", error);
             }
         
-        const updatedUser = await client.query(
-            `UPDATE users 
-             SET profile_pic = $1
-             WHERE id = $2 
-             RETURNING id, first_name, last_name, email, title, department, profile_pic`,
+        const updatedUser = await client.query(`
+            UPDATE users 
+            SET profile_pic = $1
+            WHERE id = $2 
+            RETURNING id, first_name, last_name, email, title, department, profile_pic`,
             [req.cloudinary.url, userId]
         );
 
