@@ -5,10 +5,10 @@ function Rehbercard({ contactUser }) {
         <button className="rehbercard-button">
             <div className="rehbercard">
                 <div className="rehbercard-image-and-texts">
-                    {contactUser.profilepic ? (
+                    {contactUser.profile_pic ? (
                         <img
-                            src={contactUser.profilepic}
-                            alt={contactUser.fullname}
+                            src={contactUser.profile_pic}
+                            alt={`${contactUser.first_name} ${contactUser.last_name}`}
                             className="rehbercard-image"
                         />
                     ) : (
@@ -16,7 +16,9 @@ function Rehbercard({ contactUser }) {
                     )}
 
                     <div className="rehbercard-texts">
-                        <div className="rehbercard-name">{contactUser.fullname}</div>
+                        <div className="rehbercard-name">
+                            {contactUser.first_name} {contactUser.last_name}
+                        </div>
                         <div className="rehbercard-department">{contactUser.department}</div>
                     </div>
                 </div>

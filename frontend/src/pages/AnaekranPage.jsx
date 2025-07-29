@@ -7,10 +7,18 @@ import Messagereceived from "../components/Messagereceived";
 import Messagesended from "../components/Messagesended";
 import Sendbox from "../components/Sendbox";
 import useConservationStore from "../store/conservation";
+import useUserStore from "../store/user";
 import "../style/anaekranpage.css";
 
 const AnaekranPage = () => {
-    const { chatUsers, chatUsersFetch } = useConservationStore();
+    const {
+        chatUsers,
+        chatUsersFetch,
+        messages,
+        messagingUserId
+    } = useConservationStore();
+
+    const { user } = useUserStore();
 
     useEffect(() => {
         chatUsersFetch();
@@ -33,20 +41,27 @@ const AnaekranPage = () => {
 
             <div className="anaekran-chat-panel">
                 <div className="messagetopbar-container-home">
-                    <Messagetopbar
-                        name="Arş. Gör. Derya Kaya"
-                        status="Son görülme : Bugün 22:02"
-                        image=""
-                    />
+                    <Messagetopbar id={messagingUserId} />
                 </div>
 
                 <div className="anaekran-messages">
-                    <Messagereceived text="Selam, yarın 14:00’teki toplantıya katılabilecek misin?" time="14:56" />
-                    <Messagesended text="Selam! Evet, katılacağım. Hangi salonda olacak?" time="14:58" />
-                    <Messagereceived text="B Blok, 2. kat, 204 numaralı sınıfta." time="15:00" />
-                    <Messagesended text="Harika, zamanında orada olurum. Slaytları önceden paylaşabilir misin?" time="16:50" />
-                    <Messagereceived text="Tabii, hemen gönderiyorum." time="19:20" />
-                    <Messagesended text="Süper, teşekkürler! Görüşürüz 😊" time="22:02" />
+                    {messages.map((message, index) =>
+                        message.sender_id === user.id ? (
+                            <Messagesended
+                                key={index}
+                                text={message.content}
+                                time={message.created_at}
+                                status={message.status}
+                            />
+                        ) : (
+                            <Messagereceived
+                                key={index}
+                                text={message.content}
+                                time={message.created_at}
+                                status={message.status}
+                            />
+                        )
+                    )}
                 </div>
 
                 <Sendbox />

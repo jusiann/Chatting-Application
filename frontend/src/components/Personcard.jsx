@@ -1,8 +1,17 @@
 import "../style/personcard.css";
+import useConservationStore from "../store/conservation";
 
 function Personcard({ chatUser }) {
+    const fetchMessages = useConservationStore((state) => state.fetchMessages);
+    const setMessagingUserId = useConservationStore((state) => state.setMessagingUserId);
+
+    const handleClick = () => {
+        fetchMessages({ id: chatUser.id });
+        setMessagingUserId(chatUser.id);
+    };
+
     return (
-        <button className="personcard-button">
+        <button className="personcard-button" onClick={handleClick}>
             <div className="personcard">
                 <div className="personcard-image-and-texts">
                     {chatUser.profilepic ? (

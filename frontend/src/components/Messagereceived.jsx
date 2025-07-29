@@ -1,6 +1,6 @@
 import "../style/messagereceived.css";
 
-function MessageReceived({text, time}) {
+function MessageReceived({ text, time, status = "sent" }) {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, "0");
     const minutes = now.getMinutes().toString().padStart(2, "0");
@@ -19,3 +19,4 @@ function MessageReceived({text, time}) {
 }
 
 export default MessageReceived;
+
