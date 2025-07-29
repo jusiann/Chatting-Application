@@ -1,7 +1,7 @@
 import "../style/messagesended.css";
 import { CheckCheck } from "lucide-react";
 
-function MessageSended({ text, time }) {
+function MessageSended({ text, time, status = "sent" }) {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, "0");
     const minutes = now.getMinutes().toString().padStart(2, "0");
