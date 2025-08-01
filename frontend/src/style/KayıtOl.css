@@ -1,0 +1,113 @@
+.register-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+/* Sol Panel */
+.register-left {
+    width: 50%;
+    background: #f5f7fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding: 20px;
+}
+
+.left-title {
+    width: 680px;
+    font-family: Inter;
+    font-weight: 600;
+    font-size: 36px;
+    text-align: center;
+    color: #910811;
+}
+
+.left-subtitle {
+    font-family: Inter;
+    font-weight: 600;
+    font-size: 24px;
+    color: #777777;
+}
+
+/* Sağ Panel */
+.register-right {
+    width: 50%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.register-logo {
+    width: 206px;
+    height: 206px;
+    margin-top: 20px;
+}
+
+.welcome-title {
+    font-family: Inter;
+    font-weight: 600;
+    font-size: 36px;
+    text-align: center;
+    color: #910811;
+}
+
+.welcome-subtitle {
+    font-family: Inter;
+    font-weight: 600;
+    font-size: 24px;
+    color: #777777;
+    text-align: center;
+}
+
+/* Form */
+.register-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 400px;
+}
+
+.name-surname {
+    display: flex;
+    gap: 34px;
+}
+
+.register-select {
+    width: 100%;
+    height: 64px;
+    border-radius: 15px;
+    border: none;
+    padding: 10px;
+    background: #f5f7fa;
+    font-family: Inter;
+    font-size: 16px;
+    color: #777777;
+}
+
+.register-button {
+    width: 100%;
+    height: 59px;
+    border-radius: 15px;
+    background: #910811;
+    color: #fff;
+    font-family: Inter;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.register-login-link {
+    font-family: Inter;
+    font-size: 16px;
+    text-align: center;
+}
+
+.register-login-link a {
+    color: #910811;
+    text-decoration: none;
+}
