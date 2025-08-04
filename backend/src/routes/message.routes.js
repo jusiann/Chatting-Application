@@ -9,6 +9,6 @@ router.get("/last-messages", verifyToken, getLastMessages);
 router.get("/unread-count", verifyToken, unreadCount);
 router.post("/mark-delivered", verifyToken, markDelivered);
 router.post("/send/:id", verifyToken, sendMessage);
-router.get("/:id", verifyToken, getMessages);
+router.get("/:id/:page/:pageSize", verifyToken, getMessages);
 
 export default router;

@@ -100,6 +100,12 @@ io.on('connection', (socket) => {
     console.log(`[SOCKET] User connected: ${socket.user.id}`);
     global.connectedUsers.set(socket.user.id, socket);
 
+    // Grup katılma işlemi
+    socket.on('join_group', (groupId) => {
+        socket.join(`group_${groupId}`);
+        console.log(`[SOCKET] User ${socket.user.id} joined group ${groupId}`);
+    });
+
     socket.on('send_message', async (messageData) => {
         try {
             const {receiver_id, content} = messageData;
@@ -243,6 +249,25 @@ io.on('connection', (socket) => {
             }
         } catch (error) {
             console.error('[SOCKET] Typing indicator error:', error);
+        }
+    });
+
+    // Grup mesajı gönderme
+    socket.on('group_message', async (msg) => {
+        try {
+            const result = await client.query(` 
+                INSERT INTO group_messages (group_id, sender_id, content, status) 
+                VALUES ($1, $2, $3, 'sent') RETURNING * 
+            `, [msg.groupId, socket.user.id, msg.content]);
+            
+            const savedMesssage = result.rows[0];
+            io.to(`group_${msg.groupId}`).emit('group_message', savedMesssage);
+        } catch (error) {
+            console.error('[SOCKET] Group message error:', error);
+            socket.emit('group_message_error', { 
+                message: 'Failed to send group message',
+                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
         }
     });
 
