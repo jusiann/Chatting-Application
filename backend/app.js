@@ -83,7 +83,7 @@ app.get("/health", (req, res) => {
 // Socket.IO kimlik doğrulama middleware'i
 io.use((socket, next) => {
     try {
-        const token = socket.handshake.auth.token || socket.handshake.headers['authorization']?.split(' ')[1];
+        const token = socket.handshake.auth.access_token || socket.handshake.headers['authorization']?.split(' ')[1];
         if (!token) return next(new Error('Authentication error: No token provided'));
     
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
@@ -99,6 +99,13 @@ io.use((socket, next) => {
 io.on('connection', (socket) => {
     console.log(`[SOCKET] User connected: ${socket.user.id}`);
     global.connectedUsers.set(socket.user.id, socket);
+    socket.join(`user_${socket.user.id}`);
+
+    // Grup katılma işlemi
+    socket.on('join_group', (groupId) => {
+        socket.join(`group_${groupId}`);
+        console.log(`[SOCKET] User ${socket.user.id} joined group ${groupId}`);
+    });
 
     socket.on('send_message', async (messageData) => {
         try {
@@ -129,8 +136,10 @@ io.on('connection', (socket) => {
             
             socket.emit('message_sent', fullMessage);
 
-            const receiverSocket = global.connectedUsers.get(receiver_id);
-            if (receiverSocket) receiverSocket.emit('new_message', fullMessage);
+            io.to(`user_${receiver_id}`).emit('new_message', fullMessage);
+
+            /* const receiverSocket = global.connectedUsers.get(receiver_id);
+            if (receiverSocket) receiverSocket.emit('new_message', fullMessage); */
             
             await createNotification({
                 userId: receiver_id,
@@ -165,14 +174,12 @@ io.on('connection', (socket) => {
 
             if (result.rows.length > 0) {
                 const senderId = result.rows[0].sender_id;
-                const senderSocket = global.connectedUsers.get(senderId);
-                if (senderSocket) {
-                    senderSocket.emit('message_delivered', {
-                        message_id,
-                        delivered_at: now
-                    });
-                }
                 
+                io.to(`user_${senderId}`).emit('message_delivered', {
+                    message_id,
+                    delivered_at: now
+                });
+
                 await createNotification({
                     userId: senderId,
                     senderId: socket.user.id,
@@ -243,6 +250,25 @@ io.on('connection', (socket) => {
             }
         } catch (error) {
             console.error('[SOCKET] Typing indicator error:', error);
+        }
+    });
+
+    // Grup mesajı gönderme
+    socket.on('group_message', async (msg) => {
+        try {
+            const result = await client.query(` 
+                INSERT INTO group_messages (group_id, sender_id, content, status) 
+                VALUES ($1, $2, $3, 'sent') RETURNING * 
+            `, [msg.groupId, socket.user.id, msg.content]);
+            
+            const savedMesssage = result.rows[0];
+            io.to(`group_${msg.groupId}`).emit('group_message', savedMesssage);
+        } catch (error) {
+            console.error('[SOCKET] Group message error:', error);
+            socket.emit('group_message_error', { 
+                message: 'Failed to send group message',
+                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
         }
     });
 

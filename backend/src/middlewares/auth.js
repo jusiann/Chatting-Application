@@ -58,6 +58,7 @@ export const createToken = async (user, res) => {
         success: true,
         access_token: access_token,
         refresh_token: refresh_token,
+        user: user,
         message: "Authentication successful!"
     });
 };
