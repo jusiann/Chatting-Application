@@ -11,8 +11,14 @@ import { User } from 'lucide-react';
 import DepartmanPage from './pages/DepartmanPage';
 import SettingsPage from './pages/SettingsPage';
 import KayıtOl from './pages/KayıtOl';
+import useUserStore from "./store/user.js";
+import { useEffect } from 'react';
 
 function App() {
+  const { checkAuth, user } = useUserStore();
+  useEffect(() => {
+    checkAuth();
+  }, []);
   return (
     <BrowserRouter>
       <Routes>

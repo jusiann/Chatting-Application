@@ -1,6 +1,11 @@
 .rehbercard-button {
     all: unset;
     width: 100%;
+    cursor: pointer;
+}
+
+.rehbercard-button:hover {
+    background-color: #f0f0f0;
 }
 
 .rehbercard {
@@ -13,6 +18,10 @@
     align-items: center;
     box-sizing: border-box;
     width: 100%;
+}
+.rehbercard:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
 }
 
 .rehbercard-image-and-texts {
