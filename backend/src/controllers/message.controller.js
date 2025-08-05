@@ -36,8 +36,8 @@ export const getMessages = async (req, res, next) => {
         await client.query(`
             UPDATE messages 
             SET status = $1 
-            WHERE sender_id = $2 AND receiver_id = $3 AND status = $4`,
-            [MESSAGE_STATUS.READ, otherID, userId, MESSAGE_STATUS.SENT]
+            WHERE sender_id = $2 AND receiver_id = $3 AND status != $1`,
+            [MESSAGE_STATUS.READ, otherID, userId]
         );
 
         const messages = await client.query(`
@@ -276,7 +276,7 @@ export const getLastMessages = async (req, res, next) => {
                     id: lastMessage.rows[0].id,
                     sender: lastMessage.rows[0].sender.id,
                     content: lastMessage.rows[0].content,
-                    created_at: moment(lastMessage.rows[0].created_at).format("HH:mm"),
+                    created_at: lastMessage.rows[0].created_at,
                     status: lastMessage.rows[0].status
                 } : null
             };
