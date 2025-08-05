@@ -8,9 +8,12 @@ import Rehbercard from "../components/Rehbercard";
 import { Building } from "lucide-react";
 import useConservationStore from "../store/conservation";
 import { useEffect } from "react";
+import { messageWithUser } from "../controllers/RehberPageController";
+import { useNavigate } from "react-router-dom";
 
 function RehberPage() {
     const { contactUsers, contactUsersFetch } = useConservationStore();
+    const navigate = useNavigate();
 
     useEffect(() => {
         contactUsersFetch();
@@ -38,6 +41,7 @@ function RehberPage() {
                                 <Rehbercard
                                     key={contactUser.id}
                                     contactUser={contactUser}
+                                    onClick={() => messageWithUser(contactUser.id, navigate)}
                                 />
                             ))}
                     </div>

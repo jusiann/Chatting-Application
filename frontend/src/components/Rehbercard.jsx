@@ -1,8 +1,8 @@
 import "../style/rehbercard.css";
 
-function Rehbercard({ contactUser }) {
+function Rehbercard({ contactUser, onClick }) {
     return (
-        <button className="rehbercard-button">
+        <button className="rehbercard-button" onClick={onClick}>
             <div className="rehbercard">
                 <div className="rehbercard-image-and-texts">
                     {contactUser.profile_pic ? (

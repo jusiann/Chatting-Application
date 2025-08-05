@@ -1,20 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../style/messagetopbar.css";
 import { Search, MoreVertical } from "lucide-react";
 import useConservationStore from "../store/conservation";
 
-const MessageTopBar = ({ id }) => {
-    const contactUsers = useConservationStore((state) => state.contactUsers);
-    const selectedUser = contactUsers.find((user) => user.id === id);
+const MessageTopBar = () => {
+    const messagingUser = useConservationStore((state) => state.messagingUser);
+
+    console.log('🔄 MessageTopBar render oldu. Mevcut kullanıcı:', messagingUser);
 
     return (
         <div className="message-topbar-container">
             <div className="message-topbar-wrapper">
                 <div className="message-topbar-content">
-                    {selectedUser?.profile_pic ? (
+                    {messagingUser?.profile_pic ? (
                         <img
-                            src={selectedUser.profile_pic}
-                            alt={`${selectedUser.first_name} ${selectedUser.last_name}`}
+                            src={messagingUser.profile_pic}
+                            alt={`${messagingUser.first_name} ${messagingUser.last_name}`}
                             className="message-topbar-image"
                         />
                     ) : (
@@ -23,8 +24,8 @@ const MessageTopBar = ({ id }) => {
 
                     <div className="message-topbar-texts">
                         <div className="message-topbar-name">
-                            {selectedUser
-                                ? `${selectedUser.first_name} ${selectedUser.last_name}`
+                            {messagingUser
+                                ? `${messagingUser.first_name} ${messagingUser.last_name}`
                                 : "Kullanıcı Seçili Değil"}
                         </div>
                         <div className="message-topbar-status">
