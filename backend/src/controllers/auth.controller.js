@@ -20,6 +20,20 @@ const validateEmail = (email) => {
     }
 };
 
+export const checkUser = (req,res) => {
+    const user = req.user;
+    const access_token = req.cookies.access_token || req.headers.authorization?.split(' ')[1];
+    if (!user || !access_token) {
+        throw new ApiError("User not authenticated", 401);
+    }
+    return res.status(200).json({
+        success: true,
+        user: user,
+        access_token: access_token,
+        message: "User is authenticated"
+    });
+}
+
 const validatePassword = (password) => {
     if (password.length < 8) {
         throw new ApiError("Password must be at least 8 characters long.", 400);

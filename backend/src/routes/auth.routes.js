@@ -1,5 +1,5 @@
 import express from "express";
-import {signUp, signIn, forgetPassword, checkResetCode, changePassword, changePasswordAuthenticated, refreshToken, changeName, changeTitle, changeProfilePicture} from "../controllers/auth.controller.js";
+import {signUp, signIn, forgetPassword, checkResetCode, changePassword, changePasswordAuthenticated, refreshToken, changeName, changeTitle, changeProfilePicture, checkUser} from "../controllers/auth.controller.js";
 import { uploadProfilePicture, handleUploadError, handleCloudinaryUpload } from "../middlewares/multer.js";
 import {verifyToken} from "../middlewares/auth.js";
 
@@ -51,6 +51,8 @@ router.post("/test-upload",
         }
     }
 );
+
+router.get("/check", verifyToken, checkUser);
 
 export default router;
 
