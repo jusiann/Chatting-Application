@@ -1,11 +1,8 @@
 import "../style/messagesended.css";
 import { CheckCheck, Check } from "lucide-react";
+import timeFormatter from "../controllers/TimeController";
 
 function MessageSended({message}) {
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, "0");
-    const minutes = now.getMinutes().toString().padStart(2, "0");
-    const currentTime = `${hours}:${minutes}`;
     let statusIcon = null;
 
     if (message.status === "sent") {
@@ -24,7 +21,7 @@ function MessageSended({message}) {
                     {message.content}
                 </p>
                 <div className="message-sended-meta">
-                    <span className="message-sended-time">{message.created_at}</span>
+                    <span className="message-sended-time">{timeFormatter(message.created_at)}</span>
                     {statusIcon}
                 </div>
             </div>

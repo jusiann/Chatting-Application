@@ -78,5 +78,15 @@ class MessageModel {
     );
   }
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MessageModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
   List<int> get conversationKey => [senderid, receiverid]..sort();
 }

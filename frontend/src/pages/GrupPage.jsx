@@ -5,8 +5,45 @@ import ContactCard from "../components/contactCard";
 import { ChevronDown } from "lucide-react";
 import GroupCancelButton from "../components/groupCancelButton";
 import GroupApprovalButton from "../components/groupApprovalButton";
+import useConservationStore from "../store/conservation";
+import Rehbercard from "../components/Rehbercard";
+import { useState } from "react";
+import GroupSelectedCard from "../components/groupSelectedCard";
+import useGroupStore from "../store/group";
+import {useNavigate} from "react-router-dom";
+import toast from "react-hot-toast";
 
 function Gruppage() {
+    const { contactUsers } = useConservationStore();
+    const { groupCreate } = useGroupStore();
+    const navigate = useNavigate();
+    const [selectedMembers, setSelectedMembers] = useState([]);
+    const [inputName, setInputName] = useState("");
+    const [inputDescription, setInputDescription] = useState("");
+    const addMember = (member) => {
+        if(selectedMembers.find(m => m.id === member.id)) return; // Prevent duplicates
+        setSelectedMembers((prev) => [...prev, member]);
+    };
+    const handleCreateGroup = async () => {
+        const formData = {
+            name: inputName,
+            description: inputDescription,
+            memberIds: selectedMembers.map(m => m.id)
+        };
+        if (formData.name.trim() === ""){
+            toast.error("Grup adı boş olamaz.");
+            return;
+        }
+        if (formData.memberIds.length === 0){
+            toast.error("En az bir üye seçmelisiniz.");
+            return;
+        }
+        const success = await groupCreate(formData);
+        if (success) {
+            navigate("/home");
+        }
+    };
+
     return (
         <div className="gruppage-container">
             <Sidebar />
@@ -26,13 +63,14 @@ function Gruppage() {
                     </div>
 
                     <div className="group-person-list">
-                        <ContactCard name="Prof. Dr. Taner Çevik" title="Bilgisayar Mühendisliği" />
-                        <ContactCard name="Doç. Dr. Emre Tanrıverdi" title="Elektrik-Elektronik Mühendisliği" />
-                        <ContactCard name="Dr. Öğr. Üyesi Cemal Acar" title="Endüstri Mühendisliği" />
-                        <ContactCard name="Esra Demir" title="Fakülte Sekreteri" />
-                        <ContactCard name="Mehmet Özkan" title="Öğrenci İşleri" />
-                        <ContactCard name="Gizem Tok" title="Kütüphane Sorumlusu" />
-                        <ContactCard name="Derya Kaya" title="Makine Mühendisliği" />
+                        {Array.isArray(contactUsers) &&
+                            contactUsers.map((contactUser) => (
+                                <Rehbercard
+                                    key={contactUser.id}
+                                    contactUser={contactUser}
+                                    onClick={() => addMember(contactUser)}
+                                />
+                            ))}
                     </div>
 
                 </div>
@@ -43,21 +81,25 @@ function Gruppage() {
                         <div className="group-image-circle">Grup<br />Simgesi Ekle</div>
                     </div>
 
-                    <input type="text" className="group-name-input" placeholder="Grup adını giriniz" />
+                    <input type="text" className="group-name-input" placeholder="Grup adını giriniz" value={inputName} onChange={(e) => setInputName(e.target.value)} />
+                    <input type="text" className="group-description-input" placeholder="Grup açıklamasını giriniz" value={inputDescription} onChange={(e) => setInputDescription(e.target.value)} />
 
                     <div className="selected-members-title">Seçili üyeler</div>
 
                     <div className="selected-members-list">
-                        <ContactCard name="İsmail Yıldız" title="Yazılım Uzmanı"  />
-                        <ContactCard name="Zeynep Aksoy" title="Akademik Danışman"  />
-                        <ContactCard name="Büşra Şahin" title="Eğitim Fakültesi Sekreteri"  />
-                        <ContactCard name="Barış Çetin" title="Mühendislik Fakültesi Asistanı"  />
-                        <ContactCard name="Nehir Yılmaz" title="Rektörlük Sekreteri"  />
+                         {Array.isArray(selectedMembers) &&
+                            selectedMembers.map((contactUser) => (
+                                <GroupSelectedCard
+                                    key={contactUser.id}
+                                    contactUser={contactUser}
+                                    onClick={() => setSelectedMembers((prev) => prev.filter(m => m.id !== contactUser.id))}
+                                />
+                            ))}
                     </div>
 
                     <div className="group-action-buttons">
                         <GroupCancelButton />
-                        <GroupApprovalButton text={"Grubu oluştur"}/>
+                        <GroupApprovalButton text={"Grubu oluştur"} onClick={handleCreateGroup} />
                     </div>
                 </div>
             </div>

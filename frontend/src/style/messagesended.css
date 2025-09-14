@@ -42,3 +42,9 @@
     height: 15px;
     color: #ffffff;
 }
+
+.message-sended-check-read {
+    width: 15px;
+    height: 15px;
+    color: hsl(240, 100%, 60%);
+}

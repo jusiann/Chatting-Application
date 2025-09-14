@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
@@ -15,14 +16,30 @@ class AvatarGroup extends StatelessWidget {
         children: [
           Stack(
             children: [
-              CircleAvatar(
-                radius: 21,
-                backgroundColor: Colors.blueGrey,
-                child: SvgPicture.asset(
-                  'assets/svg_files/person.svg',
-                  width: 40,
-                ),
-              ),
+              user.profilepic != null
+                  ? CachedNetworkImage(
+                      imageUrl: user.profilepic!,
+                      imageBuilder: (context, imageProvider) => CircleAvatar(
+                        radius: 25,
+                        backgroundImage: imageProvider,
+                      ),
+                      placeholder: (context, url) => CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.grey.shade200,
+                        child: SvgPicture.asset(
+                          'assets/svg_files/person.svg',
+                          height: 40,
+                        ),
+                      ),
+                    )
+                  : CircleAvatar(
+                      radius: 21,
+                      backgroundColor: Colors.blueGrey,
+                      child: SvgPicture.asset(
+                        'assets/svg_files/person.svg',
+                        width: 40,
+                      ),
+                    ),
               Positioned(
                 bottom: 0,
                 right: 0,

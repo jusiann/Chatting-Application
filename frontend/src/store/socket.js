@@ -111,6 +111,10 @@ const useSocketStore = create((set, get) => ({
     get().emit('send_message', messageData);
   },
 
+  sendGroupMessage: (groupId, content) =>{
+    get().emit('group_message', { groupId, content });
+  },
+
   // Typing durumunu gönderme
   sendTyping: (data) => {
     get().emit('typing', data);

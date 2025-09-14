@@ -1,88 +1,52 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
-import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
-import 'package:mobile/features/chat/controllers/message_controller.dart';
-import 'package:mobile/features/chat/controllers/providers.dart';
+import 'package:mobile/features/chat/controllers/group_controller.dart';
 import 'package:mobile/features/chat/controllers/socket_service.dart';
-import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
-import 'package:mobile/features/chat/controllers/user_service.dart';
-import 'package:mobile/features/chat/models/chat_model.dart';
+import 'package:mobile/features/chat/models/group_model.dart';
 import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/features/chat/views/widgets/emoji_select_widget.dart';
-import 'package:mobile/features/chat/views/widgets/received_message_widget.dart';
-import 'package:mobile/features/chat/views/widgets/send_message_widget.dart';
-// ignore: library_prefixes
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:mobile/features/chat/views/widgets/group_message_received.dart';
+import 'package:mobile/features/chat/views/widgets/group_message_sended.dart';
 
-class IndividualPage extends ConsumerStatefulWidget {
-  const IndividualPage({super.key, required this.chat});
-  final ChatModel chat;
+class GroupChatView extends ConsumerStatefulWidget {
+  final GroupModel group;
+
+  const GroupChatView({super.key, required this.group});
 
   @override
-  ConsumerState<IndividualPage> createState() => _IndividualPageState();
+  ConsumerState<GroupChatView> createState() => _GroupChatViewState();
 }
 
-class _IndividualPageState extends ConsumerState<IndividualPage>
+class _GroupChatViewState extends ConsumerState<GroupChatView>
     with WidgetsBindingObserver {
-  bool _showemoji = false;
-  final _controller = TextEditingController();
-  IO.Socket? socket;
+  final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _showemoji = false;
 
   @override
   void initState() {
+    super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref
-          .read(messageControllerProvider.notifier)
-          .fetchMore(widget.chat.id);
-      final currentUserId = ref.read(authControllerProvider).authUser!.id;
-      final messages = ref
-          .watch(messageControllerProvider.notifier)
-          .forChat(widget.chat.id, currentUserId);
-      final unreadIds = messages
-          .where((m) => m.senderid == widget.chat.id && m.status != 'read')
-          .map((m) => m.id)
-          .toList();
-      if (unreadIds.isNotEmpty) {
-        ref.read(socketServiceProvider.notifier).emit('mark_read', {
-          'receiver_id': currentUserId,
-          'sender_id': widget.chat.id,
-        });
-      }
-      ref
-          .read(unreadMessageControllerProvider.notifier)
-          .clearUnread(widget.chat.id);
+          .read(groupMessageControllerProvider.notifier)
+          .fetchGroupMessages(widget.group.id, 1, 20);
 
-      ref.read(openChatIdProvider.notifier).state = widget.chat.id;
+      // Gruba katıl
+      /* ref
+          .read(socketServiceProvider.notifier)
+          .emit('join_group', widget.group.id); */
     });
-
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels <=
           _scrollController.position.minScrollExtent + 100) {
         await ref
-            .read(messageControllerProvider.notifier)
-            .fetchMore(widget.chat.id);
-        final currentUserId = ref.read(authControllerProvider).authUser!.id;
-        final postMessages = ref
-            .watch(messageControllerProvider.notifier)
-            .forChat(widget.chat.id, currentUserId);
-        final unreadIds = postMessages
-            .where((m) => m.senderid == widget.chat.id && m.status != 'read')
-            .map((m) => m.id)
-            .toList();
-        if (unreadIds.isNotEmpty) {
-          ref.read(socketServiceProvider.notifier).emit('message_read_all', {
-            'receiverId': currentUserId,
-          });
-        }
+            .read(groupMessageControllerProvider.notifier)
+            .fetchGroupMessages(widget.group.id, 1, 20);
       }
     });
-
-    super.initState();
   }
 
   @override
@@ -108,15 +72,12 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
 
   @override
   Widget build(BuildContext context) {
-    final currentUserId = ref.watch(authControllerProvider).authUser!.id;
-    final allMessages = ref.watch(messageControllerProvider);
-    final messages = allMessages
-        .where(
-          (m) =>
-              (m.senderid == widget.chat.id && m.receiverid == currentUserId) ||
-              (m.senderid == currentUserId && m.receiverid == widget.chat.id),
-        )
-        .toList();
+    final currentUser = ref.watch(authControllerProvider).authUser!;
+    final allMessages = ref.watch(groupMessageControllerProvider);
+    final messages =
+        allMessages.where((msg) => msg.groupId == widget.group.id).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
     return PopScope(
       canPop: !_showemoji,
       onPopInvokedWithResult: (didPop, result) {
@@ -126,7 +87,6 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
           });
           return;
         }
-        ref.read(openChatIdProvider.notifier).state = null;
         if (!didPop) Navigator.of(context).pop(result);
       },
 
@@ -147,34 +107,13 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  '${widget.chat.title ?? ''} ${widget.chat.fullname}',
+                  widget.group.name,
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: Colors.white,
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Son görülme: ',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      formatMessageTime(widget.chat.time),
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -185,26 +124,10 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
               child: CircleAvatar(
                 radius: 25,
                 backgroundColor: Colors.blueGrey,
-                child: widget.chat.profilepic != null
-                    ? CachedNetworkImage(
-                        imageUrl: widget.chat.profilepic!,
-                        imageBuilder: (context, imageProvider) => CircleAvatar(
-                          radius: 25,
-                          backgroundImage: imageProvider,
-                        ),
-                        placeholder: (context, url) => CircleAvatar(
-                          radius: 25,
-                          backgroundColor: Colors.grey.shade200,
-                          child: SvgPicture.asset(
-                            'assets/svg_files/person.svg',
-                            height: 40,
-                          ),
-                        ),
-                      )
-                    : SvgPicture.asset(
-                        'assets/svg_files/person.svg',
-                        width: 40,
-                      ),
+                child: SvgPicture.asset(
+                  'assets/svg_files/groups.svg',
+                  height: 40,
+                ),
               ),
             ),
             SizedBox(width: 15),
@@ -233,16 +156,11 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   itemBuilder: (context, index) {
-                    final reversedIndex = messages.length - 1 - index;
-                    if (messages[reversedIndex].senderid == widget.chat.id) {
-                      return ReceivedMessageWidget(
-                        key: ValueKey(messages[reversedIndex].id),
-                        message: messages[reversedIndex],
-                      );
+                    final message = messages[index];
+                    if (message.senderId != currentUser.id) {
+                      return GroupMessageReceived(message: message);
                     } else {
-                      return SendMessageWidget(
-                        message: messages[reversedIndex],
-                      );
+                      return GroupMessageSended(message: message);
                     }
                   },
                   itemCount: messages.length,
@@ -328,11 +246,12 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                               if (_controller.text.trim().isNotEmpty) {
                                 final msg = {
                                   'content': _controller.text,
-                                  'receiver_id': widget.chat.id,
+                                  'senderId': currentUser.id,
+                                  'groupId': widget.group.id,
                                 };
                                 ref
                                     .read(socketServiceProvider.notifier)
-                                    .emit('send_message', msg);
+                                    .emit('group_message', msg);
                                 _controller.clear();
                                 _scrollController.animateTo(
                                   0,

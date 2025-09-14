@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "../api/axios.js";
 import useSocketStore from "./socket.js";
+import useGroupStore from "./group.js";
 
 const useConservationStore = create((set, get) => ({
     chatUsers: [],
@@ -13,6 +14,21 @@ const useConservationStore = create((set, get) => ({
             console.error("chatUsersFetch hatası:", error);
             set({ chatUsers: [] });
         }
+    },
+    updateChatUsers: async (newUserId, message) => {
+        const currentUsers = get().chatUsers;
+        const updatedUser = currentUsers.find((user) =>
+            user.id === newUserId )
+        if (!updatedUser) {
+            await get().chatUsersFetch();
+            return;
+        } // Kullanıcı bulunamazsa çıkış yap
+        updatedUser.lastMessage.content = message.content; // Yeni mesaj içeriği
+        updatedUser.lastMessage.created_at = message.created_at; // Yeni mesaj zamanı
+        updatedUser.lastMessage.status = message.status; // Yeni mesaj durumu
+        const filteredUsers = currentUsers.filter((user) =>
+            user.id !== newUserId );
+        set({ chatUsers: [...filteredUsers, updatedUser] });
     },
 
     contactUsers: [],
@@ -28,11 +44,20 @@ const useConservationStore = create((set, get) => ({
 
     messages: [],
     messagingUserId: null,
+    messagingGroupId: null,
     messagingUser: null,
+    messagingType: null,
     setMessagingUser: ({id}) => {
-        const user = get().chatUsers.find((user) => user.id == id);
-        set({ messagingUser: user });
-        console.log("Mesajlaşma başlatıldı:", user);
+        if(get().messagingType === "individual"){
+            const user = get().chatUsers.find((user) => user.id == id);
+            set({ messagingUser: user });
+            console.log("Mesajlaşma başlatıldı:", user);
+        }
+        else if(get().messagingType === "group"){
+            const group = useGroupStore.getState().groups.find((group) => group.id == id);
+            set({ messagingUser: group });
+            console.log("Grup mesajlaşma başlatıldı:", group);
+        }
     },
 
     fetchMessages: async ({ id }) => {
@@ -44,6 +69,18 @@ const useConservationStore = create((set, get) => ({
             set({ messages: [] });
         }
     },
+
+    fetchGroupMessages: async (groupId) => {
+        try {
+            const response = await axios.get(`/groups/${groupId}/messages`);
+            set({ messages: response.data });
+        } catch (error) {
+            console.error("Grup mesajları alınamadı:", error);
+            set({ messages: [] });
+        }
+    },
+
+    setMessagingType: (type) => set({ messagingType: type }),
 
     setMessagingUserId: (id) => set({ messagingUserId: id }),
 
@@ -73,19 +110,51 @@ const useConservationStore = create((set, get) => ({
         }
     },
 
+    sendGroupMessage: async (groupId, content) => {
+        const socketStore = useSocketStore.getState();
+        socketStore.sendGroupMessage(groupId, content);
+    },
+
     // Yeni mesaj geldiğinde çağrılacak
     addNewMessage: (message) => {
         const currentMessages = get().messages;
         set({ messages: [...currentMessages, message] });
     },
 
-    handleDelivered: (messageId) => {
+    handleDelivered: (receiver_id) => {
         const messages = get().messages;
-        const message = messages.find(msg => msg.id === messageId);
-        if (message) {
-            message.status = "delivered";
-            set({ messages: [...messages] });
+        const updatedMessages = messages.map(msg => {
+            if (msg.receiver_id === receiver_id && msg.status === "sent") {
+                return { ...msg, status: "delivered" };
+            }
+            return msg;
+        });
+        const updatedChatUser = get().chatUsers.find(user => user.id === receiver_id);
+        if (updatedChatUser && updatedChatUser.lastMessage.status === "sent") {
+            updatedChatUser.lastMessage.status = "delivered";
         }
+        const updatedChatUsers = get().chatUsers.map(user => 
+            user.id === receiver_id ? updatedChatUser : user
+        );
+        set({ messages: updatedMessages, chatUsers: updatedChatUsers });
+    },
+
+    handleRead: (receiver_id) => {
+        const messages = get().messages;
+        const updatedMessages = messages.map(msg => {
+            if (msg.receiver_id === receiver_id && msg.status !== "read") {
+                return { ...msg, status: "read" };
+            }
+            return msg;
+        });
+        const updatedChatUser = get().chatUsers.find(user => user.id === receiver_id);
+        if (updatedChatUser && updatedChatUser.lastMessage.status !== "read") {
+            updatedChatUser.lastMessage.status = "read";
+        }
+        const updatedChatUsers = get().chatUsers.map(user => 
+            user.id === receiver_id ? updatedChatUser : user
+        );
+        set({ messages: updatedMessages, chatUsers: updatedChatUsers });
     },
 
     // Socket event listener'ları kurma

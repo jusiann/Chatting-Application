@@ -52,6 +52,7 @@ class AuthController extends _$AuthController {
         await ref
             .read(unreadMessageControllerProvider.notifier)
             .fetchUnreadCounts(_token!);
+
         state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
         return;
       }
@@ -60,7 +61,7 @@ class AuthController extends _$AuthController {
     final refreshToken = await _storage.read(key: 'refreshToken');
     if (refreshToken != null) {
       final response = await http.post(
-        Uri.parse('http://192.168.1.9:5001/api/auth/refresh'),
+        Uri.parse('http://10.10.1.197:5001/api/auth/refresh-token'),
         headers: {
           'Authorization': 'Bearer $refreshToken',
           'Content-Type': 'application/json',
@@ -68,11 +69,9 @@ class AuthController extends _$AuthController {
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final accessToken = data['accessToken'];
-        final refreshToken = data['refreshToken'];
+        final accessToken = data['access_token'];
         await _storage.write(key: 'accessToken', value: accessToken);
         _token = accessToken;
-        await _storage.write(key: 'refreshToken', value: refreshToken);
         final decodedToken = JwtDecoder.decode(accessToken);
         final user = AuthUserModel.fromJwt(decodedToken);
         await ref
@@ -96,11 +95,11 @@ class AuthController extends _$AuthController {
 
   Future<void> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse('http://192.168.1.9:5001/api/auth/signin'),
+      Uri.parse('http://10.10.1.197:5001/api/auth/sign-in'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       Fluttertoast.showToast(
         msg: 'Giriş Başarılı.',
         toastLength: Toast.LENGTH_SHORT,
@@ -110,17 +109,17 @@ class AuthController extends _$AuthController {
         fontSize: 16.0,
       );
       final data = jsonDecode(response.body);
-      await _storage.write(key: 'accessToken', value: data['accessToken']);
-      await _storage.write(key: 'refreshToken', value: data['refreshToken']);
-      final decoded = JwtDecoder.decode(data['accessToken']);
+      await _storage.write(key: 'accessToken', value: data['access_token']);
+      await _storage.write(key: 'refreshToken', value: data['refresh_token']);
+      final decoded = JwtDecoder.decode(data['access_token']);
       final user = AuthUserModel.fromJwt(decoded);
-      await _startTokenRefreshTimer(data['accessToken']);
-      _token = data['accessToken'];
+      await _startTokenRefreshTimer(data['access_token']);
+      _token = data['access_token'];
       await ref
           .read(unreadMessageControllerProvider.notifier)
           .fetchUnreadCounts(_token!);
       state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
-      ref.read(socketServiceProvider.notifier).connect(data['accessToken']);
+      ref.read(socketServiceProvider.notifier).connect(data['access_token']);
       await markDeliveredMessages();
     }
     if (response.statusCode != 200) {
@@ -177,7 +176,7 @@ class AuthController extends _$AuthController {
 
   Future<void> markDeliveredMessages() async {
     final uri = Uri.parse(
-      'http://192.168.1.9:5001/api/messages/mark-delivered',
+      'http://10.10.1.197:5001/api/messages/mark-delivered',
     );
     final response = await http.get(
       uri,

@@ -23,7 +23,7 @@ class ProfileController extends _$ProfileController {
   Future<void> updateProfile(String newName, String newSurname) async {
     final token = ref.read(authControllerProvider.notifier).token;
     final response = await http.put(
-      Uri.parse('http://192.168.1.9:5001/api/auth/change-name'),
+      Uri.parse('http://10.10.1.197:5001/api/auth/change-name'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -60,7 +60,7 @@ class ProfileController extends _$ProfileController {
   Future<void> updateTitle(String newTitle) async {
     final token = ref.read(authControllerProvider.notifier).token;
     final response = await http.put(
-      Uri.parse('http://192.168.1.9:5001/api/auth/change-title'),
+      Uri.parse('http://10.10.1.197:5001/api/auth/change-title'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -104,7 +104,7 @@ class ProfileController extends _$ProfileController {
       final token = ref.read(authControllerProvider.notifier).token;
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.1.9:5001/api/auth/upload-profile-image'),
+        Uri.parse('http://10.10.1.197:5001/api/auth/upload-profile-image'),
       );
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(
@@ -125,6 +125,9 @@ class ProfileController extends _$ProfileController {
           textColor: Colors.white,
           fontSize: 16.0,
         );
+        final data = jsonDecode(responseBody.body);
+        await _storage.write(key: 'accessToken', value: data['accessToken']);
+        await _storage.write(key: 'refreshToken', value: data['refreshToken']);
         ref.read(authControllerProvider.notifier).changeUser();
       } else {
         Fluttertoast.showToast(

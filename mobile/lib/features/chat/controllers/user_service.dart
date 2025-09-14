@@ -3,22 +3,67 @@ import 'dart:convert';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
+import 'package:mobile/features/chat/models/group_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:http/http.dart' as http;
 part 'user_service.g.dart';
 
 class ContactUsers {
   List<UserModel> contactUsers;
   List<ChatModel> messageUsers;
-  ContactUsers({this.contactUsers = const [], this.messageUsers = const []});
+  List<GroupModel> userGroups; // Yeni alan eklendi
+
+  ContactUsers({
+    required this.contactUsers,
+    required this.messageUsers,
+    this.userGroups = const [], // Default değer
+  });
+
   ContactUsers copyWith({
     List<UserModel>? contactUsers,
     List<ChatModel>? messageUsers,
+    List<GroupModel>? userGroups,
   }) {
     return ContactUsers(
       contactUsers: contactUsers ?? this.contactUsers,
       messageUsers: messageUsers ?? this.messageUsers,
+      userGroups: userGroups ?? this.userGroups,
     );
+  }
+
+  // Hem bireysel sohbetleri hem de grupları birleştiren method
+  List<dynamic> get allChats {
+    final List<dynamic> combined = [];
+
+    // Bireysel sohbetleri ekle
+    combined.addAll(messageUsers);
+
+    // Grupları ChatModel formatına dönüştürüp ekle
+    final groupChats = userGroups
+        .map(
+          (group) => ChatModel(
+            id: group.id,
+            firstName: group.name,
+            lastName: '',
+            email: '',
+            profilepic: null,
+            isGroup: true,
+            time: group.lastMessageTime ?? group.createdAt,
+            currentMessage: group.lastMessage ?? 'Grup oluşturuldu',
+            senderid: 0,
+            messageStatus: 'sent',
+            messageId: -1,
+          ),
+        )
+        .toList();
+
+    combined.addAll(groupChats);
+
+    // Zamana göre sırala (son mesaj zamanına göre)
+    combined.sort((a, b) => b.time.compareTo(a.time));
+
+    return combined;
   }
 }
 
@@ -26,58 +71,120 @@ class ContactUsers {
 class UserService extends _$UserService {
   @override
   ContactUsers build() {
-    return ContactUsers();
+    return ContactUsers(contactUsers: [], messageUsers: [], userGroups: []);
   }
 
   Future<void> fetchUsers() async {
-    print('[DEBUG] Kullanici cagrisi yapıldı');
-    var responseContact;
-    var responseMessageUsers;
-    final authController = ref.read(authControllerProvider.notifier);
-    if (ref.read(authControllerProvider).isLoggedIn) {
+    print('FETCH USER METODU ÇAGIRILDI');
+    final token = ref.read(authControllerProvider.notifier).token;
+    if (token != null) {
       try {
-        final accessToken = authController.token;
-        responseContact = await http.get(
-          Uri.parse('http://192.168.1.9:5001/api/messages/users'),
+        // Kullanıcıları getir
+        final contactResponse = await http.get(
+          Uri.parse('http://10.10.1.197:5001/api/messages/users'),
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer $accessToken',
+            'Authorization': 'Bearer $token',
           },
         );
-        responseMessageUsers = await http.get(
-          Uri.parse('http://192.168.1.9:5001/api/messages/messageUsers'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $accessToken',
-          },
-        );
-      } catch (err) {
-        print(err);
-      }
 
-      if (responseContact.statusCode == 200 &&
-          responseMessageUsers.statusCode == 200) {
-        try {
-          final List<dynamic> contactData = jsonDecode(responseContact.body);
-          final List<dynamic> messageUserData = jsonDecode(
-            responseMessageUsers.body,
-          );
-          final contactUsers = contactData
-              .map((user) => UserModel.fromJson(user))
+        // Mesaj kullanıcılarını getir
+        final messageResponse = await http.get(
+          Uri.parse('http://10.10.1.197:5001/api/messages/last-messages'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+
+        // Grupları getir
+        final groupResponse = await http.get(
+          Uri.parse('http://10.10.1.197:5001/api/groups/user-groups'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+        if (groupResponse.statusCode == 200) {
+          print('GROUPRESPONSE BAŞARILI');
+        }
+
+        if (contactResponse.statusCode == 200 &&
+            messageResponse.statusCode == 200 &&
+            groupResponse.statusCode == 200) {
+          final contactUserData = jsonDecode(contactResponse.body)['users'];
+          final messageUserData = jsonDecode(messageResponse.body)['data'];
+          final groupData = jsonDecode(groupResponse.body);
+          final contactUsers = contactUserData
+              .map<UserModel>((user) => UserModel.fromJson(user))
               .toList();
           final messageUsers = messageUserData
-              .map((user) => ChatModel.fromJson(user))
+              .where((user) => user['lastMessage'] != null)
+              .map<ChatModel>((user) => ChatModel.fromJson(user))
+              .toList();
+          final userGroups = groupData
+              .map<GroupModel>((group) => GroupModel.fromJson(group))
               .toList();
 
           state = ContactUsers(
             contactUsers: contactUsers,
             messageUsers: messageUsers,
+            userGroups: userGroups,
           );
-          print(messageUsers);
-        } catch (err) {
-          print(err);
         }
+      } catch (err) {
+        print(err);
       }
+    }
+  }
+
+  Future<void> refreshChat() async {
+    final token = ref.read(authControllerProvider.notifier).token;
+    if (token != null) {
+      try {
+        // Kullanıcıları getir
+        final messageResponse = await http.get(
+          Uri.parse('http://10.10.1.197:5001/api/messages/message-users'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+        if (messageResponse.statusCode == 200) {
+          print('MESSAGE RESPONSE BAŞARILI');
+        } else {
+          print('MESSAGE RESPONSE HATA: ${messageResponse.statusCode}');
+        }
+        final messageUsersData = jsonDecode(messageResponse.body);
+        final messageUsers = messageUsersData
+            .map<ChatModel>((user) => ChatModel.fromJson(user))
+            .toList();
+        state = state.copyWith(messageUsers: messageUsers);
+      } catch (err) {
+        print(err);
+      }
+    }
+  }
+
+  void changeChatStatus(int receiverId, String status) {
+    final index = state.messageUsers.indexWhere(
+      (chat) => chat.id == receiverId,
+    );
+    if (index != -1) {
+      final updatedChat = state.messageUsers[index].copyWith(
+        messageStatus: status,
+      );
+      updateChat(updatedChat);
+    }
+  }
+
+  void changeChatStatusRead(int userId) {
+    final index = state.messageUsers.indexWhere((chat) => chat.id == userId);
+    if (index != -1) {
+      final updatedChat = state.messageUsers[index].copyWith(
+        messageStatus: 'read',
+      );
+      updateChat(updatedChat);
     }
   }
 
@@ -94,5 +201,19 @@ class UserService extends _$UserService {
     }
     updatedList.sort((a, b) => b.time.compareTo(a.time));
     state = state.copyWith(messageUsers: updatedList);
+  }
+
+  void updateGroup(GroupModel updatedGroup) {
+    print('updateGroup fonksiyonu Calisti..');
+    final updatedList = List<GroupModel>.from(state.userGroups);
+    final index = state.userGroups.indexWhere(
+      (group) => group.id == updatedGroup.id,
+    );
+    if (index != -1) {
+      updatedList[index] = updatedGroup;
+    } else {
+      updatedList.add(updatedGroup);
+    }
+    state = state.copyWith(userGroups: updatedList);
   }
 }

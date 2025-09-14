@@ -10,7 +10,8 @@ Future<List<MessageModel>> fetchMessagesFromDb({
   required int pageSize,
 }) async {
   final uri = Uri.parse(
-    'http://192.168.1.9:5001/api/messages/$otherUserId/$page/$pageSize',
+    /* 'http://10.10.1.197:5001/api/messages/$otherUserId/$page/$pageSize', */
+    'http://10.10.1.197:5001/api/messages/$otherUserId',
   );
 
   final response = await http.get(
@@ -23,7 +24,7 @@ Future<List<MessageModel>> fetchMessagesFromDb({
   print('STATUS CODE : ${response.statusCode}');
   print('RESPONSE: ${response.body}');
   if (response.statusCode == 200) {
-    final List<dynamic> jsonList = jsonDecode(response.body);
+    final List<dynamic> jsonList = jsonDecode(response.body)['messages'];
     return jsonList.map((json) => MessageModel.fromJson(json)).toList();
   } else {
     print(response.body);
@@ -36,7 +37,7 @@ Future<MessageModel> sendMessage({
   required int id,
   required String token,
 }) async {
-  final url = Uri.parse('http://192.168.1.9:5001/api/messages/send/$id');
+  final url = Uri.parse('http://10.10.1.197:5001/api/messages/send/$id');
   final response = await http.post(
     url,
     headers: {
