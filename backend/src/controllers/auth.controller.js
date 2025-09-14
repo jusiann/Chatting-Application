@@ -475,46 +475,20 @@ export const changeTitle = async (req, res, next) => {
     }
 };
 
-export const changeProfilePicture = async (req, res, next) => {
+export const uploadProfileImage = async (req, res) => {
     try {
         const userId = req.user.id;
-        if (!req.cloudinary)
-            throw new ApiError("Profile picture upload failed", 400);
+        const imageUrl = req.file.path;
 
-        const currentUser = await client.query(`
-            SELECT profile_pic_id FROM users 
-            WHERE id = $1`,
-            [userId]
-        );
-
-
-        if (currentUser.rows[0]?.profile_pic_id)
-            try {
-                await deleteFromCloudinary(currentUser.rows[0].profile_pic_id);
-            } catch (error) {
-                console.error("Error deleting old profile picture:", error);
-            }
-        
-        const updatedUser = await client.query(`
-            UPDATE users 
-            SET profile_pic = $1
-            WHERE id = $2 
-            RETURNING id, first_name, last_name, email, title, department, profile_pic`,
-            [req.cloudinary.url, userId]
-        );
-
-        if (updatedUser.rows.length === 0)
-            throw new ApiError("Failed to update user profile picture.", 400);
-
-        await createToken(updatedUser.rows[0], res);
-
-        res.status(200).json({
-            success: true,
-            message: "Profile picture updated successfully",
-            profile_pic: req.cloudinary.url
-        });
-
-    } catch (error) {
-        next(error);
+        const updatedUser = await client.query(`update users set profile_pic = $1 where id = $2 returning *`, [imageUrl, userId]);
+        if(updatedUser.rows[0]){
+            createToken(updatedUser.rows[0], res);
+            return;
+        }
+        return res.status(401).json({message: 'Kullanıcı bulunamadı.'});
+    } 
+    catch (err) {
+        console.log(err);
+        return res.status(400).json({message: err});
     }
-};
+}

@@ -17,7 +17,7 @@ class RegisterController {
         password == null) {
       print('tüm alanların doldurulması zorunludur.');
     } else {
-      final url = Uri.parse('http://192.168.1.9:5001/api/auth/signup');
+      final url = Uri.parse('http://10.10.1.197:5001/api/auth/sign-up');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -29,7 +29,7 @@ class RegisterController {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         Fluttertoast.showToast(
           msg: 'Kayıt başarılı',
           toastLength: Toast.LENGTH_SHORT,

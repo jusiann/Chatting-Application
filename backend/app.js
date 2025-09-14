@@ -54,13 +54,13 @@ app.use(cors({
     origin: process.env.CLIENT_URL || "http://localhost:5001",
     credentials: true
 }));
-app.use(rateLimit({
+/* app.use(rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: process.env.RATE_LIMIT || 100,
     standardHeaders: true,
     legacyHeaders: false,
     message: { success: false, message: 'Too many requests, please try again later.' }
-}));
+})); */
 morgan.token('api-prefix', () => '[API]');
 app.use(morgan(process.env.NODE_ENV === 'production' 
     ? ':api-prefix [:method] :url :status :res[content-length] - :response-time ms' 
@@ -96,15 +96,23 @@ io.use((socket, next) => {
 });
 
 // Socket.IO bağlantı yönetimi
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
     console.log(`[SOCKET] User connected: ${socket.user.id}`);
     global.connectedUsers.set(socket.user.id, socket);
     socket.join(`user_${socket.user.id}`);
 
+    io.emit('message_delivered', {
+        receiver_id: socket.user.id,
+    });
+    const userGroups = await client.query(
+        `SELECT group_id FROM group_members WHERE user_id = $1`,
+        [socket.user.id]
+    );
+
     // Grup katılma işlemi
-    socket.on('join_group', (groupId) => {
-        socket.join(`group_${groupId}`);
-        console.log(`[SOCKET] User ${socket.user.id} joined group ${groupId}`);
+    userGroups.rows.forEach(row => {
+        socket.join(`group_${row.group_id}`);
+        console.log(`[SOCKET] User ${socket.user.id} joined group ${row.group_id}`);
     });
 
     socket.on('send_message', async (messageData) => {
@@ -121,26 +129,11 @@ io.on('connection', (socket) => {
                 [socket.user.id, receiver_id, content, 'sent']
             );
             const newMessage = result.rows[0];
-            
-            const messageWithDetails = await client.query(`
-                SELECT m.*, 
-                       json_build_object('id', s.id, 'first_name', s.first_name, 'last_name', s.last_name, 'profile_pic', s.profile_pic) as sender,
-                       json_build_object('id', r.id, 'first_name', r.first_name, 'last_name', r.last_name, 'profile_pic', r.profile_pic) as receiver
-                FROM messages m
-                JOIN users s ON m.sender_id = s.id
-                JOIN users r ON m.receiver_id = r.id
-                WHERE m.id = $1`, 
-                [newMessage.id]
-            );
-            const fullMessage = messageWithDetails.rows[0];
-            
-            socket.emit('message_sent', fullMessage);
 
-            io.to(`user_${receiver_id}`).emit('new_message', fullMessage);
+            socket.emit('message_sent', newMessage);
 
-            /* const receiverSocket = global.connectedUsers.get(receiver_id);
-            if (receiverSocket) receiverSocket.emit('new_message', fullMessage); */
-            
+            io.to(`user_${receiver_id}`).emit('new_message', newMessage);
+
             await createNotification({
                 userId: receiver_id,
                 senderId: socket.user.id,
@@ -163,21 +156,20 @@ io.on('connection', (socket) => {
 
     socket.on('mark_delivered', async (data) => {
         try {
-            const {message_id} = data;
-            if (!message_id) throw new Error('Eksik alan: message_id');
-            
+            const {receiver_id, sender_id} = data;
+            if (!receiver_id || !sender_id) throw new Error('Eksik alan: receiver_id veya sender_id');
+
             const now = new Date();
             const result = await client.query(
-                `UPDATE messages SET status = 'delivered', delivered_at = $1 WHERE id = $2 AND receiver_id = $3 AND status = 'sent' RETURNING sender_id`,
-                [now, message_id, socket.user.id]
+                `UPDATE messages SET status = 'delivered', delivered_at = $1 where receiver_id = $2 AND sender_id = $3 AND status = 'sent' RETURNING sender_id`,
+                [now, receiver_id, sender_id]
             );
 
             if (result.rows.length > 0) {
                 const senderId = result.rows[0].sender_id;
                 
                 io.to(`user_${senderId}`).emit('message_delivered', {
-                    message_id,
-                    delivered_at: now
+                    receiver_id: receiver_id,
                 });
 
                 await createNotification({
@@ -202,19 +194,17 @@ io.on('connection', (socket) => {
 
     socket.on('mark_read', async (data) => {
         try {
-            const {message_ids, sender_id} = data;
-            if (!message_ids || !Array.isArray(message_ids) || !sender_id) throw new Error('Eksik veya geçersiz alanlar: message_ids veya sender_id');
+            const {receiver_id, sender_id} = data;
+            if (!receiver_id || !sender_id) throw new Error('Eksik veya geçersiz alanlar: receiver_id veya sender_id');
             
             const now = new Date();
-            for (const message_id of message_ids) {
-                await client.query(
-                    `UPDATE messages SET status = 'read', read_at = $1 WHERE id = $2 AND receiver_id = $3 AND status != 'read'`,
-                    [now, message_id, socket.user.id]
-                );
-            }
-
-            const senderSocket = global.connectedUsers.get(sender_id);
-            if (senderSocket) senderSocket.emit('messages_read', { message_ids, read_at: now });
+            await client.query(
+                `UPDATE messages SET status = 'read', read_at = $1 WHERE sender_id = $2 AND receiver_id = $3 AND status != 'read'`,
+                [now, sender_id, receiver_id]
+            );
+            io.to(`user_${sender_id}`).emit('messages_read', {
+                receiver_id: receiver_id,
+            });
 
             await createNotification({
                 userId: sender_id,
@@ -222,7 +212,6 @@ io.on('connection', (socket) => {
                 type: NOTIFICATION_TYPES.MESSAGE_READ,
                 content: 'Messages read',
                 data: {
-                    message_ids,
                     read_at: now
                 }
             });
@@ -309,7 +298,7 @@ gracefulShutdown('SIGINT');
 gracefulShutdown('SIGTERM');
 
 // Sunucuyu başlatma
-server.listen(port, () => {
+server.listen(port,'0.0.0.0', () => {
     console.log(`[API] Server running on port ${port}`);
     console.log(`[API] Mode: ${process.env.NODE_ENV || "Development"}`);
     console.log(`[API] Health check available at: http://localhost:${port}/health`);

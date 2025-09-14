@@ -7,7 +7,7 @@ const router = express.Router();
 router.post("/create", verifyToken, createGroup);
 router.post("/:groupId/message", verifyToken, sendGroupMessage);
 router.get("/user-groups", verifyToken, getUserGroupsWithLastMessages);
-router.get("/:groupId/messages/:page/:pageSize", verifyToken, getGroupMessages);
+router.get("/:groupId/messages", verifyToken, getGroupMessages);
 router.get("/:groupId/members", verifyToken, getGroupMembers);
 
 export default router;

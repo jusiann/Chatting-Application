@@ -2,6 +2,8 @@ import React, { useEffect , useRef} from "react";
 import Sidebar from "../components/Sidebar";
 import Searchbar from "../components/Searchbar";
 import Personcard from "../components/Personcard";
+import GroupSelectedCard from "../components/groupSelectedCard";
+import useGroupStore from "../store/group";
 import Messagetopbar from "../components/Messagetopbar";
 import Messagereceived from "../components/Messagereceived";
 import Messagesended from "../components/Messagesended";
@@ -10,6 +12,7 @@ import useConservationStore from "../store/conservation";
 import useUserStore from "../store/user";
 import "../style/anaekranpage.css";
 import useSocketStore from "../store/socket";
+import GroupCard from "../components/groupCard";
 
 const AnaekranPage = () => {
     const {
@@ -21,7 +24,12 @@ const AnaekranPage = () => {
         addNewMessage,
         messagingUser,
         handleDelivered,
+        handleRead,
+        updateChatUsers,
+        messagingType,
     } = useConservationStore();
+
+    const {groups, fetchGroups, updateGroupLastMessage } = useGroupStore();
 
     const { user } = useUserStore();
 
@@ -31,6 +39,7 @@ const AnaekranPage = () => {
 
     useEffect(() => {
         chatUsersFetch();
+        fetchGroups();
         initializeSocket();
     }, []);
 
@@ -46,22 +55,47 @@ const AnaekranPage = () => {
 
     useEffect(() => {
         on("new_message", (message) => {
-            if (message.sender_id === messagingUser?.id) {
+            if ((message.sender_id === messagingUser?.id) && (messagingType === "individual")) {
                 addNewMessage(message);
+                emit("mark_read", { receiver_id: user.id, sender_id: messagingUser.id });
             }
-            chatUsersFetch();
+            else {
+                emit("mark_delivered", { receiver_id: user.id, sender_id: message.sender_id });
+            }
+            updateChatUsers(message.sender_id, message);
+            //chatUsersFetch();
+        });
 
-            emit("mark_delivered", { message_id: message.id });
+        on("message_sent",(message) => {
+            updateChatUsers(message.receiver_id, message);
+        });
+
+        on("group_message", (message) => {
+            if(message.group_id === messagingUser?.id && messagingType === "group"){
+                addNewMessage(message);
+                /* emit("mark_group_read", { user_id: user.id, group_id: messagingUser.id }); */
+            }
+            updateGroupLastMessage(message.group_id, message);
         });
 
         on("message_delivered", (data) => {
-            const msgId = data.message_id;
-            handleDelivered(msgId);
-            chatUsersFetch();
+            const receiver_id = data.receiver_id;
+            handleDelivered(receiver_id);
+            //chatUsersFetch();
         });
+
+        on("messages_read", (data) => {
+            const receiverId = data.receiver_id;
+            handleRead(receiverId);
+            //chatUsersFetch();
+        });
+
         return () => {
             off("new_message");
             off("message_delivered");
+            off("message_read");
+            off("group_message");
+            off("message_sent");
         }
     }, [on, addNewMessage, messagingUser?.id, off]);
 
@@ -74,12 +108,39 @@ const AnaekranPage = () => {
     };
 
     const sortedMessages = messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    const filteredChatUsers = Array.isArray(chatUsers) ? chatUsers.filter(chatUser => chatUser.lastMessage != null) : [];
-    const sortedChatUser = filteredChatUsers.sort((a, b) => {
-        const aTime = new Date(a.lastMessage.created_at);
-        const bTime = new Date(b.lastMessage.created_at);
-        return bTime - aTime; // En son mesajı önce göster
-    });
+
+
+    // Normalize users and groups into a single conversation list with a common shape
+    const userConversations = Array.isArray(chatUsers)
+        ? chatUsers.map(u => ({
+            type: 'user',
+            id: `user-${u.id}`,
+            rawId: u.id,
+            displayName: u.first_name,
+            profile_pic: u.profile_pic,
+            lastMessage: u.lastMessage || null,
+            created_at: u.lastMessage != null ? u.lastMessage.created_at : null,
+            original: u,
+        }))
+        : [];
+
+    const groupConversations = Array.isArray(groups)
+        ? groups.map(g => ({
+            type: 'group',
+            id: `group-${g.id}`,
+            rawId: g.id,
+            displayName: g.name || g.first_name || 'Grup',
+            profile_pic: g.profile_pic || null,
+            // assume groups may have last_message or lastMessage
+            lastMessage: g.last_message || g.lastMessage || null,
+            created_at: g.last_message_time || g.created_at,
+            original: g,
+        }))
+        : [];
+
+    const conversationList = [...userConversations, ...groupConversations]
+        .filter(c => (c.lastMessage != null && c.type ==="user") || c.type === "group") // only those with messages
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     return (
         <div className="anaekran-container">
@@ -89,10 +150,13 @@ const AnaekranPage = () => {
                 <Searchbar />
 
                 <div className="anaekran-person-list">
-                    {Array.isArray(sortedChatUser) &&
-                        sortedChatUser.map((chatUser) => (
-                            <Personcard key={chatUser.id} chatUser={chatUser} />
-                        ))}
+                    {conversationList.map((c) => (
+                        c.type === 'user' ? (
+                            <Personcard key={c.id} chatUser={c.original} />
+                        ) : (
+                            <GroupCard key={c.id} groupRoom={c.original} /> //Değişecek
+                        )
+                    ))}
                 </div>
             </div>
 
@@ -102,7 +166,7 @@ const AnaekranPage = () => {
                 </div>
 
                 <div className="anaekran-messages">
-                    {sortedMessages.map((message, index) =>
+                    {messagingType === "individual" ? sortedMessages.map((message, index) =>
                         message.sender_id === user.id ? (
                             <Messagesended
                                 key={index}
@@ -114,7 +178,17 @@ const AnaekranPage = () => {
                                 message={message}
                             />
                         )
-                    )}
+                    ) : sortedMessages.map((message, index) =>
+                        message.sender_id === user.id ? (
+                            <Messagesended
+                                key={index}
+                                message={message} />
+                        ) : (
+                            <Messagereceived
+                                key={index}
+                                message={message} /> 
+                            )
+                        )} 
                     <div ref={messagesEndRef} />
                 </div>
 

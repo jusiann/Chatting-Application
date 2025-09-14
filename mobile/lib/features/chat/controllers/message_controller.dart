@@ -46,7 +46,7 @@ class MessageController extends _$MessageController {
 
   void addFromSocket(MessageModel msg) {
     final message = msg;
-    final isDuplicate = _messages.any(
+    final isDuplicate = state.any(
       (m) =>
           m.text == message.text &&
           m.senderid == message.senderid &&
@@ -54,8 +54,7 @@ class MessageController extends _$MessageController {
           m.time.difference(message.time).inMilliseconds.abs() < 100,
     );
     if (!isDuplicate) {
-      _messages.add(message);
-      state = [..._messages];
+      state = [...state, message];
     }
   }
 
@@ -75,89 +74,64 @@ class MessageController extends _$MessageController {
         .toList();
   }
 
-  void markAsDelivered(int id, String deliveredAt) {
-    final index = state.indexWhere((msg) => msg.id == id);
-    if (index != -1) {
-      final updated = state[index].copyWith(
-        status: 'delivered',
-        deliveredAt: deliveredAt,
-      );
-      state = [...state]..[index] = updated;
-    }
+  void markAsDelivered(int receiverId) {
+    state = [
+      for (final msg in state)
+        if (msg.receiverid == receiverId)
+          msg.copyWith(status: 'delivered')
+        else
+          msg,
+    ];
   }
 
-  void markAsRead(int id, String readAt) {
-    final index = state.indexWhere((msg) => msg.id == id);
-    if (index != -1) {
-      final updated = state[index].copyWith(status: 'read', readAt: readAt);
-      state = [...state]..[index] = updated;
-    }
+  void markAsRead(int receiverId) {
+    state = [
+      for (final msg in state)
+        if (msg.receiverid == receiverId) msg.copyWith(status: 'read') else msg,
+    ];
+  }
+
+  void markReadAll(int readerId, String readAt) {
+    state = [
+      for (final msg in state)
+        if (msg.receiverid == readerId)
+          msg.copyWith(status: 'read', readAt: readAt)
+        else
+          msg,
+    ];
   }
 
   void handleIncomingMessages(dynamic data) async {
     final currentUserId = ref.read(authControllerProvider).authUser!.id;
     final senderId = (data['sender_id'] as int);
+    final otherUserId = senderId != currentUserId
+        ? senderId
+        : (data['receiver_id'] as int);
+    final otherUser = ref
+        .read(userServiceProvider)
+        .contactUsers
+        .where((user) => user.id == otherUserId)
+        .firstOrNull;
+    if (otherUser != null) {
+      final updatedModel = ChatModel.fromUser(otherUser!).copyWith(
+        time: DateTime.parse(data['created_at']),
+        currentMessage: data['content'],
+        senderid: data['sender_id'],
+        messageStatus: data['status'],
+        messageId: data['id'],
+      );
+      ref.read(userServiceProvider.notifier).updateChat(updatedModel);
+    }
     final openChatId = ref.read(openChatIdProvider);
 
     final isChatOpen =
         (openChatId != null && openChatId == senderId) ||
         currentUserId == senderId;
-
     if (!isChatOpen) {
       ref
           .read(unreadMessageControllerProvider.notifier)
           .incrementUnread(senderId);
+      await ref.read(userServiceProvider.notifier).refreshChat();
     }
-    ChatModel model;
-
-    if (senderId != currentUserId) {
-      UserModel? user;
-      try {
-        user = ref
-            .read(userServiceProvider)
-            .contactUsers
-            .firstWhere((u) => u.id == senderId);
-      } catch (err) {
-        user = null;
-      }
-      if (user == null) {
-        await ref.read(userServiceProvider.notifier).fetchUsers();
-        user = ref
-            .read(userServiceProvider)
-            .contactUsers
-            .firstWhere((u) => u.id == senderId);
-      }
-      model = ChatModel(
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        profilepic: user.profilepic,
-        isGroup: false,
-        time: DateTime.parse(data['created_at']),
-        currentMessage: data['content'],
-        id: senderId,
-        senderid: data['sender_id'],
-        messageStatus: data['status'],
-      );
-    } else {
-      final newId = data['receiver_id'];
-      final user = ref
-          .read(userServiceProvider)
-          .contactUsers
-          .firstWhere((u) => u.id == newId);
-      model = ChatModel(
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        profilepic: user.profilepic,
-        isGroup: false,
-        time: DateTime.parse(data['created_at']),
-        currentMessage: data['content'],
-        id: user.id,
-        senderid: data['sender_id'],
-        messageStatus: data['status'],
-      );
-    }
-    ref.read(userServiceProvider.notifier).updateChat(model);
   }
 }

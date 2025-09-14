@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
-import 'package:mobile/features/chat/models/message_model.dart';
+import 'package:mobile/features/chat/models/group_message_model.dart';
 
-class SendMessageWidget extends ConsumerWidget {
-  const SendMessageWidget({super.key, required this.message});
-  final MessageModel message;
+class GroupMessageSended extends StatelessWidget {
+  const GroupMessageSended({super.key, required this.message});
+  final GroupMessageModel message;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final status = message.status;
     return Align(
       alignment: Alignment.centerRight,
@@ -27,7 +26,7 @@ class SendMessageWidget extends ConsumerWidget {
                   Padding(
                     padding: const EdgeInsets.only(right: 70, left: 5, top: 5),
                     child: Text(
-                      message.text,
+                      message.content,
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 14,
@@ -40,7 +39,7 @@ class SendMessageWidget extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        formatMessageTime(message.time),
+                        formatMessageTime(message.createdAt),
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 12,

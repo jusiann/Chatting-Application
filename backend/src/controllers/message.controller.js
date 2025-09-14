@@ -191,49 +191,13 @@ export const markDelivered = async (req, res, next) => {
 };
 
 export const unreadCount = async (req, res, next) => {
-    try {
-        const userId = req.user.id;
-        
-        // Sadece gelen okunmamış mesajlar
-        const result = await client.query(`
-            SELECT 
-                m.sender_id,
-                u.first_name,
-                u.last_name,
-                u.profile_pic,
-                m.content,
-                COUNT(*) as unread_count
-            FROM messages m
-            JOIN users u ON m.sender_id = u.id
-            WHERE m.receiver_id = $1 
-            AND m.status = $2
-            GROUP BY m.sender_id, u.first_name, u.last_name, u.profile_pic, m.content
-            ORDER BY MAX(m.created_at) DESC`,
-            [userId, MESSAGE_STATUS.SENT]
-        );
-
-        const unreadMessages = result.rows.map(row => ({
-            sender: {
-                id: row.sender_id,
-                name: `${row.first_name} ${row.last_name}`,
-                profile_pic: row.profile_pic
-            },
-            content: row.content,
-            count: parseInt(row.unread_count)
-        }));
-
-        const totalUnread = result.rows.reduce((sum, row) => sum + parseInt(row.unread_count), 0);
-
-        res.status(200).json({
-            success: true,
-            data: {
-                unread_messages: unreadMessages,
-                total_unread: totalUnread
-            }
-        });
-    } catch (error) {
-        next(error);
+    const userId = req.user.id;
+    const { rows } = await client.query(`select sender_id, Count(*) as count from messages where receiver_id = $1 and status != 'read' group by sender_id`, [userId]);
+    const counts = {};
+    for(const row of rows){
+        counts[row.sender_id] = parseInt(row.count);
     }
+    res.status(200).json(counts);
 };
 
 export const getLastMessages = async (req, res, next) => {
@@ -271,7 +235,10 @@ export const getLastMessages = async (req, res, next) => {
                 id: user.id,
                 first_name: user.first_name,
                 last_name: user.last_name,
+                email: user.email,
                 profile_pic: user.profile_pic,
+                title: user.title,
+                department: user.department,
                 lastMessage: lastMessage.rows[0] ? {
                     id: lastMessage.rows[0].id,
                     sender: lastMessage.rows[0].sender.id,

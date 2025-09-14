@@ -1,10 +1,11 @@
-import "../style/rehbercard.css";
+import { XCircle } from "lucide-react";
+import "../style/groupSelectedCard.css";
 
-function Rehbercard({ contactUser, onClick }) {
+function GroupSelectedCard({ contactUser, onClick }) {
     return (
-        <button className="rehbercard-button" onClick={onClick}>
-            <div className="rehbercard">
-                <div className="rehbercard-image-and-texts">
+        <button className="group-selected-card-button">
+            <div className="group-selected-card">
+                <div className="group-selected-card-image-and-texts">
                     {contactUser.profile_pic ? (
                         <img
                             src={contactUser.profile_pic}
@@ -18,16 +19,20 @@ function Rehbercard({ contactUser, onClick }) {
                         </svg>
                         )}
 
-                    <div className="rehbercard-texts">
-                        <div className="rehbercard-name">
+                    <div className="group-selected-card-texts">
+                        <div className="group-selected-card-name">
                             {contactUser.first_name} {contactUser.last_name}
                         </div>
-                        <div className="rehbercard-department">{contactUser.department}</div>
+                        <div className="group-selected-card-department">{contactUser.department}</div>
                     </div>
+                    <div className="group-selected-card-spacer" />
+                    <button className="group-selected-card-remove" onClick={onClick}>
+                        <XCircle />
+                    </button>
                 </div>
             </div>
         </button>
     );
 }
 
-export default Rehbercard;
+export default GroupSelectedCard;

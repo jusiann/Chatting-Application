@@ -2,207 +2,151 @@ import client from "../lib/db.js";
 import {ApiError} from "../middlewares/error.js";
 
 export const createGroup = async (req, res, next) => {
+    const { name, description, memberIds } = req.body;
+    const creatorId = req.user.id;
+    
     try {
-        const { name, description } = req.body;
-        const userId = req.user.id;
-        if (!name) 
-            throw new ApiError("Group name is required.", 400);
-        
-        await client.query('BEGIN');
-        const groupResult = await client.query(`
-            INSERT INTO groups (name, description, created_by) 
-            VALUES ($1, $2, $3) 
-            RETURNING *`,
-            [name, description || null, userId]
+        // Grup oluştur
+        const group = await client.query(
+            `INSERT INTO groups (name, description, created_by) VALUES ($1, $2, $3) RETURNING *`,
+            [name, description, creatorId]
         );
         
-        const group = groupResult.rows[0];
-        await client.query(`
-            INSERT INTO group_members (group_id, user_id, role) 
-            VALUES ($1, $2, $3)`,
-            [group.id, userId, 'admin']
+        const groupId = group.rows[0].id;
+        
+        // Grup oluşturucusunu admin olarak ekle
+        await client.query(
+            `INSERT INTO group_members (group_id, user_id, role) VALUES ($1, $2, 'admin')`,
+            [groupId, creatorId]
         );
         
-        await client.query('COMMIT');
+        // Diğer üyeleri ekle
+        for (const memberId of memberIds) {
+            await client.query(
+                `INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)`,
+                [groupId, memberId]
+            );
+        }
         
-        res.status(201).json({
-            success: true,
-            group: groupResult.rows[0]
-        });
-    } catch (error) {
-        await client.query('ROLLBACK').catch(() => {});
-        next(error);
+        res.status(200).json(group.rows[0]);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Grup oluşturulurken hata oluştu' });
     }
 };
 
 export const sendGroupMessage = async (req, res, next) => {
+    const { groupId } = req.params;
+    const { content } = req.body;
+    const senderId = req.user.id;
+    
     try {
-        const {groupId} = req.params;
-        const {content} = req.body;
-        const userId = req.user.id;
-        if (!content) 
-            throw new ApiError("Message content is required.", 400);
-        
-        const memberCheck = await client.query(`
-            SELECT * FROM group_members 
-            WHERE group_id = $1 AND user_id = $2`,
-            [groupId, userId]
+        // Kullanıcının gruba üye olup olmadığını kontrol et
+        const membership = await client.query(
+            `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
+            [groupId, senderId]
         );
         
-        if (memberCheck.rowCount === 0)
-            throw new ApiError("You are not a member of this group.", 403);
+        if (membership.rows.length === 0) {
+            return res.status(403).json({ message: 'Bu gruba mesaj gönderme yetkiniz yok' });
+        }
         
-        const result = await client.query(`
-            INSERT INTO group_messages (group_id, sender_id, content) 
-            VALUES ($1, $2, $3) 
-            RETURNING *`,
-            [groupId, userId, content]
+        const message = await client.query(
+            `INSERT INTO group_messages (group_id, sender_id, content) 
+             VALUES ($1, $2, $3) RETURNING *`,
+            [groupId, senderId, content]
         );
-
-        res.status(201).json({ 
-            success: true, 
-            message: result.rows[0] 
-        });
-    } catch (error) {
-        next(error);
+        
+        res.status(200).json(message.rows[0]);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Mesaj gönderilirken hata oluştu' });
     }
 };
 
 export const getUserGroupsWithLastMessages = async (req, res, next) => {
+    const userId = req.user.id;
+    
     try {
-        const userId = req.user.id;
-
-        // Önce kullanıcının gruplarını al
-        const groupsResult = await client.query(`
-            SELECT 
-                g.*,
-                u.first_name as creator_first_name,
-                u.last_name as creator_last_name
+        const groups = await client.query(`
+            SELECT g.*, gm.role,
+                   (SELECT content FROM group_messages 
+                    WHERE group_id = g.id 
+                    ORDER BY created_at DESC LIMIT 1) as last_message,
+                   (SELECT created_at FROM group_messages 
+                    WHERE group_id = g.id 
+                    ORDER BY created_at DESC LIMIT 1) as last_message_time
             FROM groups g
             JOIN group_members gm ON g.id = gm.group_id
-            JOIN users u ON g.created_by = u.id
             WHERE gm.user_id = $1
-            ORDER BY g.updated_at DESC`,
-            [userId]
-        );
+            ORDER BY last_message_time DESC
+        `, [userId]);
         
-        if (groupsResult.rows.length === 0) {
-            return res.status(200).json({
-                success: true,
-                groups: []
-            });
-        }
-
-        const groups = groupsResult.rows;
-        const groupIds = groups.map(g => g.id);
-
-        // Son mesajları al
-        const lastMessagesResult = await client.query(`
-            WITH RankedMessages AS (
-                SELECT 
-                    gm.*,
-                    u.first_name as sender_first_name,
-                    u.last_name as sender_last_name,
-                    ROW_NUMBER() OVER (PARTITION BY gm.group_id ORDER BY gm.created_at DESC) as rn
-                FROM group_messages gm
-                JOIN users u ON gm.sender_id = u.id
-                WHERE gm.group_id = ANY($1)
-            )
-            SELECT * FROM RankedMessages WHERE rn = 1`,
-            [groupIds]
-        );
-
-        // Grupları ve son mesajları birleştir
-        const groupsWithLastMsg = groups.map(group => ({
-            id: group.id,
-            name: group.name,
-            description: group.description,
-            created_by: {
-                id: group.created_by,
-                name: `${group.creator_first_name} ${group.creator_last_name}`
-            },
-            created_at: group.created_at,
-            updated_at: group.updated_at,
-            last_message: lastMessagesResult.rows.find(msg => msg.group_id === group.id) ? {
-                id: lastMessagesResult.rows.find(msg => msg.group_id === group.id).id,
-                content: lastMessagesResult.rows.find(msg => msg.group_id === group.id).content,
-                sender: {
-                    id: lastMessagesResult.rows.find(msg => msg.group_id === group.id).sender_id,
-                    name: `${lastMessagesResult.rows.find(msg => msg.group_id === group.id).sender_first_name} ${lastMessagesResult.rows.find(msg => msg.group_id === group.id).sender_last_name}`
-                },
-                created_at: lastMessagesResult.rows.find(msg => msg.group_id === group.id).created_at
-            } : null
-        }));
-        
-        res.status(200).json({ 
-            success: true, 
-            groups: groupsWithLastMsg 
-        });
-    } catch (error) {
-        console.error('Grup listesi alınırken hata:', error);
-        next(error);
+        res.status(200).json(groups.rows);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Gruplar getirilirken hata oluştu' });
     }
 };
 
 export const getGroupMessages = async (req, res, next) => {
+    
+    const { groupId } = req.params;
+    const userId = req.user.id;
+    
     try {
-        const {groupId, page, pageSize} = req.params;
-        const userId = req.user.id;
-        const pageNum = parseInt(page) || 1;
-        const size = parseInt(pageSize) || 20;
-        const offset = (pageNum - 1) * size;
-        const memberCheck = await client.query(`
-            SELECT * FROM group_members 
-            WHERE group_id = $1 AND user_id = $2`,
+        // Kullanıcının gruba üye olup olmadığını kontrol et
+        console.log('Checking group membership...');
+        const membership = await client.query(
+            `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
             [groupId, userId]
         );
-
-        if (memberCheck.rowCount === 0)
-            throw new ApiError("You are not a member of this group.", 403);
         
-        const messagesResult = await client.query(`
-            SELECT * FROM group_messages 
-            WHERE group_id = $1 ORDER BY created_at 
-            DESC LIMIT $2 OFFSET $3`,
-            [groupId, size, offset]
-        );
-
-        res.status(200).json({ 
-            success: true, 
-            messages: messagesResult.rows 
-        });
-    } catch (error) {
-        next(error);
+        if (membership.rows.length === 0) {
+            return res.status(403).json({ message: 'Bu grubun mesajlarını görme yetkiniz yok' });
+        }
+        
+        const messages = await client.query(`
+            SELECT gm.*, u.first_name, u.last_name 
+            FROM group_messages gm
+            JOIN users u ON gm.sender_id = u.id
+            WHERE gm.group_id = $1
+            ORDER BY gm.created_at DESC
+        `, [groupId]);
+        
+        res.status(200).json(messages.rows);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Mesajlar getirilirken hata oluştu' });
     }
 };
 
 export const getGroupMembers = async (req, res, next) => {
+    const { groupId } = req.params;
+    const userId = req.user.id;
+    
     try {
-        const {groupId} = req.params;
-        const userId = req.user.id;
-        const memberCheck = await client.query(`
-            SELECT * FROM group_members 
-            WHERE group_id = $1 AND user_id = $2`,
+        // Kullanıcının gruba üye olup olmadığını kontrol et
+        const membership = await client.query(
+            `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
             [groupId, userId]
         );
-
-        if (memberCheck.rowCount === 0)
-            throw new ApiError("You are not a member of this group.", 403);
         
-        const membersResult = await client.query(`
-            SELECT u.id, u.first_name, u.last_name, u.email, gm.role, gm.joined_at
-            FROM group_members gm
-            JOIN users u ON gm.user_id = u.id
+        if (membership.rows.length === 0) {
+            return res.status(403).json({ message: 'Bu grubun üyelerini görme yetkiniz yok' });
+        }
+        
+        const members = await client.query(`
+            SELECT u.id, u.name, u.surname, u.email, gm.role, gm.joined_at
+            FROM users u
+            JOIN group_members gm ON u.id = gm.user_id
             WHERE gm.group_id = $1
-            ORDER BY gm.joined_at ASC`,
-            [groupId]
-        );
-
-        res.status(200).json({ 
-            success: true, 
-            members: membersResult.rows 
-        });
-    } catch (error) {
-        next(error);
+            ORDER BY gm.joined_at
+        `, [groupId]);
+        
+        res.status(200).json(members.rows);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Üyeler getirilirken hata oluştu' });
     }
 };

@@ -9,7 +9,7 @@ const Sendbox = () => {
         receiver_id: "", 
     });
 
-    const { sendMessage , messagingUser, chatUsersFetch} = useConservationStore();
+    const { sendMessage , messagingUser, chatUsersFetch, sendGroupMessage, messagingType} = useConservationStore();
 
     useEffect(() => {
         setMessage(prev => ({
@@ -23,10 +23,18 @@ const Sendbox = () => {
     };
     const handleSend = () => {
         if (message.content.trim() && message.receiver_id) {
-            sendMessage(message);
-            console.log("Mesaj gönderildi:", message);
-            setMessage({ ...message, content: "" }); // Mesaj kutusunu temizle
-            chatUsersFetch(); // Güncel kullanıcı listesini çek
+            if(messagingType === "individual"){
+                sendMessage(message);
+                console.log("Mesaj gönderildi:", message);
+                setMessage({ ...message, content: "" }); // Mesaj kutusunu temizle
+                /* chatUsersFetch(); */ // Güncel kullanıcı listesini çek
+            } else if(messagingType === "group"){
+                const groupId = messagingUser.id;
+                const content = message.content;
+                sendGroupMessage(groupId, content);
+                console.log("Grup mesajı gönderildi:", message);
+                setMessage({ ...message, content: "" }); // Mesaj kutusunu temizle
+            }
         }
     };
 

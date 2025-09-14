@@ -10,7 +10,7 @@ class UnreadMessageController extends _$UnreadMessageController {
   Map<int, int> build() => {};
 
   Future<void> fetchUnreadCounts(String token) async {
-    final uri = Uri.parse('http://192.168.1.9:5001/api/messages/unread-counts');
+    final uri = Uri.parse('http://10.10.1.197:5001/api/messages/unread-count');
     final response = await http.get(
       uri,
       headers: {
