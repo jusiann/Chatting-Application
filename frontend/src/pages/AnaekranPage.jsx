@@ -13,6 +13,7 @@ import useUserStore from "../store/user";
 import "../style/anaekranpage.css";
 import useSocketStore from "../store/socket";
 import GroupCard from "../components/groupCard";
+import GroupMessageReceived from "../components/groupMessageReceived";
 
 const AnaekranPage = () => {
     const {
@@ -184,7 +185,7 @@ const AnaekranPage = () => {
                                 key={index}
                                 message={message} />
                         ) : (
-                            <Messagereceived
+                            <GroupMessageReceived
                                 key={index}
                                 message={message} /> 
                             )
