@@ -13,11 +13,14 @@ import SettingsPage from './pages/SettingsPage';
 import KayıtOl from './pages/KayıtOl';
 import useUserStore from "./store/user.js";
 import { useEffect } from 'react';
+import useConservationStore from './store/conservation.js';
 
 function App() {
   const { checkAuth, user } = useUserStore();
+  const {contactUsersFetch} = useConservationStore();
   useEffect(() => {
     checkAuth();
+    contactUsersFetch();
   }, []);
   return (
     <BrowserRouter>

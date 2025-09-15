@@ -26,6 +26,13 @@ function groupCard({ groupRoom }) {
         console.log("Mesajlaşma başlatıldı:", messagingUser);
     }, [messagingUser]);
 
+    const PREVIEW_MAX_CHARS = 40; // adjust this value as you like
+    const getPreview = (text) => {
+        if (!text) return "Grup Oluşturuldu";
+        if (text.length <= PREVIEW_MAX_CHARS) return text;
+        return text.slice(0, PREVIEW_MAX_CHARS) + "...";
+    };
+
     return (
         <button className="groupcard-button" onClick={handleClick}>
             <div className="groupcard">
@@ -38,7 +45,7 @@ function groupCard({ groupRoom }) {
 
                     <div className="groupcard-texts">
                         <div className="groupcard-name">{groupRoom.name}</div>
-                        <div className="groupcard-message">{groupRoom.last_message ? groupRoom.last_message : "Grup oluşturuldu."}</div>
+                        <div className="groupcard-message">{getPreview(groupRoom.last_message)}</div>
                     </div>
                 </div>
 

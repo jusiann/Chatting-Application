@@ -24,6 +24,14 @@ function Personcard({ chatUser }) {
         console.log("Mesajlaşma başlatıldı:", messagingUser);
     }, [messagingUser]);
 
+    // Truncate preview text to a fixed number of characters
+    const PREVIEW_MAX_CHARS = 40; // adjust this value as you like
+    const getPreview = (text) => {
+        if (!text) return "No message";
+        if (text.length <= PREVIEW_MAX_CHARS) return text;
+        return text.slice(0, PREVIEW_MAX_CHARS) + "...";
+    };
+
     return (
         <button className="personcard-button" onClick={handleClick}>
             <div className="personcard">
@@ -39,7 +47,7 @@ function Personcard({ chatUser }) {
 
                     <div className="personcard-texts">
                         <div className="personcard-name">{chatUser.first_name}</div>
-                        <div className="personcard-message">{chatUser.lastMessage ? chatUser.lastMessage.content : "No message"}</div>
+                        <div className="personcard-message">{getPreview(chatUser.lastMessage?.content)}</div>
                     </div>
                 </div>
 
