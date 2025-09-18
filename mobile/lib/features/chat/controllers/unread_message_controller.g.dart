@@ -7,7 +7,7 @@ part of 'unread_message_controller.dart';
 // **************************************************************************
 
 String _$unreadMessageControllerHash() =>
-    r'136eb3743d2818c3693513900cd6d5f64cb5ecde';
+    r'bbc9c71e737be9cd9b4ab46e4e258f51e2de8296';
 
 /// See also [UnreadMessageController].
 @ProviderFor(UnreadMessageController)

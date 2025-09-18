@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
+import 'package:mobile/features/chat/controllers/unread_group_messages.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
 import 'package:mobile/features/chat/models/group_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:mobile/config.dart';
 part 'user_service.g.dart';
 
 class ContactUsers {
@@ -54,6 +56,7 @@ class ContactUsers {
             senderid: 0,
             messageStatus: 'sent',
             messageId: -1,
+            unreadCount: group.unreadCount,
           ),
         )
         .toList();
@@ -81,7 +84,7 @@ class UserService extends _$UserService {
       try {
         // Kullanıcıları getir
         final contactResponse = await http.get(
-          Uri.parse('http://10.10.1.197:5001/api/messages/users'),
+          Uri.parse('$baseUrl/api/messages/users'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -90,7 +93,7 @@ class UserService extends _$UserService {
 
         // Mesaj kullanıcılarını getir
         final messageResponse = await http.get(
-          Uri.parse('http://10.10.1.197:5001/api/messages/last-messages'),
+          Uri.parse('$baseUrl/api/messages/last-messages'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
@@ -99,15 +102,12 @@ class UserService extends _$UserService {
 
         // Grupları getir
         final groupResponse = await http.get(
-          Uri.parse('http://10.10.1.197:5001/api/groups/user-groups'),
+          Uri.parse('$baseUrl/api/groups/user-groups'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',
           },
         );
-        if (groupResponse.statusCode == 200) {
-          print('GROUPRESPONSE BAŞARILI');
-        }
 
         if (contactResponse.statusCode == 200 &&
             messageResponse.statusCode == 200 &&
@@ -115,6 +115,7 @@ class UserService extends _$UserService {
           final contactUserData = jsonDecode(contactResponse.body)['users'];
           final messageUserData = jsonDecode(messageResponse.body)['data'];
           final groupData = jsonDecode(groupResponse.body);
+          ref.read(unreadGroupMessagesProvider.notifier).unReadcount(groupData);
           final contactUsers = contactUserData
               .map<UserModel>((user) => UserModel.fromJson(user))
               .toList();
@@ -144,7 +145,7 @@ class UserService extends _$UserService {
       try {
         // Kullanıcıları getir
         final messageResponse = await http.get(
-          Uri.parse('http://10.10.1.197:5001/api/messages/message-users'),
+          Uri.parse('$baseUrl/api/messages/message-users'),
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $token',

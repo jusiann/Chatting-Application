@@ -75,7 +75,8 @@ export const getUserGroupsWithLastMessages = async (req, res, next) => {
                     ORDER BY created_at DESC LIMIT 1) as last_message,
                    (SELECT created_at FROM group_messages 
                     WHERE group_id = g.id 
-                    ORDER BY created_at DESC LIMIT 1) as last_message_time
+                    ORDER BY created_at DESC LIMIT 1) as last_message_time,
+                    (SELECT COUNT(*) FROM group_messages WHERE group_id = g.id and id > COALESCE(gm.last_read_message_id, 0)) as unread_count
             FROM groups g
             JOIN group_members gm ON g.id = gm.group_id
             WHERE gm.user_id = $1

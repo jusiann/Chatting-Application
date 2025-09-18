@@ -40,46 +40,23 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
           .read(messageControllerProvider.notifier)
           .fetchMore(widget.chat.id);
       final currentUserId = ref.read(authControllerProvider).authUser!.id;
-      final messages = ref
-          .watch(messageControllerProvider.notifier)
-          .forChat(widget.chat.id, currentUserId);
-      final unreadIds = messages
-          .where((m) => m.senderid == widget.chat.id && m.status != 'read')
-          .map((m) => m.id)
-          .toList();
-      if (unreadIds.isNotEmpty) {
-        ref.read(socketServiceProvider.notifier).emit('mark_read', {
-          'receiver_id': currentUserId,
-          'sender_id': widget.chat.id,
-        });
-      }
+      ref.read(socketServiceProvider.notifier).emit('mark_read', {
+        'receiver_id': currentUserId,
+        'sender_id': widget.chat.id,
+      });
+
       ref
           .read(unreadMessageControllerProvider.notifier)
           .clearUnread(widget.chat.id);
 
-      ref.read(openChatIdProvider.notifier).state = widget.chat.id;
+      ref
+          .read(openChatControllerProvider.notifier)
+          .setOpenChat(widget.chat.id, 'individual');
     });
 
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels <=
-          _scrollController.position.minScrollExtent + 100) {
-        await ref
-            .read(messageControllerProvider.notifier)
-            .fetchMore(widget.chat.id);
-        final currentUserId = ref.read(authControllerProvider).authUser!.id;
-        final postMessages = ref
-            .watch(messageControllerProvider.notifier)
-            .forChat(widget.chat.id, currentUserId);
-        final unreadIds = postMessages
-            .where((m) => m.senderid == widget.chat.id && m.status != 'read')
-            .map((m) => m.id)
-            .toList();
-        if (unreadIds.isNotEmpty) {
-          ref.read(socketServiceProvider.notifier).emit('message_read_all', {
-            'receiverId': currentUserId,
-          });
-        }
-      }
+          _scrollController.position.minScrollExtent + 100) {}
     });
 
     super.initState();
@@ -126,7 +103,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
           });
           return;
         }
-        ref.read(openChatIdProvider.notifier).state = null;
+        ref.read(openChatControllerProvider.notifier).clearOpenChat();
         if (!didPop) Navigator.of(context).pop(result);
       },
 

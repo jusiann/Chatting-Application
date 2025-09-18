@@ -6,7 +6,7 @@ part of 'socket_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$socketServiceHash() => r'c3c99766dc984dcbf00e454b68aa094450fc20e8';
+String _$socketServiceHash() => r'83b68e4d6e9d748efa25cf41afaa8a56f15ad0d9';
 
 /// See also [SocketService].
 @ProviderFor(SocketService)

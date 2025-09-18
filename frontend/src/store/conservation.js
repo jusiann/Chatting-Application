@@ -45,7 +45,7 @@ const useConservationStore = create((set, get) => ({
     messages: [],
     messagingUserId: null,
     messagingGroupId: null,
-    messagingUser: null,
+    messagingUser: null,    
     messagingType: null,
     setMessagingUser: ({id}) => {
         if(get().messagingType === "individual"){

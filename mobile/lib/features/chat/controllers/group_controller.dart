@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mobile/config.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/group_model.dart';
@@ -16,7 +17,7 @@ class GroupController extends _$GroupController {
   Future<void> fetchUserGroups() async {
     final token = ref.read(authControllerProvider.notifier).token;
     final response = await http.get(
-      Uri.parse('http://10.10.1.197:5001/api/groups/user-groups'),
+      Uri.parse('$baseUrl/api/groups/user-groups'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -36,7 +37,7 @@ class GroupController extends _$GroupController {
   }) async {
     final token = ref.read(authControllerProvider.notifier).token;
     final response = await http.post(
-      Uri.parse('http://10.10.1.197:5001/api/groups/create'),
+      Uri.parse('$baseUrl/api/groups/create'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -61,13 +62,11 @@ class GroupMessageController extends _$GroupMessageController {
   @override
   List<GroupMessageModel> build() => [];
 
-  Future<void> fetchGroupMessages(int groupId, int page, int pageSize) async {
+  Future<void> fetchGroupMessages(int groupId) async {
     final token = ref.read(authControllerProvider.notifier).token;
-    print("Fetching messages for group $groupId, page $page, size $pageSize");
+    print("Fetching messages for group $groupId");
     final response = await http.get(
-      Uri.parse(
-        'http://10.10.1.197:5001/api/groups/$groupId/messages/$page/$pageSize',
-      ),
+      Uri.parse('$baseUrl/api/groups/$groupId/messages'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

@@ -11,6 +11,7 @@ import 'package:mobile/features/chat/controllers/unread_message_controller.dart'
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/config.dart';
 part 'auth_controller.g.dart';
 
 class AuthState {
@@ -61,7 +62,7 @@ class AuthController extends _$AuthController {
     final refreshToken = await _storage.read(key: 'refreshToken');
     if (refreshToken != null) {
       final response = await http.post(
-        Uri.parse('http://10.10.1.197:5001/api/auth/refresh-token'),
+        Uri.parse('$baseUrl/api/auth/refresh-token'),
         headers: {
           'Authorization': 'Bearer $refreshToken',
           'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ class AuthController extends _$AuthController {
 
   Future<void> login(String email, String password) async {
     final response = await http.post(
-      Uri.parse('http://10.10.1.197:5001/api/auth/sign-in'),
+      Uri.parse('$baseUrl/api/auth/sign-in'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email, 'password': password}),
     );
@@ -175,9 +176,7 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> markDeliveredMessages() async {
-    final uri = Uri.parse(
-      'http://10.10.1.197:5001/api/messages/mark-delivered',
-    );
+    final uri = Uri.parse('$baseUrl/api/messages/mark-delivered');
     final response = await http.get(
       uri,
       headers: {

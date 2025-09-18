@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/chat/controllers/unread_group_messages.dart';
 import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
@@ -15,6 +16,7 @@ class ChatPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unReadCount = ref.watch(unreadMessageControllerProvider);
+    final groupUnReadCount = ref.watch(unreadGroupMessagesProvider);
     final userState = ref.watch(userServiceProvider);
     final allChats = userState.allChats; // Hem gruplar hem bireysel sohbetler
 
@@ -62,7 +64,9 @@ class ChatPage extends ConsumerWidget {
                   lastMessage: chat.currentMessage,
                   lastMessageTime: chat.time,
                 ),
-                unreadCount: 0, // Grup için unread count ekleyebilirsiniz
+                unreadCount:
+                    groupUnReadCount[chat.id] ??
+                    0, // Grup için unread count ekleyebilirsiniz
               ),
             );
           } else if (chat is ChatModel) {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:mobile/config.dart';
 import 'package:mobile/features/chat/models/message_model.dart';
 
 Future<List<MessageModel>> fetchMessagesFromDb({
@@ -11,7 +12,7 @@ Future<List<MessageModel>> fetchMessagesFromDb({
 }) async {
   final uri = Uri.parse(
     /* 'http://10.10.1.197:5001/api/messages/$otherUserId/$page/$pageSize', */
-    'http://10.10.1.197:5001/api/messages/$otherUserId',
+    '$baseUrl/api/messages/$otherUserId',
   );
 
   final response = await http.get(
@@ -37,7 +38,7 @@ Future<MessageModel> sendMessage({
   required int id,
   required String token,
 }) async {
-  final url = Uri.parse('http://10.10.1.197:5001/api/messages/send/$id');
+  final url = Uri.parse('$baseUrl/api/messages/send/$id');
   final response = await http.post(
     url,
     headers: {

@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/group_controller.dart';
+import 'package:mobile/features/chat/controllers/providers.dart';
 import 'package:mobile/features/chat/controllers/socket_service.dart';
+import 'package:mobile/features/chat/controllers/unread_group_messages.dart';
 import 'package:mobile/features/chat/models/group_model.dart';
 import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/features/chat/views/widgets/emoji_select_widget.dart';
@@ -32,7 +34,19 @@ class _GroupChatViewState extends ConsumerState<GroupChatView>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref
           .read(groupMessageControllerProvider.notifier)
-          .fetchGroupMessages(widget.group.id, 1, 20);
+          .fetchGroupMessages(widget.group.id);
+
+      ref
+          .read(openChatControllerProvider.notifier)
+          .setOpenChat(widget.group.id, 'group');
+
+      ref.read(socketServiceProvider.notifier).emit('group_read', {
+        'groupId': widget.group.id,
+      });
+
+      ref
+          .read(unreadGroupMessagesProvider.notifier)
+          .clearUnread(widget.group.id);
 
       // Gruba katıl
       /* ref
@@ -42,9 +56,9 @@ class _GroupChatViewState extends ConsumerState<GroupChatView>
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels <=
           _scrollController.position.minScrollExtent + 100) {
-        await ref
+        /* await ref
             .read(groupMessageControllerProvider.notifier)
-            .fetchGroupMessages(widget.group.id, 1, 20);
+            .fetchGroupMessages(widget.group.id, 1, 20); */
       }
     });
   }
@@ -87,7 +101,10 @@ class _GroupChatViewState extends ConsumerState<GroupChatView>
           });
           return;
         }
-        if (!didPop) Navigator.of(context).pop(result);
+        ref.read(openChatControllerProvider.notifier).clearOpenChat();
+        if (!didPop) {
+          Navigator.of(context).pop(result);
+        }
       },
 
       child: Scaffold(
@@ -246,7 +263,6 @@ class _GroupChatViewState extends ConsumerState<GroupChatView>
                               if (_controller.text.trim().isNotEmpty) {
                                 final msg = {
                                   'content': _controller.text,
-                                  'senderId': currentUser.id,
                                   'groupId': widget.group.id,
                                 };
                                 ref

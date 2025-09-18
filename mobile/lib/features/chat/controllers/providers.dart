@@ -1,8 +1,41 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/chat/controllers/home_state.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+part 'providers.g.dart';
 
-final homeShellProvider = ChangeNotifierProvider<HomeState>((ref) {
-  return HomeState(navBarIndex: 0);
-});
+class OpenChats {
+  final int id;
+  final String type;
 
-final openChatIdProvider = StateProvider<int?>((ref) => null);
+  OpenChats({required this.id, required this.type});
+}
+
+class HomeShell {
+  final int navbarId;
+
+  HomeShell({required this.navbarId});
+}
+
+@Riverpod(keepAlive: true)
+class OpenChatController extends _$OpenChatController {
+  @override
+  OpenChats build() => OpenChats(id: -1, type: '');
+
+  void setOpenChat(int id, String type) {
+    state = OpenChats(id: id, type: type);
+  }
+
+  void clearOpenChat() {
+    state = OpenChats(id: -1, type: '');
+  }
+}
+
+@Riverpod(keepAlive: true)
+class HomeShellController extends _$HomeShellController {
+  @override
+  HomeShell build() => HomeShell(navbarId: 0);
+
+  void setNavbarId(int id) {
+    state = HomeShell(navbarId: id);
+  }
+}

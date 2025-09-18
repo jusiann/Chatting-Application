@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:mobile/config.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'unread_message_controller.g.dart';
 
@@ -10,7 +11,7 @@ class UnreadMessageController extends _$UnreadMessageController {
   Map<int, int> build() => {};
 
   Future<void> fetchUnreadCounts(String token) async {
-    final uri = Uri.parse('http://10.10.1.197:5001/api/messages/unread-count');
+    final uri = Uri.parse('$baseUrl/api/messages/unread-count');
     final response = await http.get(
       uri,
       headers: {

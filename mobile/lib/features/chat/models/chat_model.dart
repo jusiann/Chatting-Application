@@ -16,6 +16,7 @@ class ChatModel {
   String? messageStatus;
   String? department;
   int messageId;
+  int? unreadCount;
 
   ChatModel({
     required this.firstName,
@@ -33,6 +34,7 @@ class ChatModel {
     this.department,
     this.profilepic,
     required this.messageId,
+    this.unreadCount,
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
