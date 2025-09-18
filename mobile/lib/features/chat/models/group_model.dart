@@ -7,6 +7,7 @@ class GroupModel {
   final String? lastMessage;
   final DateTime? lastMessageTime;
   final DateTime createdAt;
+  final int? unreadCount;
 
   GroupModel({
     required this.id,
@@ -17,6 +18,7 @@ class GroupModel {
     this.lastMessage,
     this.lastMessageTime,
     required this.createdAt,
+    this.unreadCount,
   });
 
   factory GroupModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class GroupModel {
           ? DateTime.parse(json['last_message_time'])
           : null,
       createdAt: DateTime.parse(json['created_at']),
+      unreadCount: int.tryParse(json['unread_count'].toString()) ?? 0,
     );
   }
 }

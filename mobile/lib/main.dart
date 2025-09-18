@@ -4,9 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/router/app_router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print("Error loading .env file: $e");
+  }
   cameras = await availableCameras();
 
   runApp(const ProviderScope(child: MyApp()));

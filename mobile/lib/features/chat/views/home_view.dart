@@ -19,16 +19,16 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: ref.read(homeShellProvider).navBarIndex == 0,
+      canPop: ref.read(homeShellControllerProvider).navbarId == 0,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && ref.read(homeShellProvider).navBarIndex != 0) {
-          ref.read(homeShellProvider).setIndex(0);
+        if (!didPop && ref.read(homeShellControllerProvider).navbarId != 0) {
+          ref.read(homeShellControllerProvider.notifier).setNavbarId(0);
         }
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            pageName[ref.watch(homeShellProvider).navBarIndex] ?? 'Hata',
+            pageName[ref.watch(homeShellControllerProvider).navbarId] ?? 'Hata',
             style: TextStyle(
               color: Color(0xFF910811),
               fontFamily: 'Inter',
@@ -58,12 +58,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           ),
         ),
         body: IndexedStack(
-          index: ref.watch(homeShellProvider).navBarIndex,
+          index: ref.watch(homeShellControllerProvider).navbarId,
           children: [ChatPage(), ContactPage(), SettingsView()],
         ),
         bottomNavigationBar: BottomNavigationBar(
-          currentIndex: ref.watch(homeShellProvider).navBarIndex,
-          onTap: (i) => ref.read(homeShellProvider).setIndex(i),
+          currentIndex: ref.watch(homeShellControllerProvider).navbarId,
+          onTap: (i) =>
+              ref.read(homeShellControllerProvider.notifier).setNavbarId(i),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Sohbetler'),
             BottomNavigationBarItem(

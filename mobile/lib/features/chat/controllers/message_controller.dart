@@ -77,7 +77,7 @@ class MessageController extends _$MessageController {
   void markAsDelivered(int receiverId) {
     state = [
       for (final msg in state)
-        if (msg.receiverid == receiverId)
+        if (msg.receiverid == receiverId && msg.status != 'read')
           msg.copyWith(status: 'delivered')
         else
           msg,
@@ -122,10 +122,11 @@ class MessageController extends _$MessageController {
       );
       ref.read(userServiceProvider.notifier).updateChat(updatedModel);
     }
-    final openChatId = ref.read(openChatIdProvider);
+    final openChatId = ref.read(openChatControllerProvider).id;
+    final openChatType = ref.read(openChatControllerProvider).type;
 
     final isChatOpen =
-        (openChatId != null && openChatId == senderId) ||
+        (openChatType == 'individual' && openChatId == senderId) ||
         currentUserId == senderId;
     if (!isChatOpen) {
       ref

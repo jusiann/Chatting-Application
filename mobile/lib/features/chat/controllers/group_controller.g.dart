@@ -6,7 +6,7 @@ part of 'group_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$groupControllerHash() => r'd4d3ec7d7b28dafed62ba20aa1a487d64bacda3a';
+String _$groupControllerHash() => r'b9ea5b8c006a4ddfb43b75b611607680957ff2a5';
 
 /// See also [GroupController].
 @ProviderFor(GroupController)
@@ -23,7 +23,7 @@ final groupControllerProvider =
 
 typedef _$GroupController = Notifier<List<GroupModel>>;
 String _$groupMessageControllerHash() =>
-    r'510881b723d6f75e586f9915b048ffe637827db6';
+    r'2ebc496648c5f8d8c05f06f002b0408d944de730';
 
 /// See also [GroupMessageController].
 @ProviderFor(GroupMessageController)

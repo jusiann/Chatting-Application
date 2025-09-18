@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/config.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class RegisterController {
@@ -17,7 +18,7 @@ class RegisterController {
         password == null) {
       print('tüm alanların doldurulması zorunludur.');
     } else {
-      final url = Uri.parse('http://10.10.1.197:5001/api/auth/sign-up');
+      final url = Uri.parse('$baseUrl/api/auth/sign-up');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},

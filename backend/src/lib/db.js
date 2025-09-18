@@ -160,7 +160,10 @@ const createGroupMembersTable = async () => {
                 group_id INTEGER NOT NULL REFERENCES groups(id),
                 user_id INTEGER NOT NULL REFERENCES users(id),
                 joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                role VARCHAR(20) NOT NULL DEFAULT 'member'
+                role VARCHAR(20) NOT NULL DEFAULT 'member',
+                last_read_message_id BIGINT,
+                last_read_at TIMESTAMPTZ,
+                unread_count INT NOT NULL DEFAULT 0
             )
         `);
         await client.query(`
@@ -190,6 +193,7 @@ const createGroupMessagesTable = async () => {
             CREATE INDEX IF NOT EXISTS idx_group_messages_group_id ON group_messages(group_id);
             CREATE INDEX IF NOT EXISTS idx_group_messages_sender_id ON group_messages(sender_id);
             CREATE INDEX IF NOT EXISTS idx_group_messages_created_at ON group_messages(created_at);
+            CREATE INDEX IF NOT EXISTS idx_messages_group_id_id ON group_messages(group_id, id);
         `);
         console.log("[DB] Group messages table checked/created successfully");
     } catch (error) {

@@ -3,6 +3,7 @@ import 'package:mobile/features/authentication/controllers/auth_controller.dart'
 import 'package:mobile/features/authentication/models/auth_user_model.dart';
 import 'package:mobile/features/chat/controllers/message_controller.dart';
 import 'package:mobile/features/chat/controllers/providers.dart';
+import 'package:mobile/features/chat/controllers/unread_group_messages.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/message_model.dart';
 import 'package:mobile/features/chat/models/group_message_model.dart';
@@ -10,6 +11,7 @@ import 'package:mobile/features/chat/models/group_model.dart';
 import 'package:mobile/features/chat/controllers/group_controller.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:mobile/config.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 part 'socket_service.g.dart';
 
@@ -40,7 +42,7 @@ class SocketService extends _$SocketService {
     _socket?.disconnect();
 
     _socket = IO.io(
-      'http://10.10.1.197:5001',
+      baseUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .enableAutoConnect()
@@ -59,7 +61,8 @@ class SocketService extends _$SocketService {
     _socket!.onDisconnect((_) => print('[SOCKET] Bağlantı koptu'));
 
     _socket!.on('new_message', (data) async {
-      final openChatId = ref.read(openChatIdProvider);
+      final openChatId = ref.read(openChatControllerProvider).id;
+      final openChatType = ref.read(openChatControllerProvider).type;
       final msg = MessageModel.fromJson(data);
       ref.read(messageControllerProvider.notifier).addFromSocket(msg);
       /*       await ref.read(userServiceProvider.notifier).refreshChat(); */
@@ -70,7 +73,9 @@ class SocketService extends _$SocketService {
           'sender_id': msg.senderid,
         });
       }
-      if (openChatId != null && openChatId == msg.senderid) {
+      if (openChatId != null &&
+          openChatId == msg.senderid &&
+          openChatType == 'individual') {
         _socket!.emit('mark_read', {
           'receiver_id': msg.receiverid,
           'sender_id': msg.senderid,
@@ -79,7 +84,6 @@ class SocketService extends _$SocketService {
     });
 
     _socket!.on('message_sent', (data) async {
-      final openChatId = ref.read(openChatIdProvider);
       final msg = MessageModel.fromJson(data);
       ref.read(messageControllerProvider.notifier).addFromSocket(msg);
       ref.read(messageControllerProvider.notifier).handleIncomingMessages(data);
@@ -139,21 +143,44 @@ class SocketService extends _$SocketService {
       }
 
       // Grup chat listesini güncelle
-      final groupId = data['group_id'];
+      final dynamic rawGroupId = data['group_id'];
+      final int groupId = rawGroupId is int
+          ? rawGroupId
+          : int.tryParse(rawGroupId?.toString() ?? '') ?? -1;
       final content = data['content'];
-      final createdAt = DateTime.parse(data['created_at']);
+      final DateTime createdAt =
+          DateTime.tryParse(data['created_at']?.toString() ?? '') ??
+          DateTime.now();
+
+      // Mevcut grubu UserService state'inden bulmaya çalış
+      final groups = ref.read(userServiceProvider).userGroups;
+      GroupModel? existing;
+      for (final g in groups) {
+        if (g.id == groupId) {
+          existing = g;
+          break;
+        }
+      }
 
       final updatedGroup = GroupModel(
         id: groupId,
-        name: 'Grup', // Bu veriyi backend'den almanız gerekebilir
-        description: null,
-        createdBy: 0,
-        createdAt: createdAt,
+        name: existing?.name ?? 'Grup',
+        description: existing?.description,
+        createdBy: existing?.createdBy ?? 0,
+        createdAt: existing?.createdAt ?? createdAt,
         lastMessage: content,
         lastMessageTime: createdAt,
       );
 
       ref.read(userServiceProvider.notifier).updateGroup(updatedGroup);
+
+      final openChat = ref.read(openChatControllerProvider);
+      if (openChat.id != groupId || openChat.type != 'group') {
+        ref.read(unreadGroupMessagesProvider.notifier).incrementUnread(groupId);
+      } else {
+        // Eğer grup sohbeti açıksa, okundu olarak işaretle
+        _socket!.emit('group_read', {'groupId': groupId});
+      }
     });
 
     // State güncelle

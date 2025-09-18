@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/config.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
@@ -23,7 +24,7 @@ class ProfileController extends _$ProfileController {
   Future<void> updateProfile(String newName, String newSurname) async {
     final token = ref.read(authControllerProvider.notifier).token;
     final response = await http.put(
-      Uri.parse('http://10.10.1.197:5001/api/auth/change-name'),
+      Uri.parse('$baseUrl/api/auth/change-name'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -60,7 +61,7 @@ class ProfileController extends _$ProfileController {
   Future<void> updateTitle(String newTitle) async {
     final token = ref.read(authControllerProvider.notifier).token;
     final response = await http.put(
-      Uri.parse('http://10.10.1.197:5001/api/auth/change-title'),
+      Uri.parse('$baseUrl/api/auth/change-title'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -104,7 +105,7 @@ class ProfileController extends _$ProfileController {
       final token = ref.read(authControllerProvider.notifier).token;
       final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://10.10.1.197:5001/api/auth/upload-profile-image'),
+        Uri.parse('$baseUrl/api/auth/upload-profile-image'),
       );
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(
