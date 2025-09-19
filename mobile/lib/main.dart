@@ -5,6 +5,8 @@ import 'package:mobile/features/authentication/controllers/auth_controller.dart'
 import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +16,9 @@ Future<void> main() async {
     print("Error loading .env file: $e");
   }
   cameras = await availableCameras();
+
+  await initializeDateFormatting('tr_TR');
+  Intl.defaultLocale = 'tr_TR';
 
   runApp(const ProviderScope(child: MyApp()));
 }

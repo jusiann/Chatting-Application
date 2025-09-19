@@ -16,8 +16,36 @@ class HomeShell extends ConsumerStatefulWidget {
 class _HomeShellState extends ConsumerState<HomeShell> {
   final Map<int, String> pageName = {0: 'Sohbet', 1: 'Rehber', 2: 'Ayarlar'};
 
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    final initialIndex = ref.read(homeShellControllerProvider).navbarId;
+    _pageController = PageController(initialPage: initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(homeShellControllerProvider, (prev, next) {
+      final idx = next.navbarId;
+      if (_pageController.hasClients &&
+          (_pageController.page?.round() ?? _pageController.initialPage) !=
+              idx) {
+        _pageController.animateToPage(
+          idx,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
+
     return PopScope(
       canPop: ref.read(homeShellControllerProvider).navbarId == 0,
       onPopInvokedWithResult: (didPop, result) {
@@ -57,14 +85,38 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             ),
           ),
         ),
-        body: IndexedStack(
-          index: ref.watch(homeShellControllerProvider).navbarId,
+        body: PageView(
+          controller: _pageController,
+          physics: const PageScrollPhysics(),
+          onPageChanged: (value) =>
+              ref.read(homeShellControllerProvider.notifier).setNavbarId(value),
           children: [ChatPage(), ContactPage(), SettingsView()],
         ),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: ref.watch(homeShellControllerProvider).navbarId,
-          onTap: (i) =>
-              ref.read(homeShellControllerProvider.notifier).setNavbarId(i),
+          onTap: (i) => _pageController.animateToPage(
+            i,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+          ),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          elevation: 8,
+          selectedItemColor: Color(0xFF910811),
+          unselectedItemColor: Colors.grey,
+          selectedIconTheme: const IconThemeData(size: 28),
+          unselectedIconTheme: const IconThemeData(size: 22),
+          selectedLabelStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+          showUnselectedLabels: true,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Sohbetler'),
             BottomNavigationBarItem(

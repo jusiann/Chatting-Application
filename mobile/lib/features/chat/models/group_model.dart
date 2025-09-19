@@ -30,9 +30,9 @@ class GroupModel {
       role: json['role'],
       lastMessage: json['last_message'],
       lastMessageTime: json['last_message_time'] != null
-          ? DateTime.parse(json['last_message_time'])
+          ? DateTime.parse(json['last_message_time']).toLocal()
           : null,
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: DateTime.parse(json['created_at']).toLocal(),
       unreadCount: int.tryParse(json['unread_count'].toString()) ?? 0,
     );
   }

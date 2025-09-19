@@ -22,7 +22,7 @@ class MessageModel {
   factory MessageModel.fromJson(Map<String, dynamic> json) {
     return MessageModel(
       text: json['content'],
-      time: DateTime.parse(json['created_at']),
+      time: DateTime.parse(json['created_at']).toLocal(),
       senderid: json['sender_id'],
       receiverid: json['receiver_id'],
       id: json['id'],
@@ -46,7 +46,7 @@ class MessageModel {
   factory MessageModel.fromMap(Map<String, dynamic> map) {
     return MessageModel(
       text: map['content'],
-      time: DateTime.parse(map['created_at']),
+      time: DateTime.parse(map['created_at']).toLocal(),
       senderid: map['sender_id'],
       receiverid: map['receiver_id'],
       id: map['id'],

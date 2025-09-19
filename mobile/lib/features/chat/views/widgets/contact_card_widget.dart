@@ -52,6 +52,8 @@ class ContactCard extends StatelessWidget {
       ),
       title: Text(
         user.title != null ? '${user.title} ${user.fullname}' : user.fullname,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontFamily: 'Inter',
           fontSize: 14,

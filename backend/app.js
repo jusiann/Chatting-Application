@@ -291,7 +291,7 @@ io.on("connection", async (socket) => {
       `select id from group_messages where group_id = $1 order by id desc limit 1`,
       [data.groupId]
     );
-    const lastId = last.rows[0].id ?? null;
+    const lastId = last.rows && last.rows.length > 0 ? last.rows[0].id : null;
     await client.query(
       `update group_members set last_read_message_id = $1,
         last_read_at = NOW(), unread_count = 0 where group_id = $2 and user_id = $3`,

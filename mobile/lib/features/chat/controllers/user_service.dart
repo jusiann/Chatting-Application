@@ -14,23 +14,26 @@ part 'user_service.g.dart';
 class ContactUsers {
   List<UserModel> contactUsers;
   List<ChatModel> messageUsers;
-  List<GroupModel> userGroups; // Yeni alan eklendi
-
+  List<GroupModel> userGroups;
+  bool fetchingUsers = false;
   ContactUsers({
     required this.contactUsers,
     required this.messageUsers,
-    this.userGroups = const [], // Default değer
+    this.userGroups = const [],
+    this.fetchingUsers = false, // Default değer
   });
 
   ContactUsers copyWith({
     List<UserModel>? contactUsers,
     List<ChatModel>? messageUsers,
     List<GroupModel>? userGroups,
+    bool? fetchingUsers,
   }) {
     return ContactUsers(
       contactUsers: contactUsers ?? this.contactUsers,
       messageUsers: messageUsers ?? this.messageUsers,
       userGroups: userGroups ?? this.userGroups,
+      fetchingUsers: fetchingUsers ?? this.fetchingUsers,
     );
   }
 
@@ -79,6 +82,7 @@ class UserService extends _$UserService {
 
   Future<void> fetchUsers() async {
     print('FETCH USER METODU ÇAGIRILDI');
+    state = state.copyWith(fetchingUsers: true);
     final token = ref.read(authControllerProvider.notifier).token;
     if (token != null) {
       try {
@@ -127,14 +131,17 @@ class UserService extends _$UserService {
               .map<GroupModel>((group) => GroupModel.fromJson(group))
               .toList();
 
-          state = ContactUsers(
+          state = state.copyWith(
             contactUsers: contactUsers,
             messageUsers: messageUsers,
             userGroups: userGroups,
+            fetchingUsers: false,
           );
         }
+        state = state.copyWith(fetchingUsers: false);
       } catch (err) {
         print(err);
+        state = state.copyWith(fetchingUsers: false);
       }
     }
   }
