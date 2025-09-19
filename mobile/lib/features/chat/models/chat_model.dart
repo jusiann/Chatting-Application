@@ -45,7 +45,7 @@ class ChatModel {
       email: json['email'],
       isGroup: false,
       time: lastMessage != null && lastMessage['created_at'] != null
-          ? DateTime.parse(lastMessage['created_at'])
+          ? DateTime.parse(lastMessage['created_at']).toLocal()
           : DateTime.now(),
       currentMessage: lastMessage?['content'] ?? '',
       id: json['id'],

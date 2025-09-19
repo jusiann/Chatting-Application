@@ -18,11 +18,31 @@ class AuthState {
   final AuthUserModel? authUser;
   final bool isLoggedIn;
   final bool isChecking;
+  final bool loggingIn;
+  final bool registering;
   AuthState({
     required this.isLoggedIn,
     this.authUser,
     required this.isChecking,
+    this.loggingIn = false,
+    this.registering = false,
   });
+
+  AuthState copyWith({
+    AuthUserModel? authUser,
+    bool? isLoggedIn,
+    bool? isChecking,
+    bool? loggingIn,
+    bool? registering,
+  }) {
+    return AuthState(
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+      authUser: authUser ?? this.authUser,
+      isChecking: isChecking ?? this.isChecking,
+      loggingIn: loggingIn ?? this.loggingIn,
+      registering: registering ?? this.registering,
+    );
+  }
 }
 
 @Riverpod(keepAlive: true)
@@ -47,7 +67,9 @@ class AuthController extends _$AuthController {
       if (isStillValid && remainingTime > Duration(minutes: 1)) {
         final decoded = JwtDecoder.decode(_token!);
         final user = AuthUserModel.fromJwt(decoded);
-        ref.read(socketServiceProvider.notifier).connect(_token!);
+        await ref.read(socketServiceProvider.notifier).connect(_token!);
+        // Proaktif: İlk açılışta listeleri/grupları yükle (socket onConnect beklemeden)
+        await ref.read(userServiceProvider.notifier).fetchUsers();
         await _startTokenRefreshTimer(_token!);
         await markDeliveredMessages();
         await ref
@@ -69,12 +91,13 @@ class AuthController extends _$AuthController {
         },
       );
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final accessToken = data['access_token'];
+        final accessToken = jsonDecode(response.body)['access_token'];
         await _storage.write(key: 'accessToken', value: accessToken);
         _token = accessToken;
         final decodedToken = JwtDecoder.decode(accessToken);
         final user = AuthUserModel.fromJwt(decodedToken);
+        // Proaktif: İlk açılışta listeleri/grupları yükle (socket onConnect beklemeden)
+        await ref.read(userServiceProvider.notifier).fetchUsers();
         await ref
             .read(unreadMessageControllerProvider.notifier)
             .fetchUnreadCounts(_token!);
@@ -83,11 +106,14 @@ class AuthController extends _$AuthController {
           authUser: user,
           isChecking: false,
         ));
-        ref.read(socketServiceProvider.notifier).connect(accessToken);
+        await ref.read(socketServiceProvider.notifier).connect(accessToken);
         await _startTokenRefreshTimer(accessToken);
         await markDeliveredMessages();
         return;
-      } else {}
+      } else {
+        state = AuthState(isLoggedIn: false, authUser: null, isChecking: false);
+        return;
+      }
     } else {
       state = AuthState(isLoggedIn: false, authUser: null, isChecking: false);
       return;
@@ -95,6 +121,8 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> login(String email, String password) async {
+    state = state.copyWith(loggingIn: true);
+    await Future.delayed(Duration(seconds: 1));
     final response = await http.post(
       Uri.parse('$baseUrl/api/auth/sign-in'),
       headers: {'Content-Type': 'application/json'},
@@ -116,14 +144,23 @@ class AuthController extends _$AuthController {
       final user = AuthUserModel.fromJwt(decoded);
       await _startTokenRefreshTimer(data['access_token']);
       _token = data['access_token'];
+      // Proaktif: İlk açılışta listeleri/grupları yükle (socket onConnect beklemeden)
+      await ref.read(userServiceProvider.notifier).fetchUsers();
       await ref
           .read(unreadMessageControllerProvider.notifier)
           .fetchUnreadCounts(_token!);
-      state = AuthState(isLoggedIn: true, authUser: user, isChecking: false);
-      ref.read(socketServiceProvider.notifier).connect(data['access_token']);
+      await ref
+          .read(socketServiceProvider.notifier)
+          .connect(data['access_token']);
       await markDeliveredMessages();
+      state = AuthState(
+        isLoggedIn: true,
+        authUser: user,
+        isChecking: false,
+        loggingIn: false,
+      );
     }
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201) {
       dynamic data = jsonDecode(response.body);
       String message = data['message'] ?? 'bir hata olustu';
 
@@ -135,7 +172,9 @@ class AuthController extends _$AuthController {
         textColor: Colors.white,
         fontSize: 16.0,
       );
+      state = state.copyWith(loggingIn: false);
     }
+    state = state.copyWith(loggingIn: false);
   }
 
   Future<void> logout() async {
@@ -187,5 +226,66 @@ class AuthController extends _$AuthController {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
     }
+  }
+
+  Future<void> signupUser({
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? password,
+  }) async {
+    if (firstName == null ||
+        lastName == null ||
+        email == null ||
+        password == null) {
+      print('tüm alanların doldurulması zorunludur.');
+    } else {
+      state = state.copyWith(registering: true);
+      await Future.delayed(Duration(seconds: 1));
+      final url = Uri.parse('$baseUrl/api/auth/sign-up');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'first_name': firstName,
+          'last_name': lastName,
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        state = state.copyWith(registering: false);
+        Fluttertoast.showToast(
+          msg: 'Kayıt başarılı',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      } else {
+        state = state.copyWith(registering: false);
+        String message = 'bir hata oluştu';
+        try {
+          final data = jsonDecode(response.body);
+          if (data is Map && data['message'] != null) {
+            message = data['message'].toString();
+          }
+        } catch (e) {
+          message = 'sunucu hatası ${response.body}';
+        }
+        Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+      state = state.copyWith(registering: false);
+    }
+    state = state.copyWith(registering: false);
   }
 }

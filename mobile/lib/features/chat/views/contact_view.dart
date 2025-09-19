@@ -41,7 +41,7 @@ class _ContactPageState extends ConsumerState<ContactPage> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(userServiceProvider);
-    if (userState.contactUsers.isEmpty) {
+    if (userState.fetchingUsers) {
       return Center(child: CircularProgressIndicator());
     }
 

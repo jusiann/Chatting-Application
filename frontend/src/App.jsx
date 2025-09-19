@@ -1,26 +1,25 @@
-
-import './App.css'
+import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import RehberPage from "./pages/RehberPage";
-import GrupPage from "./pages/GrupPage"
+import GrupPage from "./pages/GrupPage";
 import AnaekranPage from "./pages/AnaekranPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import Textinput from './components/Textinput';
-import { User } from 'lucide-react';
-import DepartmanPage from './pages/DepartmanPage';
-import SettingsPage from './pages/SettingsPage';
-import KayıtOl from './pages/KayıtOl';
+import Textinput from "./components/Textinput";
+import { User } from "lucide-react";
+import DepartmanPage from "./pages/DepartmanPage";
+import SettingsPage from "./pages/SettingsPage";
+import KayıtOl from "./pages/KayıtOl";
 import useUserStore from "./store/user.js";
-import { useEffect } from 'react';
-import useConservationStore from './store/conservation.js';
+import { useEffect } from "react";
+import useConservationStore from "./store/conservation.js";
 
 function App() {
   const { checkAuth, user } = useUserStore();
-  const {contactUsersFetch} = useConservationStore();
-  useEffect(() => {
-    checkAuth();
-    contactUsersFetch();
+  const { contactUsersFetch } = useConservationStore();
+  useEffect(async () => {
+    await checkAuth();
+    if (user != null) await contactUsersFetch();
   }, []);
   return (
     <BrowserRouter>

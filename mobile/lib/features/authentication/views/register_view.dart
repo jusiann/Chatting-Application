@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/authentication/controllers/register_controller.dart';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterState();
+  ConsumerState<RegisterPage> createState() => _RegisterState();
 }
 
-class _RegisterState extends State<RegisterPage> {
+class _RegisterState extends ConsumerState<RegisterPage> {
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -19,6 +21,7 @@ class _RegisterState extends State<RegisterPage> {
   bool _obscureText2 = true;
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
     return Scaffold(
       appBar: AppBar(),
       body: LayoutBuilder(
@@ -154,15 +157,17 @@ class _RegisterState extends State<RegisterPage> {
                           if (password != passwordRep) {
                             print('Şifreler eşleşmiyor.');
                           } else {
-                            RegisterController.signupUser(
-                              firstName: firstName,
-                              lastName: lastName,
-                              email: email,
-                              password: password,
-                            );
+                            ref
+                                .read(authControllerProvider.notifier)
+                                .signupUser(
+                                  firstName: firstName,
+                                  lastName: lastName,
+                                  email: email,
+                                  password: password,
+                                );
                           }
                         },
-                        child: Text('Kayıt ol'),
+
                         style: FilledButton.styleFrom(
                           backgroundColor: Color(0xFF910811),
                           foregroundColor: Colors.white,
@@ -170,6 +175,9 @@ class _RegisterState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(15),
                           ),
                         ),
+                        child: authState.registering
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text('Kayıt ol'),
                       ),
                     ),
                     SizedBox(height: 15),

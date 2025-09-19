@@ -20,6 +20,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -154,7 +155,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             borderRadius: BorderRadius.circular(15),
                           ),
                         ),
-                        child: Text('Giriş yap'),
+                        child: authState.loggingIn
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text('Giriş yap'),
                       ),
                     ),
                     SizedBox(height: 20),

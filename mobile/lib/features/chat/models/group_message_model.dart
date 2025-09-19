@@ -1,4 +1,3 @@
-import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
 
 class GroupMessageModel {
@@ -29,7 +28,7 @@ class GroupMessageModel {
       senderId: json['sender_id'],
       content: json['content'],
       status: json['status'],
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: DateTime.parse(json['created_at']).toLocal(),
       senderName: json['first_name'],
       senderSurname: json['last_name'],
     );
@@ -44,7 +43,7 @@ class GroupMessageModel {
       senderId: json['sender_id'],
       content: json['content'],
       status: json['status'],
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: DateTime.parse(json['created_at']).toLocal(),
       senderName: sender.firstName,
       senderSurname: sender.lastName,
     );

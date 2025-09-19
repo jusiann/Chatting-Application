@@ -5,7 +5,6 @@ import 'package:mobile/features/chat/controllers/unread_message_controller.dart'
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/models/message_model.dart';
-import 'package:mobile/features/chat/models/user_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'message_controller.g.dart';
 
@@ -21,23 +20,11 @@ class MessageController extends _$MessageController {
     return _messages;
   }
 
-  bool get hasMore => _hasMore;
-
   Future<void> fetchMore(int otherUserId) async {
-    if (!_hasMore) return;
-
-    _page++;
-
     final newMessages = await fetchMessagesFromDb(
       otherUserId: otherUserId,
       token: ref.read(authControllerProvider.notifier).token!,
-      page: _page,
-      pageSize: _pageSize,
     );
-
-    if (newMessages.length < _pageSize) {
-      _hasMore = false;
-    }
 
     _messages.insertAll(0, newMessages);
     _messages.sort((a, b) => a.time.compareTo(b.time));
@@ -114,7 +101,7 @@ class MessageController extends _$MessageController {
         .firstOrNull;
     if (otherUser != null) {
       final updatedModel = ChatModel.fromUser(otherUser!).copyWith(
-        time: DateTime.parse(data['created_at']),
+        time: DateTime.parse(data['created_at']).toLocal(),
         currentMessage: data['content'],
         senderid: data['sender_id'],
         messageStatus: data['status'],
@@ -132,7 +119,7 @@ class MessageController extends _$MessageController {
       ref
           .read(unreadMessageControllerProvider.notifier)
           .incrementUnread(senderId);
-      await ref.read(userServiceProvider.notifier).refreshChat();
+      /* await ref.read(userServiceProvider.notifier).refreshChat(); */
     }
   }
 }

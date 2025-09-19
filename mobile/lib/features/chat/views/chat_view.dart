@@ -20,8 +20,14 @@ class ChatPage extends ConsumerWidget {
     final userState = ref.watch(userServiceProvider);
     final allChats = userState.allChats; // Hem gruplar hem bireysel sohbetler
 
-    if (allChats.isEmpty) {
+    if (userState.fetchingUsers) {
       return Center(child: CircularProgressIndicator());
+    }
+
+    if (userState.fetchingUsers == false && allChats.isEmpty) {
+      return Center(
+        child: Text("Henüz mesaj yok. Kişi ekleyin veya bir gruba katılın!"),
+      );
     }
 
     return RefreshIndicator(

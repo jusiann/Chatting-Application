@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/authentication/models/auth_user_model.dart';
@@ -30,7 +32,8 @@ class SocketService extends _$SocketService {
     return MySocket();
   }
 
-  void connect(String token) {
+  Future<void> connect(String token) async {
+    // If already connected with same token, do nothing.
     if (_token == token && _socket != null && _socket!.connected) {
       print('Zaten bağlı');
       return;
@@ -40,6 +43,8 @@ class SocketService extends _$SocketService {
     _token = token;
 
     _socket?.disconnect();
+
+    final completer = Completer<void>();
 
     _socket = IO.io(
       baseUrl,
@@ -57,6 +62,7 @@ class SocketService extends _$SocketService {
       print('[SOCKET] Bağlandı');
       await ref.read(userServiceProvider.notifier).fetchUsers();
       await joinUserGroups();
+      if (!completer.isCompleted) completer.complete();
     });
     _socket!.onDisconnect((_) => print('[SOCKET] Bağlantı koptu'));
 
@@ -149,8 +155,8 @@ class SocketService extends _$SocketService {
           : int.tryParse(rawGroupId?.toString() ?? '') ?? -1;
       final content = data['content'];
       final DateTime createdAt =
-          DateTime.tryParse(data['created_at']?.toString() ?? '') ??
-          DateTime.now();
+          DateTime.tryParse(data['created_at']?.toString() ?? '')?.toLocal() ??
+          DateTime.now().toLocal();
 
       // Mevcut grubu UserService state'inden bulmaya çalış
       final groups = ref.read(userServiceProvider).userGroups;
@@ -187,6 +193,17 @@ class SocketService extends _$SocketService {
     state = MySocket(socket: _socket);
 
     print('[SOCKET] Socket kurulumu tamamlandı');
+    // Wait for the first onConnect to finish (or return immediately if already connected)
+    if (_socket!.connected && !completer.isCompleted) {
+      completer.complete();
+    }
+    return completer.future.timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        print('[SOCKET] connect timeout, continuing without confirmation');
+        return;
+      },
+    );
   }
 
   void emit(String event, dynamic data) {

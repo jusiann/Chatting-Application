@@ -42,6 +42,8 @@ class CustomCard extends ConsumerWidget {
             chat.title != null
                 ? '${chat.title!} ${chat.fullname}'
                 : chat.fullname,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 14,
@@ -63,7 +65,7 @@ class CustomCard extends ConsumerWidget {
               SizedBox(width: 5),
               Text(
                 chat.currentMessage,
-                style: TextStyle(fontFamily: 'Inter', fontSize: 13),
+                style: TextStyle(fontFamily: 'Inter', fontSize: 12),
               ),
             ],
           ),

@@ -7,8 +7,6 @@ import 'package:mobile/features/chat/models/message_model.dart';
 Future<List<MessageModel>> fetchMessagesFromDb({
   required int otherUserId,
   required String token,
-  required int page,
-  required int pageSize,
 }) async {
   final uri = Uri.parse(
     /* 'http://10.10.1.197:5001/api/messages/$otherUserId/$page/$pageSize', */

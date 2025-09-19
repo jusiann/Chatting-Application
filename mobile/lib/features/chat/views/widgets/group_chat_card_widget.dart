@@ -26,7 +26,7 @@ class GroupChatCardWidget extends StatelessWidget {
             group.name,
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -34,7 +34,7 @@ class GroupChatCardWidget extends StatelessWidget {
             group.lastMessage ?? 'Grup oluşturuldu',
             style: TextStyle(
               fontFamily: 'Inter',
-              fontSize: 13,
+              fontSize: 12,
               color: Color(0xFF777777),
             ),
             maxLines: 1,
@@ -47,12 +47,6 @@ class GroupChatCardWidget extends StatelessWidget {
                 group.lastMessageTime != null
                     ? formatMessageTime(group.lastMessageTime!)
                     : formatMessageTime(group.createdAt),
-                style: TextStyle(
-                  color: Color(0xFF910811),
-                  fontFamily: 'Inter',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
               ),
               if (unreadCount != null && unreadCount! > 0)
                 CircleAvatar(
@@ -63,7 +57,7 @@ class GroupChatCardWidget extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
