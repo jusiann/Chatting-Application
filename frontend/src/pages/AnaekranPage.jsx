@@ -106,12 +106,18 @@ const AnaekranPage = () => {
       //chatUsersFetch();
     });
 
+    on("new_group", async (id) => {
+      emit("join_group", id);
+      await fetchGroups();
+    });
+
     return () => {
       off("new_message");
       off("message_delivered");
       off("message_read");
       off("group_message");
       off("message_sent");
+      off("new_group");
     };
   }, [on, addNewMessage, messagingUser?.id, off]);
 

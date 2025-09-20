@@ -38,7 +38,7 @@ const useConservationStore = create((set, get) => ({
   updateChatUsers: async (newUserId, message) => {
     const currentUsers = get().chatUsers;
     const updatedUser = currentUsers.find((user) => user.id === newUserId);
-    if (!updatedUser) {
+    if (!updatedUser || updatedUser.lastMessage == null) {
       await get().chatUsersFetch();
       return;
     } // Kullanıcı bulunamazsa çıkış yap

@@ -5,6 +5,7 @@ import 'package:mobile/features/authentication/views/login_view.dart';
 import 'package:mobile/features/authentication/views/splash_screen.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
 import 'package:mobile/features/chat/views/create_group_view.dart';
+import 'package:mobile/features/chat/views/group_page.dart';
 import 'package:mobile/features/chat/views/home_view.dart';
 import 'package:mobile/features/settings/views/account_view.dart';
 import 'package:mobile/features/settings/views/profile_view.dart';
@@ -23,6 +24,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/login', builder: (context, state) => LoginPage()),
       GoRoute(path: '/profile', builder: (context, state) => ProfileView()),
       GoRoute(path: '/account', builder: (context, state) => AccountView()),
+      GoRoute(path: '/group/page', builder: (context, state) => GroupPage()),
       GoRoute(
         path: '/create-group',
         builder: (context, state) {

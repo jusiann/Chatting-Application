@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mobile/config.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
+import 'package:mobile/features/chat/controllers/socket_service.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/group_model.dart';
 import 'package:mobile/features/chat/models/group_message_model.dart';
@@ -49,8 +50,16 @@ class GroupController extends _$GroupController {
       }),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       await ref.read(userServiceProvider.notifier).fetchUsers();
+      final decoded = jsonDecode(response.body);
+      final rawId = decoded['id'];
+      int groupId = rawId is int ? rawId : int.parse(rawId.toString());
+      ref.read(socketServiceProvider.notifier).emit('join_group', groupId);
+      ref.read(socketServiceProvider.notifier).emit('new_group', {
+        'memberIds': memberIds,
+        'groupId': groupId,
+      });
       return true;
     }
     return false;

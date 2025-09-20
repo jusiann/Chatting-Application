@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^1.11.0",
     "dom": "^0.0.3",
+    "emoji-picker-element": "^1.27.0",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
