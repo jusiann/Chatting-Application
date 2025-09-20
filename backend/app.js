@@ -124,6 +124,18 @@ io.on("connection", async (socket) => {
     console.log(`[SOCKET] User ${socket.user.id} joined group ${row.group_id}`);
   });
 
+  socket.on("join_group", async (groupId) => {
+    socket.join(`group_${groupId}`);
+    console.log(`[SOCKET] User ${socket.user.id} joined group ${groupId}`);
+  });
+
+  socket.on("new_group", (data) => {
+    const { memberIds, groupId } = data;
+    memberIds.forEach((memberId) => {
+      socket.to(`user_${memberId}`).emit("new_group", groupId);
+    });
+  });
+
   socket.on("send_message", async (messageData) => {
     try {
       const { receiver_id, content } = messageData;

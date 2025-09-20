@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile/features/chat/controllers/group_controller.dart';
+import 'package:mobile/features/chat/controllers/providers.dart';
 import 'package:mobile/features/chat/models/user_model.dart';
 import 'package:mobile/features/chat/views/widgets/create_group_card.dart';
 
@@ -18,6 +20,7 @@ class CreateGroupView extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color(0xFF910811),
         onPressed: () async {
+          final router = GoRouter.of(context);
           final List<int> memberIds = groupMembers
               .map((user) => user.id)
               .toList();
@@ -46,7 +49,8 @@ class CreateGroupView extends ConsumerWidget {
               textColor: Colors.white,
               fontSize: 16.0,
             );
-            Navigator.pop(context);
+            ref.read(homeShellControllerProvider.notifier).setNavbarId(0);
+            router.go('/home');
           } else {
             Fluttertoast.showToast(
               msg: 'Hata: Grup oluşturulamadı.',

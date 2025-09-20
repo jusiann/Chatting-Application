@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/chat/views/group_page.dart';
+import 'package:go_router/go_router.dart';
 
 class GroupCard extends StatelessWidget {
   const GroupCard({super.key});
@@ -8,7 +8,7 @@ class GroupCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => GroupPage()));
+        context.push('/group/page');
       },
       child: ListTile(
         leading: CircleAvatar(

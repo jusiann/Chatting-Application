@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { createGroup, getGroupMessages, getGroups } from "../api/group";
+import useSocketStore from "./socket";
 
 const useGroupStore = create((set, get) => ({
   groups: [],
@@ -10,7 +11,9 @@ const useGroupStore = create((set, get) => ({
   groupCreate: async (formData) => {
     try {
       const res = await createGroup(formData);
-      set((state) => ({ groups: [...state.groups, res] }));
+      const { emit } = useSocketStore.getState();
+      emit("join_group", res.id);
+      emit("new_group", { memberIds: formData.memberIds, groupId: res.id });
       toast.success("Grup oluşturuldu!");
       return true;
     } catch (error) {
@@ -43,7 +46,7 @@ const useGroupStore = create((set, get) => ({
     console.log("updateGroupLastMessage çağrıldı:", groupId, message);
     const currentGroups = get().groups;
     const updatedGroup = currentGroups.find((group) => group.id === groupId);
-    if (!updatedGroup) {
+    if (updatedGroup == null || updatedGroup === undefined) {
       await get().fetchGroups();
       return;
     }
