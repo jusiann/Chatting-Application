@@ -4,6 +4,21 @@ import useSocketStore from "./socket.js";
 import useGroupStore from "./group.js";
 
 const useConservationStore = create((set, get) => ({
+  // Typing state
+  typingUsers: {}, // { [userId]: true }
+  typingTimeouts: {}, // { [userId]: timeoutId }
+  setUserTyping: (userId, isTyping) => {
+    set((state) => ({
+      typingUsers: { ...state.typingUsers, [String(userId)]: !!isTyping },
+    }));
+  },
+  clearUserTyping: (userId) => {
+    set((state) => {
+      const next = { ...state.typingUsers };
+      delete next[String(userId)];
+      return { typingUsers: next };
+    });
+  },
   unreadCounts: {},
   unreadFetch: async () => {
     try {
@@ -45,6 +60,7 @@ const useConservationStore = create((set, get) => ({
     updatedUser.lastMessage.content = message.content; // Yeni mesaj içeriği
     updatedUser.lastMessage.created_at = message.created_at; // Yeni mesaj zamanı
     updatedUser.lastMessage.status = message.status; // Yeni mesaj durumu
+    updatedUser.lastMessage.sender = message.sender_id; // Yeni mesaj gönderen
     const filteredUsers = currentUsers.filter((user) => user.id !== newUserId);
     set({ chatUsers: [...filteredUsers, updatedUser] });
   },
@@ -53,11 +69,29 @@ const useConservationStore = create((set, get) => ({
   contactUsersFetch: async () => {
     try {
       const response = await axios.get("/messages/users");
-      set({ contactUsers: response.data.users });
+      const normalized = response.data.users || [];
+      set({ contactUsers: normalized });
     } catch (error) {
       console.error("contactUsersFetch hatası:", error);
       set({ contactUsers: [] });
     }
+  },
+  setOnlineStatus: (userId, isOnline) => {
+    const users = get().contactUsers || [];
+    const targetId = String(userId);
+    const idx = users.findIndex((u) => String(u.id) === targetId);
+    if (idx === -1) return; // user not found in contacts
+
+    const user = users[idx];
+    if (isOnline) {
+      user.is_online = true;
+      users[idx] = user;
+    } else {
+      user.is_online = false;
+      user.last_seen = new Date().toISOString();
+      users[idx] = user;
+    }
+    set({ contactUsers: users });
   },
 
   messages: [],
@@ -65,9 +99,10 @@ const useConservationStore = create((set, get) => ({
   messagingGroupId: null,
   messagingUser: null,
   messagingType: null,
-  setMessagingUser: ({ id }) => {
+  setMessagingUser: ({ id, type }) => {
+    set({ messagingType: type });
     if (get().messagingType === "individual") {
-      const user = get().chatUsers.find((user) => user.id == id);
+      const user = get().contactUsers.find((user) => user.id == id);
       set({ messagingUser: user });
       console.log("Mesajlaşma başlatıldı:", user);
     } else if (get().messagingType === "group") {
@@ -98,8 +133,6 @@ const useConservationStore = create((set, get) => ({
       set({ messages: [] });
     }
   },
-
-  setMessagingType: (type) => set({ messagingType: type }),
 
   setMessagingUserId: (id) => set({ messagingUserId: id }),
 
@@ -190,9 +223,41 @@ const useConservationStore = create((set, get) => ({
     });
 
     // Typing durumunu dinle
-    socketStore.on("user_typing", (data) => {
-      console.log("User typing:", data);
-      // Typing gösterimi için state ekleyebilirsiniz
+    socketStore.on("typing", (data) => {
+      const fromId =
+        data?.fromId ??
+        data?.senderId ??
+        data?.sender_id ??
+        data?.userId ??
+        data?.user_id;
+      if (!fromId) return;
+      const id = String(fromId);
+      const timeouts = get().typingTimeouts;
+      // işaretle
+      get().setUserTyping(id, true);
+      // önceki timeout'u temizle ve yeni timeout ile typing'i otomatik kapat
+      if (timeouts[id]) clearTimeout(timeouts[id]);
+      const to = setTimeout(() => {
+        get().setUserTyping(id, false);
+      }, 3000);
+      set({ typingTimeouts: { ...timeouts, [id]: to } });
+    });
+
+    socketStore.on("stop_typing", (data) => {
+      const fromId =
+        data?.fromId ??
+        data?.senderId ??
+        data?.sender_id ??
+        data?.userId ??
+        data?.user_id;
+      if (!fromId) return;
+      const id = String(fromId);
+      const timeouts = get().typingTimeouts;
+      if (timeouts[id]) clearTimeout(timeouts[id]);
+      get().setUserTyping(id, false);
+      const next = { ...timeouts };
+      delete next[id];
+      set({ typingTimeouts: next });
     });
   },
 
@@ -205,7 +270,13 @@ const useConservationStore = create((set, get) => ({
   // Typing gönder
   sendTyping: (data) => {
     const socketStore = useSocketStore.getState();
-    socketStore.sendTyping(data);
+    socketStore.emit("typing", data);
+  },
+
+  // Stop typing gönder
+  sendStopTyping: (data) => {
+    const socketStore = useSocketStore.getState();
+    socketStore.emit("stop_typing", data);
   },
 
   // Socket bağlantısını kes

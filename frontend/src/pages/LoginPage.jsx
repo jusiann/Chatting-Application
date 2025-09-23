@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import useUserStore from "../store/user";
 import useConservationStore from "../store/conservation";
+import logo from "../assets/Logo1.png";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ const LoginPage = () => {
   return (
     <div className="login-container">
       <div className="login-left-panel">
-        <img src="src/assets/Logo1.png" alt="Logo" className="logo" />
+        <img src={logo} alt="Logo" className="logo" />
         <div className="login-texts">
           <h1 className="login-title">Hoşgeldiniz</h1>
           <p className="login-subtitle">Lütfen bilgileriniz giriniz</p>

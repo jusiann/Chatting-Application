@@ -19,7 +19,11 @@ const Sendbox = () => {
     chatUsersFetch,
     sendGroupMessage,
     messagingType,
+    sendTyping,
+    sendStopTyping,
   } = useConservationStore();
+
+  const typingRef = useRef({ isTyping: false, timer: null });
 
   useEffect(() => {
     setMessage((prev) => ({
@@ -72,8 +76,26 @@ const Sendbox = () => {
     };
   }, [showEmoji]);
 
+  const emitTyping = () => {
+    if (!messagingUser) return;
+    const payload =
+      messagingType === "group"
+        ? { groupId: messagingUser.id }
+        : { receiver_id: messagingUser.id };
+    if (!typingRef.current.isTyping) {
+      typingRef.current.isTyping = true;
+      sendTyping(payload);
+    }
+    if (typingRef.current.timer) clearTimeout(typingRef.current.timer);
+    typingRef.current.timer = setTimeout(() => {
+      typingRef.current.isTyping = false;
+      sendStopTyping(payload);
+    }, 1200);
+  };
+
   const handleChange = (e) => {
     setMessage({ ...message, [e.target.name]: e.target.value });
+    emitTyping();
   };
   const handleSend = () => {
     if (message.content.trim() && message.receiver_id) {
@@ -82,7 +104,7 @@ const Sendbox = () => {
         console.log("Mesaj gönderildi:", message);
         setMessage({ ...message, content: "" }); // Mesaj kutusunu temizle
         setShowEmoji(false);
-        /* chatUsersFetch(); */ // Güncel kullanıcı listesini çek
+        sendStopTyping({ receiver_id: messagingUser.id });
       } else if (messagingType === "group") {
         const groupId = messagingUser.id;
         const content = message.content;
@@ -90,6 +112,10 @@ const Sendbox = () => {
         console.log("Grup mesajı gönderildi:", message);
         setMessage({ ...message, content: "" }); // Mesaj kutusunu temizle
         setShowEmoji(false);
+        if (typingRef.current.isTyping) {
+          typingRef.current.isTyping = false;
+          sendStopTyping({ groupId });
+        }
       }
     }
   };
@@ -122,6 +148,17 @@ const Sendbox = () => {
           value={message.content}
           onChange={handleChange}
           onKeyDown={handleKeyPress}
+          onBlur={() => {
+            if (!messagingUser) return;
+            const payload =
+              messagingType === "group"
+                ? { groupId: messagingUser.id }
+                : { receiver_id: messagingUser.id };
+            if (typingRef.current.isTyping) {
+              typingRef.current.isTyping = false;
+              sendStopTyping(payload);
+            }
+          }}
         />
 
         <div className="sendbox-attachment">

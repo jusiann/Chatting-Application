@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import timeFormatter from "../controllers/TimeController";
 import useSocketStore from "../store/socket";
 import useUserStore from "../store/user";
+import { Check, CheckCheck } from "lucide-react";
 
 function Personcard({ chatUser }) {
   const fetchMessages = useConservationStore((state) => state.fetchMessages);
@@ -11,19 +12,16 @@ function Personcard({ chatUser }) {
     (state) => state.setMessagingUser
   );
   const messagingUser = useConservationStore((state) => state.messagingUser);
-  const setMessagingType = useConservationStore(
-    (state) => state.setMessagingType
-  );
-
-  const { unreadCounts, unreadClear } = useConservationStore();
+  const { unreadCounts, unreadClear, typingUsers } = useConservationStore();
 
   const { emit } = useSocketStore();
   const { user } = useUserStore();
 
+  const isTyping = typingUsers[chatUser.id] || false;
+
   const handleClick = async () => {
     await fetchMessages({ id: chatUser.id });
-    setMessagingType("individual");
-    setMessagingUser({ id: chatUser.id });
+    setMessagingUser({ id: chatUser.id, type: "individual" });
     emit("mark_read", { receiver_id: user.id, sender_id: chatUser.id });
     unreadClear(chatUser.id);
   };
@@ -37,6 +35,16 @@ function Personcard({ chatUser }) {
     if (!text) return "No message";
     if (text.length <= PREVIEW_MAX_CHARS) return text;
     return text.slice(0, PREVIEW_MAX_CHARS) + "...";
+  };
+
+  const getStatusIcon = (status) => {
+    if (status === "sent") {
+      return <Check className="card-sended-check" />; // single check mark
+    } else if (status === "delivered") {
+      return <CheckCheck className="card-sended-check" />; // double check mark
+    } else if (status === "read") {
+      return <CheckCheck className="card-readed-check" />; // double check mark with "read"
+    }
   };
 
   return (
@@ -61,7 +69,15 @@ function Personcard({ chatUser }) {
               {chatUser.title} {chatUser.first_name} {chatUser.last_name}
             </div>
             <div className="personcard-message">
-              {getPreview(chatUser.lastMessage?.content)}
+              {isTyping ? (
+                <p style={{ color: "green" }}>Yazıyor...</p>
+              ) : (
+                <>
+                  {chatUser.lastMessage.sender === user.id &&
+                    getStatusIcon(chatUser.lastMessage?.status)}{" "}
+                  {getPreview(chatUser.lastMessage?.content)}
+                </>
+              )}
             </div>
           </div>
         </div>

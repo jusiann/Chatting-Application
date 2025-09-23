@@ -14,6 +14,8 @@ exports.up = async function (knex) {
     table.integer("failed_login_attempts").defaultTo(0);
     table.timestamp("last_failed_login");
     table.timestamp("created_at").defaultTo(knex.fn.now());
+    table.timestamp("last_seen");
+    table.boolean("is_online").defaultTo(false);
   });
 
   await knex.schema.raw(

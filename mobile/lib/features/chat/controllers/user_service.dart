@@ -80,6 +80,31 @@ class UserService extends _$UserService {
     return ContactUsers(contactUsers: [], messageUsers: [], userGroups: []);
   }
 
+  void addTypingUser(int userId) {
+    final idx = state.contactUsers.indexWhere((user) => user.id == userId);
+    if (idx != -1) {
+      final typingUser = state.contactUsers[idx];
+      final updatedTypingUser = typingUser.copyWith(typing: true);
+      final updatedList = List<UserModel>.from(state.contactUsers);
+      updatedList[idx] = updatedTypingUser;
+      state = state.copyWith(contactUsers: updatedList);
+    }
+    Future.delayed(const Duration(seconds: 3), () {
+      removeTypingUser(userId);
+    });
+  }
+
+  void removeTypingUser(int userId) {
+    final idx = state.contactUsers.indexWhere((user) => user.id == userId);
+    if (idx != -1) {
+      final typingUser = state.contactUsers[idx];
+      final updatedTypingUser = typingUser.copyWith(typing: false);
+      final updatedList = List<UserModel>.from(state.contactUsers);
+      updatedList[idx] = updatedTypingUser;
+      state = state.copyWith(contactUsers: updatedList);
+    }
+  }
+
   Future<void> fetchUsers() async {
     print('FETCH USER METODU ÇAGIRILDI');
     state = state.copyWith(fetchingUsers: true);
@@ -223,5 +248,17 @@ class UserService extends _$UserService {
       updatedList.add(updatedGroup);
     }
     state = state.copyWith(userGroups: updatedList);
+  }
+
+  void setUserOnlineStatus(int userId, bool status) {
+    final userList = List<UserModel>.from(state.contactUsers);
+    final index = state.contactUsers.indexWhere((user) => user.id == userId);
+    if (index != -1 && status) {
+      userList[index].isOnline = status;
+    } else if (index != -1 && !status) {
+      userList[index].isOnline = false;
+      userList[index].lastSeen = DateTime.now().toLocal();
+    }
+    state = state.copyWith(contactUsers: userList);
   }
 }

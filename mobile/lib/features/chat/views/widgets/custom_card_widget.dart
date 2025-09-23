@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
+import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 
 class CustomCard extends ConsumerWidget {
@@ -14,6 +15,11 @@ class CustomCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.read(authControllerProvider).authUser!.id;
+    final messagingUser = ref
+        .watch(userServiceProvider)
+        .contactUsers
+        .where((user) => user.id == chat.id)
+        .first;
     return Column(
       children: [
         ListTile(
@@ -70,20 +76,34 @@ class CustomCard extends ConsumerWidget {
               ],
             ),
           ),
-          subtitle: Row(
-            children: [
-              currentTextIcon(currentUser, chat.senderid!, chat.messageStatus!),
-              SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  chat.currentMessage,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: 'Inter', fontSize: 12),
+          subtitle: messagingUser.typing!
+              ? Text(
+                  'Yazıyor...',
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.green,
+                    fontFamily: 'Inter',
+                    fontSize: 13,
+                  ),
+                )
+              : Row(
+                  children: [
+                    currentTextIcon(
+                      currentUser,
+                      chat.senderid!,
+                      chat.messageStatus!,
+                    ),
+                    SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        chat.currentMessage,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontFamily: 'Inter', fontSize: 12),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
         Padding(
           padding: const EdgeInsets.only(left: 80, right: 20),

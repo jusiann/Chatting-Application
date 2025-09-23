@@ -78,6 +78,15 @@
   border-radius: 50%;
   object-fit: cover;
 }
+
+.groupcard-unread-and-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding-right: 10px;
+}
+
 .groupcard-unread-badge {
   min-width: 20px;
   height: 20px;

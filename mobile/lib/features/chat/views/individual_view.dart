@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import 'package:mobile/features/chat/controllers/socket_service.dart';
 import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
+import 'package:mobile/features/chat/models/user_model.dart';
 import 'package:mobile/features/chat/views/camera_view.dart';
 import 'package:mobile/features/chat/views/widgets/emoji_select_widget.dart';
 import 'package:mobile/features/chat/views/widgets/received_message_widget.dart';
@@ -31,6 +33,9 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
   final _controller = TextEditingController();
   IO.Socket? socket;
   final ScrollController _scrollController = ScrollController();
+  bool _peerTyping = false;
+  Timer? _typingDebounce;
+  Timer? _typingClearTimer;
 
   @override
   void initState() {
@@ -64,6 +69,8 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
 
   @override
   void dispose() {
+    _typingDebounce?.cancel();
+    _typingClearTimer?.cancel();
     _scrollController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -85,8 +92,18 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
 
   @override
   Widget build(BuildContext context) {
+    final typingUser = ref
+        .watch(userServiceProvider)
+        .contactUsers
+        .where((user) => user.id == widget.chat.id)
+        .first;
+
     final currentUserId = ref.watch(authControllerProvider).authUser!.id;
     final allMessages = ref.watch(messageControllerProvider);
+    final UserModel messagingUser = ref
+        .watch(userServiceProvider)
+        .contactUsers
+        .firstWhere((user) => user.id == widget.chat.id);
     final messages = allMessages
         .where(
           (m) =>
@@ -132,27 +149,58 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                     color: Colors.white,
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Son görülme: ',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        color: Colors.white,
+                typingUser.typing!
+                    ? Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Yazıyor...',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Son görülme: ',
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
+                          ),
+                          messagingUser.isOnline
+                              ? Text(
+                                  'Çevrimiçi',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : messagingUser.lastSeen != null
+                              ? Text(
+                                  formatMessageTime(messagingUser.lastSeen!),
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'Bilinmiyor.',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ],
                       ),
-                    ),
-                    Text(
-                      formatMessageTime(widget.chat.time),
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -245,6 +293,24 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                                   });
                                 },
                                 controller: _controller,
+                                onChanged: (val) {
+                                  // Emit typing and debounce stop
+                                  ref.read(socketServiceProvider.notifier).emit(
+                                    'typing',
+                                    {'receiver_id': widget.chat.id},
+                                  );
+                                  _typingDebounce?.cancel();
+                                  _typingDebounce = Timer(
+                                    const Duration(seconds: 2),
+                                    () {
+                                      ref
+                                          .read(socketServiceProvider.notifier)
+                                          .emit('stop_typing', {
+                                            'receiver_id': widget.chat.id,
+                                          });
+                                    },
+                                  );
+                                },
                                 style: TextStyle(
                                   fontFamily: 'Inter',
                                   fontSize: 16,
@@ -311,6 +377,11 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                                     .read(socketServiceProvider.notifier)
                                     .emit('send_message', msg);
                                 _controller.clear();
+                                // stop typing when message is sent
+                                ref.read(socketServiceProvider.notifier).emit(
+                                  'stop_typing',
+                                  {'receiver_id': widget.chat.id},
+                                );
                                 _scrollController.animateTo(
                                   0,
                                   duration: Duration(milliseconds: 300),

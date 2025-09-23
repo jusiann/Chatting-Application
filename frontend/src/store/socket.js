@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
 const useSocketStore = create((set, get) => ({
   socket: null,
@@ -7,19 +7,19 @@ const useSocketStore = create((set, get) => ({
   connectionError: null,
 
   // Socket bağlantısını başlat
-  connect: (serverUrl = 'http://localhost:5001') => {
+  connect: (serverUrl = "http://localhost:5001") => {
     const { socket } = get();
-    
+
     if (socket && socket.connected) {
-      console.log('Socket zaten bağlı');
+      console.log("Socket zaten bağlı");
       return socket;
     }
 
-    const token = localStorage.getItem('access_token'); // Token'ı localStorage'dan al
+    const token = localStorage.getItem("access_token"); // Token'ı localStorage'dan al
 
     if (!token) {
-      console.error('Authentication token bulunamadı');
-      set({ connectionError: 'Authentication token bulunamadı' });
+      console.error("Authentication token bulunamadı");
+      set({ connectionError: "Authentication token bulunamadı" });
       return null;
     }
 
@@ -30,33 +30,32 @@ const useSocketStore = create((set, get) => ({
       reconnectionAttempts: 5,
       maxReconnectionAttempts: 5,
       auth: {
-        token: token
+        token: token,
       },
       transportOptions: {
         polling: {
           extraHeaders: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      }
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      },
     });
 
     // Event listeners
-    newSocket.on('connect', () => {
-      console.log('Socket bağlandı:', newSocket.id);
+    newSocket.on("connect", () => {
+      console.log("Socket bağlandı:", newSocket.id);
       set({ isConnected: true, connectionError: null });
     });
 
-    newSocket.on('disconnect', () => {
-      console.log('Socket bağlantısı kesildi');
+    newSocket.on("disconnect", () => {
+      console.log("Socket bağlantısı kesildi");
       set({ isConnected: false });
     });
 
-    newSocket.on('connect_error', (error) => {
-      console.error('Socket bağlantı hatası:', error);
+    newSocket.on("connect_error", (error) => {
+      console.error("Socket bağlantı hatası:", error);
       set({ isConnected: false, connectionError: error.message });
     });
-
 
     set({ socket: newSocket });
     return newSocket;
@@ -77,7 +76,7 @@ const useSocketStore = create((set, get) => ({
     if (socket && isConnected) {
       socket.emit(event, data);
     } else {
-      console.error('Socket bağlı değil');
+      console.error("Socket bağlı değil");
     }
   },
 
@@ -103,21 +102,26 @@ const useSocketStore = create((set, get) => ({
 
   // Kullanıcı join işlemi
   joinUser: (userId) => {
-    get().emit('join', { userId });
+    get().emit("join", { userId });
   },
 
   // Mesaj gönderme
   sendSocketMessage: (messageData) => {
-    get().emit('send_message', messageData);
+    get().emit("send_message", messageData);
   },
 
-  sendGroupMessage: (groupId, content) =>{
-    get().emit('group_message', { groupId, content });
+  sendGroupMessage: (groupId, content) => {
+    get().emit("group_message", { groupId, content });
   },
 
   // Typing durumunu gönderme
   sendTyping: (data) => {
-    get().emit('typing', data);
+    get().emit("typing", data);
+  },
+
+  // Stop typing durumunu gönderme
+  sendStopTyping: (data) => {
+    get().emit("stop_typing", data);
   },
 
   // Socket durumunu kontrol et
@@ -128,7 +132,7 @@ const useSocketStore = create((set, get) => ({
   // Socket instance'ını al
   getSocket: () => {
     return get().socket;
-  }
+  },
 }));
 
 export default useSocketStore;

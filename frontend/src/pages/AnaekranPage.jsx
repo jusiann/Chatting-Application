@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import Sidebar from "../components/Sidebar";
 import Searchbar from "../components/Searchbar";
 import Personcard from "../components/Personcard";
-import GroupSelectedCard from "../components/groupSelectedCard";
 import useGroupStore from "../store/group";
 import Messagetopbar from "../components/Messagetopbar";
 import Messagereceived from "../components/Messagereceived";
@@ -11,42 +10,18 @@ import Sendbox from "../components/Sendbox";
 import useConservationStore from "../store/conservation";
 import useUserStore from "../store/user";
 import "../style/anaekranpage.css";
-import useSocketStore from "../store/socket";
 import GroupCard from "../components/groupCard";
 import GroupMessageReceived from "../components/groupMessageReceived";
 
 const AnaekranPage = () => {
-  const {
-    chatUsers,
-    chatUsersFetch,
-    messages,
-    messagingUserId,
-    initializeSocket,
-    addNewMessage,
-    messagingUser,
-    handleDelivered,
-    handleRead,
-    updateChatUsers,
-    messagingType,
-    unreadIncrement,
-    contactUsersFetch,
-  } = useConservationStore();
+  const { chatUsers, messages, messagingUserId, messagingType, messagingUser } =
+    useConservationStore();
 
-  const { groups, fetchGroups, updateGroupLastMessage, unreadGroupIncrement } =
-    useGroupStore();
+  const { groups } = useGroupStore();
 
   const { user } = useUserStore();
 
-  const { on, off, emit } = useSocketStore();
-
   const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    chatUsersFetch();
-    fetchGroups();
-    initializeSocket();
-    contactUsersFetch();
-  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -57,69 +32,6 @@ const AnaekranPage = () => {
       setTimeout(() => scrollToBottom(), 100);
     }
   }, [messagingUserId]);
-
-  useEffect(() => {
-    on("new_message", (message) => {
-      if (
-        message.sender_id === messagingUser?.id &&
-        messagingType === "individual"
-      ) {
-        addNewMessage(message);
-        emit("mark_read", {
-          receiver_id: user.id,
-          sender_id: messagingUser.id,
-        });
-      } else {
-        emit("mark_delivered", {
-          receiver_id: user.id,
-          sender_id: message.sender_id,
-        });
-        unreadIncrement(message.sender_id);
-      }
-      updateChatUsers(message.sender_id, message);
-      //chatUsersFetch();
-    });
-
-    on("message_sent", (message) => {
-      updateChatUsers(message.receiver_id, message);
-    });
-
-    on("group_message", (message) => {
-      if (message.group_id === messagingUser?.id && messagingType === "group") {
-        addNewMessage(message);
-        emit("group_read", { groupId: messagingUser.id });
-      } else {
-        unreadGroupIncrement(message.group_id);
-      }
-      updateGroupLastMessage(message.group_id, message);
-    });
-
-    on("message_delivered", (data) => {
-      const receiver_id = data.receiver_id;
-      handleDelivered(receiver_id);
-      //chatUsersFetch();
-    });
-
-    on("messages_read", (data) => {
-      const receiverId = data.receiver_id;
-      handleRead(receiverId);
-      //chatUsersFetch();
-    });
-
-    on("new_group", async (id) => {
-      emit("join_group", id);
-      await fetchGroups();
-    });
-
-    return () => {
-      off("new_message");
-      off("message_delivered");
-      off("message_read");
-      off("group_message");
-      off("message_sent");
-      off("new_group");
-    };
-  }, [on, addNewMessage, messagingUser?.id, off]);
 
   const scrollToBottom = () => {
     // Yöntem 1: messagesEndRef kullanarak
@@ -184,33 +96,36 @@ const AnaekranPage = () => {
           )}
         </div>
       </div>
+      {messagingUser == null ? (
+        <div className="anaekran-right-panel">Sohbet</div>
+      ) : (
+        <div className="anaekran-chat-panel">
+          <div className="messagetopbar-container-home">
+            <Messagetopbar />
+          </div>
 
-      <div className="anaekran-chat-panel">
-        <div className="messagetopbar-container-home">
-          <Messagetopbar />
-        </div>
-
-        <div className="anaekran-messages">
-          {messagingType === "individual"
-            ? sortedMessages.map((message, index) =>
-                message.sender_id === user.id ? (
-                  <Messagesended key={index} message={message} />
-                ) : (
-                  <Messagereceived key={index} message={message} />
+          <div className="anaekran-messages">
+            {messagingType === "individual"
+              ? sortedMessages.map((message, index) =>
+                  message.sender_id === user.id ? (
+                    <Messagesended key={index} message={message} />
+                  ) : (
+                    <Messagereceived key={index} message={message} />
+                  )
                 )
-              )
-            : sortedMessages.map((message, index) =>
-                message.sender_id === user.id ? (
-                  <Messagesended key={index} message={message} />
-                ) : (
-                  <GroupMessageReceived key={index} message={message} />
-                )
-              )}
-          <div ref={messagesEndRef} />
-        </div>
+              : sortedMessages.map((message, index) =>
+                  message.sender_id === user.id ? (
+                    <Messagesended key={index} message={message} />
+                  ) : (
+                    <GroupMessageReceived key={index} message={message} />
+                  )
+                )}
+            <div ref={messagesEndRef} />
+          </div>
 
-        <Sendbox />
-      </div>
+          <Sendbox />
+        </div>
+      )}
     </div>
   );
 };

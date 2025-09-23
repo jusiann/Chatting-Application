@@ -10,6 +10,9 @@ class UserModel {
   bool selected;
   String? title;
   String? profilepic;
+  DateTime? lastSeen;
+  bool isOnline = false;
+  bool? typing = false;
 
   UserModel({
     required this.firstName,
@@ -23,6 +26,9 @@ class UserModel {
     this.selected = false,
     this.title,
     this.profilepic,
+    this.lastSeen,
+    this.isOnline = false,
+    this.typing = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -34,6 +40,42 @@ class UserModel {
       title: json['title'],
       department: json['department'],
       profilepic: json['profile_pic'],
+      lastSeen: DateTime.tryParse(json['last_seen'].toString())?.toLocal(),
+      isOnline: json['is_online'] ?? false,
+    );
+  }
+
+  UserModel copyWith({
+    int? id,
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? status,
+    String? department,
+    String? avatar,
+    String? time,
+    bool? selected,
+    String? title,
+    String? profilepic,
+    DateTime? lastSeen,
+    bool? isOnline,
+    bool? typing,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
+      status: status ?? this.status,
+      department: department ?? this.department,
+      avatar: avatar ?? this.avatar,
+      time: time ?? this.time,
+      selected: selected ?? this.selected,
+      title: title ?? this.title,
+      profilepic: profilepic ?? this.profilepic,
+      lastSeen: lastSeen ?? this.lastSeen,
+      isOnline: isOnline ?? this.isOnline,
+      typing: typing ?? this.typing,
     );
   }
 

@@ -15,9 +15,6 @@ function groupCard({ groupRoom }) {
     (state) => state.setMessagingUser
   );
   const messagingUser = useConservationStore((state) => state.messagingUser);
-  const setMessagingType = useConservationStore(
-    (state) => state.setMessagingType
-  );
 
   const { emit } = useSocketStore();
   const { user } = useUserStore();
@@ -26,8 +23,7 @@ function groupCard({ groupRoom }) {
 
   const handleClick = () => {
     fetchMessages(groupRoom.id);
-    setMessagingType("group");
-    setMessagingUser({ id: groupRoom.id });
+    setMessagingUser({ id: groupRoom.id, type: "group" });
     emit("group_read", { groupId: groupRoom.id });
     clearUnread(groupRoom.id);
   };

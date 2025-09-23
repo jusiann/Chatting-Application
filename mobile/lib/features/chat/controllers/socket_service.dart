@@ -109,6 +109,30 @@ class SocketService extends _$SocketService {
       }
     });
 
+    _socket!.on("online", (data) {
+      final rawId = data['id'];
+      final userId = int.parse(rawId.toString());
+      ref.read(userServiceProvider.notifier).setUserOnlineStatus(userId, true);
+    });
+
+    _socket!.on("offline", (data) {
+      final rawId = data['id'];
+      final userId = int.parse(rawId.toString());
+      ref.read(userServiceProvider.notifier).setUserOnlineStatus(userId, false);
+    });
+
+    _socket!.on("typing", (data) {
+      final rawId = data['sender_id'];
+      final userId = int.parse(rawId.toString());
+      ref.read(userServiceProvider.notifier).addTypingUser(userId);
+    });
+
+    _socket!.on("stop_typing", (data) {
+      final rawId = data['sender_id'];
+      final userId = int.parse(rawId.toString());
+      ref.read(userServiceProvider.notifier).removeTypingUser(userId);
+    });
+
     _socket!.on('messages_read', (data) {
       final receiverId = data['receiver_id'];
       ref.read(messageControllerProvider.notifier).markAsRead(receiverId);

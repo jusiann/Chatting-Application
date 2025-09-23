@@ -51,6 +51,7 @@ class SendMessageWidget extends ConsumerWidget {
                       buildStatusIcon(status),
                     ],
                   ),
+                  SizedBox(height: 8),
                 ],
               ),
             ),

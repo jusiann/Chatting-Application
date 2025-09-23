@@ -47,6 +47,7 @@ class ReceivedMessageWidget extends StatelessWidget {
                       ),
                     ],
                   ),
+                  SizedBox(height: 8),
                 ],
               ),
             ),
