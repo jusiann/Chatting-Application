@@ -117,7 +117,7 @@ class ProfileController extends _$ProfileController {
       );
       final response = await request.send();
       final responseBody = await http.Response.fromStream(response);
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         Fluttertoast.showToast(
           msg: 'Profil resmi başarıyla güncellendi',
           toastLength: Toast.LENGTH_SHORT,
@@ -127,8 +127,8 @@ class ProfileController extends _$ProfileController {
           fontSize: 16.0,
         );
         final data = jsonDecode(responseBody.body);
-        await _storage.write(key: 'accessToken', value: data['accessToken']);
-        await _storage.write(key: 'refreshToken', value: data['refreshToken']);
+        await _storage.write(key: 'accessToken', value: data['access_token']);
+        await _storage.write(key: 'refreshToken', value: data['refresh_token']);
         ref.read(authControllerProvider.notifier).changeUser();
       } else {
         Fluttertoast.showToast(

@@ -6,6 +6,13 @@ import moment from "moment";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
 import { ApiError } from "../middlewares/error.js";
+import AWS from "aws-sdk";
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+  region: process.env.AWS_REGION,
+});
 
 const validateEmail = (email) => {
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -530,20 +537,45 @@ export const changeTitle = async (req, res, next) => {
 export const uploadProfileImage = async (req, res) => {
   try {
     const userId = req.user.id;
-    const imageUrl = req.file.path;
+    const file = req.file;
+
+    if (!file) return res.status(400).json({ message: "Dosya bulunamadı." });
+
+    const keySafeName = file.originalname?.replace(/\s+/g, "_") || "file";
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: `profile-pics/${userId}-${Date.now()}-${keySafeName}`,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    };
+
+    // Upload to S3 and wait for completion
+    const uploadResult = await s3.upload(params).promise();
+    const imageUrl = uploadResult.Location;
+
+    if (!imageUrl) {
+      return res
+        .status(500)
+        .json({ message: "S3 yükleme sonucu URL alınamadı." });
+    }
 
     const updatedUser = await client.query(
-      `update users set profile_pic = $1 where id = $2 returning *`,
+      `UPDATE users SET profile_pic = $1 WHERE id = $2 RETURNING *`,
       [imageUrl, userId]
     );
+
     if (updatedUser.rows[0]) {
-      createToken(updatedUser.rows[0], res);
-      return;
+      await createToken(updatedUser.rows[0], res);
+      return; // createToken already sent the response
     }
-    return res.status(401).json({ message: "Kullanıcı bulunamadı." });
+
+    return res.status(404).json({ message: "Kullanıcı bulunamadı." });
   } catch (err) {
     console.log(err);
-    return res.status(400).json({ message: err });
+    return res.status(500).json({
+      message: "Profil resmi yüklenemedi.",
+      error: err?.message || err,
+    });
   }
 };
 

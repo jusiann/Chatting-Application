@@ -78,6 +78,7 @@ Widget unReadCountWidget(int? unRead) {
             fontFamily: 'Inter',
             color: Colors.white,
           ),
+          textAlign: TextAlign.right,
         ),
       ),
     );

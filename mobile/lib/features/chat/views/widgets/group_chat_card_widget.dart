@@ -41,13 +41,15 @@ class GroupChatCardWidget extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 group.lastMessageTime != null
                     ? formatMessageTime(group.lastMessageTime!)
                     : formatMessageTime(group.createdAt),
               ),
+              SizedBox(height: 6),
               if (unreadCount != null && unreadCount! > 0)
                 CircleAvatar(
                   backgroundColor: Color(0xFF910811),

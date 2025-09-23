@@ -38,34 +38,49 @@ class CustomCard extends ConsumerWidget {
                   )
                 : SvgPicture.asset('assets/svg_files/person.svg', width: 40),
           ),
-          title: Text(
-            chat.title != null
-                ? '${chat.title!} ${chat.fullname}'
-                : chat.fullname,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 14,
-              color: Colors.black,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          title: Row(
             children: [
-              Text(formatMessageTime(chat.time)),
-              SizedBox(height: 3),
-              unReadCountWidget(unRead),
+              Expanded(
+                child: Text(
+                  chat.title != null
+                      ? '${chat.title!} ${chat.fullname}'
+                      : chat.fullname,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 14,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ],
+          ),
+          trailing: SizedBox(
+            width: 80,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(formatMessageTime(chat.time)),
+                SizedBox(height: 6),
+                unReadCountWidget(unRead),
+              ],
+            ),
           ),
           subtitle: Row(
             children: [
               currentTextIcon(currentUser, chat.senderid!, chat.messageStatus!),
               SizedBox(width: 5),
-              Text(
-                chat.currentMessage,
-                style: TextStyle(fontFamily: 'Inter', fontSize: 12),
+              Expanded(
+                child: Text(
+                  chat.currentMessage,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontFamily: 'Inter', fontSize: 12),
+                ),
               ),
             ],
           ),
