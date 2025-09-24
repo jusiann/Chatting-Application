@@ -541,6 +541,17 @@ export const uploadProfileImage = async (req, res) => {
 
     if (!file) return res.status(400).json({ message: "Dosya bulunamadı." });
 
+    const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.mimetype)) {
+      return res
+        .status(400)
+        .json({ message: "Sadece JPEG/PNG/WEBP kabul edilir." });
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return res.status(413).json({ message: "Dosya boyutu 2MB'ı aşamaz." });
+    }
+
     const keySafeName = file.originalname?.replace(/\s+/g, "_") || "file";
     const params = {
       Bucket: process.env.S3_BUCKET_NAME,

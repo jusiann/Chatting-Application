@@ -1,11 +1,14 @@
 import { create } from "zustand";
-import { checkAuth, signIn, logout as apiLogout } from "../api/auth";
+import { checkAuth, signIn, logout as apiLogout, signUp } from "../api/auth";
 import toast from "react-hot-toast";
 
 const useUserStore = create((set) => ({
   user: null,
+  loggingIn: false,
   setUser: (user) => set({ user }),
   login: async (email, password) => {
+    set({ loggingIn: true });
+    await new Promise((r) => setTimeout(r, 1000));
     try {
       const res = await signIn({ email, password });
       set({ user: res.user });
@@ -19,6 +22,21 @@ const useUserStore = create((set) => ({
     } catch (error) {
       toast.error(error.response?.data?.message || "Giriş başarısız.");
       return false;
+    } finally {
+      set({ loggingIn: false });
+    }
+  },
+  signUp: async (payload) => {
+    set({ loggingIn: true });
+    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      const res = await signUp(payload);
+      return res;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Kayıt başarısız.");
+      return false;
+    } finally {
+      set({ loggingIn: false });
     }
   },
   logout: async () => {

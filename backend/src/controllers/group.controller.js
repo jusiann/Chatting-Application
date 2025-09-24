@@ -1,74 +1,77 @@
 import client from "../lib/db.js";
-import {ApiError} from "../middlewares/error.js";
+import { ApiError } from "../middlewares/error.js";
 
 export const createGroup = async (req, res, next) => {
-    const { name, description, memberIds } = req.body;
-    const creatorId = req.user.id;
-    
-    try {
-        // Grup oluştur
-        const group = await client.query(
-            `INSERT INTO groups (name, description, created_by) VALUES ($1, $2, $3) RETURNING *`,
-            [name, description, creatorId]
-        );
-        
-        const groupId = group.rows[0].id;
-        
-        // Grup oluşturucusunu admin olarak ekle
-        await client.query(
-            `INSERT INTO group_members (group_id, user_id, role) VALUES ($1, $2, 'admin')`,
-            [groupId, creatorId]
-        );
-        
-        // Diğer üyeleri ekle
-        for (const memberId of memberIds) {
-            await client.query(
-                `INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)`,
-                [groupId, memberId]
-            );
-        }
-        
-        res.status(200).json(group.rows[0]);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Grup oluşturulurken hata oluştu' });
+  const { name, description, memberIds } = req.body;
+  const creatorId = req.user.id;
+
+  try {
+    // Grup oluştur
+    const group = await client.query(
+      `INSERT INTO groups (name, description, created_by) VALUES ($1, $2, $3) RETURNING *`,
+      [name, description, creatorId]
+    );
+
+    const groupId = group.rows[0].id;
+
+    // Grup oluşturucusunu admin olarak ekle
+    await client.query(
+      `INSERT INTO group_members (group_id, user_id, role) VALUES ($1, $2, 'admin')`,
+      [groupId, creatorId]
+    );
+
+    // Diğer üyeleri ekle
+    for (const memberId of memberIds) {
+      await client.query(
+        `INSERT INTO group_members (group_id, user_id) VALUES ($1, $2)`,
+        [groupId, memberId]
+      );
     }
+
+    res.status(200).json(group.rows[0]);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Grup oluşturulurken hata oluştu" });
+  }
 };
 
 export const sendGroupMessage = async (req, res, next) => {
-    const { groupId } = req.params;
-    const { content } = req.body;
-    const senderId = req.user.id;
-    
-    try {
-        // Kullanıcının gruba üye olup olmadığını kontrol et
-        const membership = await client.query(
-            `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
-            [groupId, senderId]
-        );
-        
-        if (membership.rows.length === 0) {
-            return res.status(403).json({ message: 'Bu gruba mesaj gönderme yetkiniz yok' });
-        }
-        
-        const message = await client.query(
-            `INSERT INTO group_messages (group_id, sender_id, content) 
-             VALUES ($1, $2, $3) RETURNING *`,
-            [groupId, senderId, content]
-        );
-        
-        res.status(200).json(message.rows[0]);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Mesaj gönderilirken hata oluştu' });
+  const { groupId } = req.params;
+  const { content } = req.body;
+  const senderId = req.user.id;
+
+  try {
+    // Kullanıcının gruba üye olup olmadığını kontrol et
+    const membership = await client.query(
+      `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
+      [groupId, senderId]
+    );
+
+    if (membership.rows.length === 0) {
+      return res
+        .status(403)
+        .json({ message: "Bu gruba mesaj gönderme yetkiniz yok" });
     }
+
+    const message = await client.query(
+      `INSERT INTO group_messages (group_id, sender_id, content) 
+             VALUES ($1, $2, $3) RETURNING *`,
+      [groupId, senderId, content]
+    );
+
+    res.status(200).json(message.rows[0]);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Mesaj gönderilirken hata oluştu" });
+  }
 };
 
 export const getUserGroupsWithLastMessages = async (req, res, next) => {
-    const userId = req.user.id;
-    
-    try {
-        const groups = await client.query(`
+  const userId = req.user.id;
+
+  try {
+    const groups = await client.query(
+      `
             SELECT g.*, gm.role,
                    (SELECT content FROM group_messages 
                     WHERE group_id = g.id 
@@ -81,73 +84,126 @@ export const getUserGroupsWithLastMessages = async (req, res, next) => {
             JOIN group_members gm ON g.id = gm.group_id
             WHERE gm.user_id = $1
             ORDER BY last_message_time DESC
-        `, [userId]);
-        
-        res.status(200).json(groups.rows);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Gruplar getirilirken hata oluştu' });
-    }
+        `,
+      [userId]
+    );
+
+    res.status(200).json(groups.rows);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Gruplar getirilirken hata oluştu" });
+  }
 };
 
 export const getGroupMessages = async (req, res, next) => {
-    
-    const { groupId } = req.params;
-    const userId = req.user.id;
-    
-    try {
-        // Kullanıcının gruba üye olup olmadığını kontrol et
-        console.log('Checking group membership...');
-        const membership = await client.query(
-            `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
-            [groupId, userId]
-        );
-        
-        if (membership.rows.length === 0) {
-            return res.status(403).json({ message: 'Bu grubun mesajlarını görme yetkiniz yok' });
-        }
-        
-        const messages = await client.query(`
+  const { groupId } = req.params;
+  const userId = req.user.id;
+  const { isFirst, cursor } = req.query;
+
+  try {
+    if (isFirst == "true") {
+      // Kullanıcının gruba üye olup olmadığını kontrol et
+      console.log("Checking group membership...");
+      const membership = await client.query(
+        `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
+        [groupId, userId]
+      );
+
+      if (membership.rows.length === 0) {
+        return res
+          .status(403)
+          .json({ message: "Bu grubun mesajlarını görme yetkiniz yok" });
+      }
+
+      const messages = await client.query(
+        `
             SELECT gm.*, u.first_name, u.last_name 
             FROM group_messages gm
             JOIN users u ON gm.sender_id = u.id
             WHERE gm.group_id = $1
-            ORDER BY gm.created_at DESC
-        `, [groupId]);
-        
-        res.status(200).json(messages.rows);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Mesajlar getirilirken hata oluştu' });
+            ORDER BY gm.id DESC LIMIT 30
+        `,
+        [groupId]
+      );
+      let hasMore = false;
+      if (messages.rows.length == 30) hasMore = true;
+      let newCursor = null;
+      if (messages.rows.length > 0) {
+        newCursor = messages.rows[messages.rows.length - 1].id;
+      }
+      res
+        .status(200)
+        .json({ messages: messages.rows, hasMore, cursor: newCursor });
+    } else {
+      console.log("Checking group membership...");
+      const membership = await client.query(
+        `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
+        [groupId, userId]
+      );
+
+      if (membership.rows.length === 0) {
+        return res
+          .status(403)
+          .json({ message: "Bu grubun mesajlarını görme yetkiniz yok" });
+      }
+
+      const messages = await client.query(
+        `
+            SELECT gm.*, u.first_name, u.last_name 
+            FROM group_messages gm
+            JOIN users u ON gm.sender_id = u.id
+            WHERE gm.group_id = $1 AND gm.id < $2
+            ORDER BY gm.id DESC LIMIT 30
+        `,
+        [groupId, cursor]
+      );
+      let hasMore = false;
+      if (messages.rows.length == 30) hasMore = true;
+      let newCursor = null;
+      if (messages.rows.length > 0) {
+        newCursor = messages.rows[messages.rows.length - 1].id;
+      }
+      res
+        .status(200)
+        .json({ messages: messages.rows, hasMore, cursor: newCursor });
     }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Mesajlar getirilirken hata oluştu" });
+  }
 };
 
 export const getGroupMembers = async (req, res, next) => {
-    const { groupId } = req.params;
-    const userId = req.user.id;
-    
-    try {
-        // Kullanıcının gruba üye olup olmadığını kontrol et
-        const membership = await client.query(
-            `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
-            [groupId, userId]
-        );
-        
-        if (membership.rows.length === 0) {
-            return res.status(403).json({ message: 'Bu grubun üyelerini görme yetkiniz yok' });
-        }
-        
-        const members = await client.query(`
+  const { groupId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // Kullanıcının gruba üye olup olmadığını kontrol et
+    const membership = await client.query(
+      `SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2`,
+      [groupId, userId]
+    );
+
+    if (membership.rows.length === 0) {
+      return res
+        .status(403)
+        .json({ message: "Bu grubun üyelerini görme yetkiniz yok" });
+    }
+
+    const members = await client.query(
+      `
             SELECT u.id, u.name, u.surname, u.email, gm.role, gm.joined_at
             FROM users u
             JOIN group_members gm ON u.id = gm.user_id
             WHERE gm.group_id = $1
             ORDER BY gm.joined_at
-        `, [groupId]);
-        
-        res.status(200).json(members.rows);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Üyeler getirilirken hata oluştu' });
-    }
+        `,
+      [groupId]
+    );
+
+    res.status(200).json(members.rows);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Üyeler getirilirken hata oluştu" });
+  }
 };

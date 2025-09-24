@@ -1,10 +1,22 @@
 import "../style/loginButton.css";
-const LoginButton = ({ onClick, text = "Giriş yap" , type = "button"}) => {
-    return (
-        <button className="loginButton" onClick={onClick} type={type}>
-            <span>{text}</span>
-        </button>
-    );
+import useUserStore from "../store/user";
+import { LoaderCircle } from "lucide-react";
+const LoginButton = ({ onClick, text = "Giriş yap", type = "button" }) => {
+  const { loggingIn } = useUserStore.getState();
+  return (
+    <button
+      className="loginButton"
+      onClick={onClick}
+      type={type}
+      disabled={loggingIn}
+    >
+      {loggingIn ? (
+        <LoaderCircle size={30} className="spinner" />
+      ) : (
+        <span>{text}</span>
+      )}
+    </button>
+  );
 };
 
 export default LoginButton;

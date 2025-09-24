@@ -1,6 +1,7 @@
 import client from "../lib/db.js";
 import moment from "moment";
 import { ApiError } from "../middlewares/error.js";
+import AWS from "aws-sdk";
 
 const MESSAGE_STATUS = {
   SENT: "sent",
@@ -31,18 +32,20 @@ export const getMessages = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const otherID = req.params.id;
+    const { isFirst, cursor } = req.query;
     if (!otherID) throw new ApiError("Recipient ID is required.", 400);
 
-    await client.query(
-      `
+    if (isFirst == "true") {
+      await client.query(
+        `
             UPDATE messages 
             SET status = $1 
             WHERE sender_id = $2 AND receiver_id = $3 AND status != $1`,
-      [MESSAGE_STATUS.READ, otherID, userId]
-    );
+        [MESSAGE_STATUS.READ, otherID, userId]
+      );
 
-    const messages = await client.query(
-      `
+      const messages = await client.query(
+        `
             SELECT 
                 m.*,
                 json_build_object(
@@ -62,14 +65,93 @@ export const getMessages = async (req, res, next) => {
             JOIN users r ON m.receiver_id = r.id
             WHERE (m.sender_id = $1 AND m.receiver_id = $2) 
                OR (m.sender_id = $2 AND m.receiver_id = $1)
-            ORDER BY m.created_at DESC`,
-      [userId, otherID]
-    );
+            ORDER BY m.id DESC LIMIT 30`,
+        [userId, otherID]
+      );
+      let hasMore = false;
+      if (messages.rows.length == 30) hasMore = true;
+      let newCursor = null;
+      if (messages.rows.length > 0) {
+        newCursor = messages.rows[messages.rows.length - 1].id;
+      }
+      const newMessages = await Promise.all(
+        messages.rows.map(async (msg) => {
+          if (msg.file_key) {
+            const fileUrl = await s3.getSignedUrlPromise("getObject", {
+              Bucket: process.env.AWS_BUCKET_FILENAME,
+              Key: msg.file_key,
+              Expires: 600, // 10 dakika geçerli
+            });
+            msg.file_url = fileUrl;
+          }
+          return msg;
+        })
+      );
+      res.status(200).json({
+        success: true,
+        messages: newMessages,
+        hasMore,
+        cursor: newCursor,
+      });
+    } else {
+      await client.query(
+        `
+            UPDATE messages 
+            SET status = $1 
+            WHERE sender_id = $2 AND receiver_id = $3 AND status != $1`,
+        [MESSAGE_STATUS.READ, otherID, userId]
+      );
 
-    res.status(200).json({
-      success: true,
-      messages: messages.rows,
-    });
+      const messages = await client.query(
+        `
+            SELECT 
+                m.*,
+                json_build_object(
+                    'id', s.id,
+                    'first_name', s.first_name,
+                    'last_name', s.last_name,
+                    'profile_pic', s.profile_pic
+                ) as sender,
+                json_build_object(
+                    'id', r.id,
+                    'first_name', r.first_name,
+                    'last_name', r.last_name,
+                    'profile_pic', r.profile_pic
+                ) as receiver
+            FROM messages m
+            JOIN users s ON m.sender_id = s.id
+            JOIN users r ON m.receiver_id = r.id
+            WHERE ((m.sender_id = $1 AND m.receiver_id = $2) 
+               OR (m.sender_id = $2 AND m.receiver_id = $1)) AND m.id < $3
+            ORDER BY m.id DESC LIMIT 30`,
+        [userId, otherID, cursor]
+      );
+      let hasMore = false;
+      if (messages.rows.length == 30) hasMore = true;
+      let newCursor = null;
+      if (messages.rows.length > 0) {
+        newCursor = messages.rows[messages.rows.length - 1].id;
+      }
+      const newMessages = await Promise.all(
+        messages.rows.map(async (msg) => {
+          if (msg.file_key) {
+            const fileUrl = await s3.getSignedUrlPromise("getObject", {
+              Bucket: process.env.AWS_BUCKET_FILENAME,
+              Key: msg.file_key,
+              Expires: 600, // 10 dakika geçerli
+            });
+            msg.file_url = fileUrl;
+          }
+          return msg;
+        })
+      );
+      res.status(200).json({
+        success: true,
+        messages: newMessages,
+        hasMore,
+        cursor: newCursor,
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -270,4 +352,27 @@ export const getLastMessages = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const uploadUrl = async (req, res) => {
+  const { fileName, fileType } = req.body;
+  if (!fileName || !fileType) {
+    return res.status(400).json({ error: "File name and type are required." });
+  }
+
+  // Generate a unique file key, e.g., using a timestamp or UUID
+  const fileKey = `uploads/${Date.now()}_${fileName}`;
+  const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_KEY,
+    region: process.env.AWS_REGION,
+  });
+
+  const url = await s3.getSignedUrlPromise("putObject", {
+    Bucket: process.env.AWS_BUCKET_FILENAME,
+    Key: fileKey,
+    Expires: 60, // URL geçerlilik süresi (saniye cinsinden)
+    ContentType: fileType,
+  });
+  res.status(200).json({ uploadUrl: url, fileKey });
 };

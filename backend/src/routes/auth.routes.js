@@ -14,11 +14,10 @@ import {
   logout,
 } from "../controllers/auth.controller.js";
 import { verifyToken } from "../middlewares/auth.js";
-import multer from "multer";
+import upload from "../middlewares/multer.js";
 import rateLimit from "express-rate-limit";
 
 const router = express.Router();
-const upload = multer();
 
 // Login rate limit
 export const loginLimiter = rateLimit({

@@ -113,6 +113,12 @@ io.on("connection", async (socket) => {
   io.emit("message_delivered", {
     receiver_id: socket.user.id,
   });
+
+  io.emit("online", { id: socket.user.id });
+  await client.query(`UPDATE users SET is_online = TRUE WHERE id = $1`, [
+    socket.user.id,
+  ]);
+
   const userGroups = await client.query(
     `SELECT group_id FROM group_members WHERE user_id = $1`,
     [socket.user.id]
@@ -154,7 +160,12 @@ io.on("connection", async (socket) => {
         "INSERT INTO messages (sender_id, receiver_id, content, status, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *",
         [socket.user.id, receiver_id, content, "sent"]
       );
-      const newMessage = result.rows[0];
+      let newMessage = result.rows[0];
+      const lastMessage = {
+        sender: newMessage.sender_id,
+        status: newMessage.status,
+      };
+      newMessage = { ...newMessage, lastMessage: lastMessage };
 
       socket.emit("message_sent", newMessage);
 
@@ -200,7 +211,7 @@ io.on("connection", async (socket) => {
           receiver_id: receiver_id,
         });
 
-        await createNotification({
+        /* await createNotification({
           userId: senderId,
           senderId: socket.user.id,
           type: NOTIFICATION_TYPES.MESSAGE_DELIVERED,
@@ -209,7 +220,7 @@ io.on("connection", async (socket) => {
             message_id,
             delivered_at: now,
           },
-        });
+        }); */
       }
     } catch (error) {
       console.error("[SOCKET] Mark delivered error:", error);
@@ -263,15 +274,24 @@ io.on("connection", async (socket) => {
       if (!receiver_id) {
         throw new Error("Missing required field: receiver_id");
       }
-
-      const receiverSocket = global.connectedUsers.get(receiver_id);
-      if (receiverSocket) {
-        receiverSocket.emit("user_typing", {
-          sender_id: socket.user.id,
-        });
-      }
+      io.to(`user_${receiver_id}`).emit("typing", {
+        sender_id: socket.user.id,
+        receiver_id: receiver_id,
+      });
     } catch (error) {
       console.error("[SOCKET] Typing indicator error:", error);
+    }
+  });
+
+  socket.on("stop_typing", (data) => {
+    try {
+      const { receiver_id } = data;
+      io.to(`user_${receiver_id}`).emit("stop_typing", {
+        sender_id: socket.user.id,
+        receiver_id: receiver_id,
+      });
+    } catch (error) {
+      console.error("[SOCKET] Stop typing error:", error);
     }
   });
 
@@ -311,10 +331,30 @@ io.on("connection", async (socket) => {
     );
   });
 
+  socket.on("file_message", async (data) => {
+    const { senderId, receiverId, content, fileKey, fileType } = data;
+    if (!senderId || !receiverId || !fileKey || !fileType) {
+      return socket.emit("message_error", {
+        message: "Missing required fields for file message",
+      });
+    }
+    const result = await client.query(
+      "INSERT INTO messages (sender_id, receiver_id, content, file_key, file_type) VALUES ($1,$2,$3,$4,$5) RETURNING *",
+      [senderId, receiverId, content, fileKey, fileType]
+    );
+    io.to(`user_${receiverId}`).emit("new_message", result.rows[0]);
+    socket.emit("message_sent", result.rows[0]);
+  });
+
   // Bağlantı kesilmesi
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     console.log(`[SOCKET] User disconnected: ${socket.user.id}`);
     global.connectedUsers.delete(socket.user.id);
+    io.emit("offline", { id: socket.user.id });
+    await client.query(
+      `UPDATE users SET last_seen = NOW(), is_online = FALSE WHERE id = $1`,
+      [socket.user.id]
+    );
   });
 });
 

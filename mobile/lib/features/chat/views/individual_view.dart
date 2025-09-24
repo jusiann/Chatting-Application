@@ -33,7 +33,6 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
   final _controller = TextEditingController();
   IO.Socket? socket;
   final ScrollController _scrollController = ScrollController();
-  bool _peerTyping = false;
   Timer? _typingDebounce;
   Timer? _typingClearTimer;
 
@@ -43,7 +42,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ref
           .read(messageControllerProvider.notifier)
-          .fetchMore(widget.chat.id);
+          .fetchInitial(widget.chat.id);
       final currentUserId = ref.read(authControllerProvider).authUser!.id;
       ref.read(socketServiceProvider.notifier).emit('mark_read', {
         'receiver_id': currentUserId,
@@ -60,8 +59,14 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
     });
 
     _scrollController.addListener(() async {
-      if (_scrollController.position.pixels <=
-          _scrollController.position.minScrollExtent + 100) {}
+      final pos = _scrollController.position;
+      // For reverse: true, scrolling "up" increases pixels toward maxScrollExtent
+      if (pos.pixels >= (pos.maxScrollExtent - 100) &&
+          pos.maxScrollExtent > 0) {
+        await ref
+            .read(messageControllerProvider.notifier)
+            .fetchMore(widget.chat.id);
+      }
     });
 
     super.initState();

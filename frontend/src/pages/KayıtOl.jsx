@@ -4,8 +4,8 @@ import LoginButton from "../components/loginButton";
 import Textinput from "../components/Textinput";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { signUp } from "../api/auth";
 import { useNavigate } from "react-router-dom";
+import useUserStore from "../store/user";
 import logo from "../assets/Logo1.png";
 
 const KayıtOl = () => {
@@ -19,6 +19,8 @@ const KayıtOl = () => {
     password: "",
     confirmPassword: "",
   });
+
+  const signUp = useUserStore((state) => state.signUp);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

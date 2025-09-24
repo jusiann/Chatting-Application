@@ -1,34 +1,103 @@
+import 'dart:convert';
+
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
-import 'package:mobile/features/chat/controllers/individual_page_controller.dart';
 import 'package:mobile/features/chat/controllers/providers.dart';
 import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:mobile/features/chat/models/chat_model.dart';
 import 'package:mobile/features/chat/models/message_model.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:http/http.dart' as http;
+import 'package:mobile/config.dart';
 part 'message_controller.g.dart';
 
 @riverpod
 class MessageController extends _$MessageController {
   List<MessageModel> _messages = [];
   bool _hasMore = true;
-  int _page = 0;
-  final int _pageSize = 20;
+  int? cursor;
+  bool _isLoading = false;
 
   @override
   List<MessageModel> build() {
     return _messages;
   }
 
-  Future<void> fetchMore(int otherUserId) async {
-    final newMessages = await fetchMessagesFromDb(
-      otherUserId: otherUserId,
-      token: ref.read(authControllerProvider.notifier).token!,
+  Future<void> fetchInitial(int otherUserId) async {
+    if (_isLoading) return;
+    _isLoading = true;
+    final token = ref.read(authControllerProvider.notifier).token!;
+    final uri = Uri.parse(
+      /* 'http://10.10.1.197:5001/api/messages/$otherUserId/$page/$pageSize', */
+      '$baseUrl/api/messages/$otherUserId?isFirst=true',
     );
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body)['messages'];
+      _hasMore = jsonDecode(response.body)['hasMore'];
+      cursor = jsonDecode(response.body)['cursor'];
+      final messageList = jsonList
+          .map((json) => MessageModel.fromJson(json))
+          .toList();
+      final newMessages = messageList;
 
-    _messages.insertAll(0, newMessages);
-    _messages.sort((a, b) => a.time.compareTo(b.time));
-    state = [..._messages];
+      _messages.insertAll(0, newMessages);
+      final uniqueMessages = <int, MessageModel>{};
+      for (var msg in _messages) {
+        uniqueMessages[msg.id] = msg;
+      }
+      _messages = uniqueMessages.values.toList();
+      _messages.sort((a, b) => a.time.compareTo(b.time));
+      state = [..._messages];
+    } else {
+      print(response.body);
+      throw Exception('Mesajlar yüklenirken hata oluştu.');
+    }
+    _isLoading = false;
+  }
+
+  Future<void> fetchMore(int otherUserId) async {
+    if (_isLoading || !_hasMore) return;
+    _isLoading = true;
+    final token = ref.read(authControllerProvider.notifier).token!;
+    final uri = Uri.parse(
+      '$baseUrl/api/messages/$otherUserId?isFirst=false&cursor=${cursor ?? ''}',
+    );
+    final response = await http.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body)['messages'];
+      _hasMore = jsonDecode(response.body)['hasMore'];
+      cursor = jsonDecode(response.body)['cursor'];
+      final messageList = jsonList
+          .map((json) => MessageModel.fromJson(json))
+          .toList();
+      final newMessages = messageList;
+
+      _messages.insertAll(0, newMessages);
+      final uniqueMessages = <int, MessageModel>{};
+      for (var msg in _messages) {
+        uniqueMessages[msg.id] = msg;
+      }
+      _messages = uniqueMessages.values.toList();
+      _messages.sort((a, b) => a.time.compareTo(b.time));
+      state = [..._messages];
+    } else {
+      print(response.body);
+      throw Exception('Mesajlar yüklenirken hata oluştu.');
+    }
+    _isLoading = false;
   }
 
   void addFromSocket(MessageModel msg) {
@@ -100,7 +169,7 @@ class MessageController extends _$MessageController {
         .where((user) => user.id == otherUserId)
         .firstOrNull;
     if (otherUser != null) {
-      final updatedModel = ChatModel.fromUser(otherUser!).copyWith(
+      final updatedModel = ChatModel.fromUser(otherUser).copyWith(
         time: DateTime.parse(data['created_at']).toLocal(),
         currentMessage: data['content'],
         senderid: data['sender_id'],

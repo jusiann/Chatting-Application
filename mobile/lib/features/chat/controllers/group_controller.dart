@@ -70,12 +70,17 @@ class GroupController extends _$GroupController {
 class GroupMessageController extends _$GroupMessageController {
   @override
   List<GroupMessageModel> build() => [];
+  bool _hasMore = true;
+  int? cursor;
+  bool _isLoading = false;
 
   Future<void> fetchGroupMessages(int groupId) async {
+    if (_isLoading) return;
+    _isLoading = true;
     final token = ref.read(authControllerProvider.notifier).token;
     print("Fetching messages for group $groupId");
     final response = await http.get(
-      Uri.parse('$baseUrl/api/groups/$groupId/messages'),
+      Uri.parse('$baseUrl/api/groups/$groupId/messages?isFirst=true'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -84,12 +89,53 @@ class GroupMessageController extends _$GroupMessageController {
 
     if (response.statusCode == 200) {
       print("Messages fetched successfully for group $groupId");
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(response.body)['messages'];
+      _hasMore = jsonDecode(response.body)['hasMore'];
+      cursor = jsonDecode(response.body)['cursor'];
       final messages = data
           .map((json) => GroupMessageModel.fromJson(json))
           .toList();
-      state = [...state, ...messages];
+      final combined = [...state, ...messages];
+      final uniqueMessages = <int, GroupMessageModel>{};
+      for (var msg in combined) {
+        uniqueMessages[msg.id] = msg;
+      }
+      state = uniqueMessages.values.toList();
     }
+    _isLoading = false;
+  }
+
+  Future<void> fetchMoreGroupMessages(int groupId) async {
+    if (_isLoading || !_hasMore) return;
+    _isLoading = true;
+    final token = ref.read(authControllerProvider.notifier).token;
+    print("Fetching messages for group $groupId");
+    final response = await http.get(
+      Uri.parse(
+        '$baseUrl/api/groups/$groupId/messages?isFirst=false&cursor=${cursor ?? ''}',
+      ),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print("Messages fetched successfully for group $groupId");
+      final List<dynamic> data = jsonDecode(response.body)['messages'];
+      _hasMore = jsonDecode(response.body)['hasMore'];
+      cursor = jsonDecode(response.body)['cursor'];
+      final messages = data
+          .map((json) => GroupMessageModel.fromJson(json))
+          .toList();
+      final combined = [...state, ...messages];
+      final uniqueMessages = <int, GroupMessageModel>{};
+      for (var msg in combined) {
+        uniqueMessages[msg.id] = msg;
+      }
+      state = uniqueMessages.values.toList();
+    }
+    _isLoading = false;
   }
 
   void addGroupMessage(GroupMessageModel message) {

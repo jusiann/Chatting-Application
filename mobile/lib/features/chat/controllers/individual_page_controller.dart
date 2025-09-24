@@ -7,6 +7,34 @@ import 'package:mobile/features/chat/models/message_model.dart';
 Future<List<MessageModel>> fetchMessagesFromDb({
   required int otherUserId,
   required String token,
+  required bool isFirst,
+}) async {
+  final uri = Uri.parse(
+    /* 'http://10.10.1.197:5001/api/messages/$otherUserId/$page/$pageSize', */
+    '$baseUrl/api/messages/$otherUserId?isFirst=$isFirst',
+  );
+
+  final response = await http.get(
+    uri,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+  print('STATUS CODE : ${response.statusCode}');
+  print('RESPONSE: ${response.body}');
+  if (response.statusCode == 200) {
+    final List<dynamic> jsonList = jsonDecode(response.body)['messages'];
+    return jsonList.map((json) => MessageModel.fromJson(json)).toList();
+  } else {
+    print(response.body);
+    throw Exception('Mesajlar yüklenirken hata oluştu.');
+  }
+}
+
+Future<List<MessageModel>> fetchMoreMessages({
+  required int otherUserId,
+  required String token,
 }) async {
   final uri = Uri.parse(
     /* 'http://10.10.1.197:5001/api/messages/$otherUserId/$page/$pageSize', */

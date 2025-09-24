@@ -44,11 +44,13 @@ exports.up = async function (knex) {
       .references("id")
       .inTable("users")
       .onDelete("CASCADE");
-    table.text("content").notNullable();
+    table.text("content");
     table.string("status", 20).defaultTo("sent");
     table.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
     table.timestamp("delivered_at");
     table.timestamp("read_at");
+    table.text("file_key");
+    table.text("file_type");
 
     // Eğer isimlendirilmiş constraint istersen:
     table

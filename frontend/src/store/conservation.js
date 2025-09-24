@@ -99,6 +99,8 @@ const useConservationStore = create((set, get) => ({
   messagingGroupId: null,
   messagingUser: null,
   messagingType: null,
+  hasMore: false,
+  cursor: null,
   setMessagingUser: ({ id, type }) => {
     set({ messagingType: type });
     if (get().messagingType === "individual") {
@@ -116,18 +118,92 @@ const useConservationStore = create((set, get) => ({
 
   fetchMessages: async ({ id }) => {
     try {
-      const response = await axios.get(`/messages/${id}`);
-      set({ messages: response.data.messages });
+      const response = await axios.get(`/messages/${id}?isFirst=true`);
+      // Backend returns newest -> oldest (ORDER BY id DESC). Reverse to keep array oldest -> newest.
+      const ordered = [...(response.data.messages || [])].reverse();
+      set({ messages: ordered });
+      set({ hasMore: response.data.hasMore || false });
+      set({ cursor: response.data.cursor || null });
+      console.log("Mesajlar alındı:", response.data);
     } catch (error) {
       console.error("Mesajlar alınamadı:", error);
       set({ messages: [] });
     }
   },
 
+  fetchMoreMessages: async ({ id }) => {
+    if (get().messagingType == "individual") {
+      try {
+        if (get().hasMore == false) return;
+        if (!get().cursor) return;
+        const cursor = get().cursor;
+        const response = await axios.get(
+          `/messages/${id}?isFirst=false&cursor=${cursor}`
+        );
+        // Older chunk (newest->oldest) needs reversing before prepend.
+        const moreDescending = response.data.messages || [];
+        const moreAscending = [...moreDescending].reverse();
+        const existing = get().messages || [];
+        // Prepend older messages. This keeps overall order oldest -> newest.
+        const combined = [...moreAscending, ...existing];
+        // Deduplicate by id (in case overlap)
+        const seen = new Set();
+        const deduped = [];
+        for (const m of combined) {
+          if (m && !seen.has(m.id)) {
+            seen.add(m.id);
+            deduped.push(m);
+          }
+        }
+        set({ messages: deduped });
+        set({ hasMore: response.data.hasMore || false });
+        set({ cursor: response.data.cursor || null });
+        console.log("Daha fazla mesaj alındı:", response.data);
+      } catch (error) {
+        console.error("Daha fazla mesaj alınamadı:", error);
+      }
+    } else if (get().messagingType == "group") {
+      try {
+        if (get().hasMore == false) return;
+        if (!get().cursor) return;
+        const cursor = get().cursor;
+        const response = await axios.get(
+          `/groups/${id}/messages?isFirst=false&cursor=${cursor}`
+        );
+        // Older chunk (newest->oldest) needs reversing before prepend.
+        const moreDescending = response.data.messages || [];
+        const moreAscending = [...moreDescending].reverse();
+        const existing = get().messages || [];
+        // Prepend older messages. This keeps overall order oldest -> newest.
+        const combined = [...moreAscending, ...existing];
+        // Deduplicate by id (in case overlap)
+        const seen = new Set();
+        const deduped = [];
+        for (const m of combined) {
+          if (m && !seen.has(m.id)) {
+            seen.add(m.id);
+            deduped.push(m);
+          }
+        }
+        set({ messages: deduped });
+        set({ hasMore: response.data.hasMore || false });
+        set({ cursor: response.data.cursor || null });
+        console.log("Daha fazla grup mesajı alındı:", response.data);
+      } catch (error) {
+        console.error("Daha fazla grup mesajı alınamadı:", error);
+      }
+    }
+  },
+
   fetchGroupMessages: async (groupId) => {
     try {
-      const response = await axios.get(`/groups/${groupId}/messages`);
-      set({ messages: response.data });
+      const response = await axios.get(
+        `/groups/${groupId}/messages?isFirst=true`
+      );
+      const ordered = [...(response.data.messages || [])].reverse();
+      set({ hasMore: response.data.hasMore || false });
+      set({ cursor: response.data.cursor || null });
+      set({ messages: ordered });
     } catch (error) {
       console.error("Grup mesajları alınamadı:", error);
       set({ messages: [] });
@@ -169,7 +245,9 @@ const useConservationStore = create((set, get) => ({
 
   // Yeni mesaj geldiğinde çağrılacak
   addNewMessage: (message) => {
-    const currentMessages = get().messages;
+    // Keep ordering oldest -> newest. Only append if not already present.
+    const currentMessages = get().messages || [];
+    if (currentMessages.some((m) => m.id === message.id)) return;
     set({ messages: [...currentMessages, message] });
   },
 
