@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import "emoji-picker-element";
 import "../style/sendbox.css";
-import { SmilePlus, Paperclip, Send } from "lucide-react";
+import { SmilePlus, Paperclip, Send, Image, File, Camera } from "lucide-react";
 import useConservationStore from "../store/conservation";
+import useFileStore from "../store/file";
 
 const Sendbox = () => {
   const [message, setMessage] = useState({
@@ -23,7 +24,12 @@ const Sendbox = () => {
     sendStopTyping,
   } = useConservationStore();
 
+  const [open, setOpen] = useState(false);
+  const { file, setFile } = useFileStore();
+  const fileInputRef = useRef(null);
+
   const typingRef = useRef({ isTyping: false, timer: null });
+  const menuRef = useRef(null);
 
   useEffect(() => {
     setMessage((prev) => ({
@@ -41,6 +47,16 @@ const Sendbox = () => {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [showEmoji]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!showEmoji) return;
@@ -127,6 +143,19 @@ const Sendbox = () => {
     }
   };
 
+  const handleFileClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setOpen(false);
+      console.log("Seçilen dosya:", useFileStore.getState().file);
+    }
+  };
+
   return (
     <div className="sendbox-wrapper">
       <div className="sendbox-container">
@@ -161,8 +190,25 @@ const Sendbox = () => {
           }}
         />
 
-        <div className="sendbox-attachment">
-          <Paperclip size={24} />
+        <div className="sendbox-attachment" ref={menuRef}>
+          <button onClick={() => setOpen((prev) => !prev)}>
+            <Paperclip size={24} />
+          </button>
+
+          <div className={`attachment-menu ${open ? "open" : ""}`}>
+            <button className="menu-item">
+              <Image /> Fotoğraf
+            </button>
+            <button className="menu-item" onClick={handleFileClick}>
+              <File /> Dosya
+            </button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
+          </div>
         </div>
 
         <div className="sendbox-send" onClick={handleSend}>

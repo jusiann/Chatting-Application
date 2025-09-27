@@ -230,9 +230,9 @@ const useConservationStore = create((set, get) => ({
       socketStore.sendSocketMessage(messageData);
 
       // Mesajları güncelle
-      if (get().messagingUser.id) {
+      /* if (get().messagingUser.id) {
         get().fetchMessages({ id: get().messagingUser.id });
-      }
+      } */
     } catch (error) {
       console.error("Mesaj gönderme hatası:", error);
     }

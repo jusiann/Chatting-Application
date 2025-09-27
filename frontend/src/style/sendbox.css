@@ -20,7 +20,6 @@
   gap: 45px;
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
-  overflow: hidden;
 }
 
 .sendbox-icon,
@@ -70,4 +69,56 @@
 
 .emoji-picker {
   --category-icon-size: 18px;
+}
+
+.sendbox-attachment {
+  position: relative;
+  display: inline-block;
+}
+
+.sendbox-attachment button {
+  padding: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.attachment-menu {
+  position: absolute;
+  bottom: 40px; /* yukarı açılacak */
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  opacity: 0;
+  transform: translateY(10px) scale(0.95);
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.attachment-menu.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.menu-item:hover {
+  background: #f0f0f0;
 }

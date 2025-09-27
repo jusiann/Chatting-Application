@@ -9,6 +9,12 @@ const MESSAGE_STATUS = {
   READ: "read",
 };
 
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+  region: process.env.AWS_REGION,
+});
+
 export const getUsers = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -78,7 +84,7 @@ export const getMessages = async (req, res, next) => {
         messages.rows.map(async (msg) => {
           if (msg.file_key) {
             const fileUrl = await s3.getSignedUrlPromise("getObject", {
-              Bucket: process.env.AWS_BUCKET_FILENAME,
+              Bucket: process.env.S3_BUCKET_FILENAME,
               Key: msg.file_key,
               Expires: 600, // 10 dakika geçerli
             });
@@ -136,7 +142,7 @@ export const getMessages = async (req, res, next) => {
         messages.rows.map(async (msg) => {
           if (msg.file_key) {
             const fileUrl = await s3.getSignedUrlPromise("getObject", {
-              Bucket: process.env.AWS_BUCKET_FILENAME,
+              Bucket: process.env.S3_BUCKET_FILENAME,
               Key: msg.file_key,
               Expires: 600, // 10 dakika geçerli
             });
@@ -357,22 +363,21 @@ export const getLastMessages = async (req, res, next) => {
 export const uploadUrl = async (req, res) => {
   const { fileName, fileType } = req.body;
   if (!fileName || !fileType) {
+    console.log("Alanlar eksik");
     return res.status(400).json({ error: "File name and type are required." });
   }
+  console.log(fileType);
 
   // Generate a unique file key, e.g., using a timestamp or UUID
   const fileKey = `uploads/${Date.now()}_${fileName}`;
-  const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_KEY,
-    region: process.env.AWS_REGION,
-  });
 
   const url = await s3.getSignedUrlPromise("putObject", {
-    Bucket: process.env.AWS_BUCKET_FILENAME,
+    Bucket: process.env.S3_BUCKET_FILENAME,
     Key: fileKey,
     Expires: 60, // URL geçerlilik süresi (saniye cinsinden)
     ContentType: fileType,
   });
   res.status(200).json({ uploadUrl: url, fileKey });
+  console.log("Upload URL oluşturuldu:", url);
+  console.log("Upload başarılı");
 };

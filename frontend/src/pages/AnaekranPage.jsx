@@ -12,6 +12,10 @@ import useUserStore from "../store/user";
 import "../style/anaekranpage.css";
 import GroupCard from "../components/groupCard";
 import GroupMessageReceived from "../components/groupMessageReceived";
+import useFileStore from "../store/file";
+import { File } from "lucide-react";
+import GroupApprovalButton from "../components/groupApprovalButton";
+import GroupCancelButton from "../components/groupCancelButton";
 
 const AnaekranPage = () => {
   const {
@@ -21,6 +25,8 @@ const AnaekranPage = () => {
     messagingUser,
     fetchMoreMessages,
   } = useConservationStore();
+
+  const { file, clearFile, uploadFile } = useFileStore();
 
   const { groups } = useGroupStore();
 
@@ -89,6 +95,12 @@ const AnaekranPage = () => {
     container.scrollTop = container.scrollHeight;
     // Ek olarak anchor'a scrollIntoView ile güvence altına al
     messagesEndRef.current?.scrollIntoView({ block: "end" });
+  };
+
+  const handleUpload = () => {
+    if (!file) return;
+    uploadFile();
+    clearFile();
   };
 
   // İlk yüklemede (yeni sohbet seçildiğinde ve mesajlar geldiğinde) en alta kaydır
@@ -185,26 +197,41 @@ const AnaekranPage = () => {
             <Messagetopbar />
           </div>
 
-          <div className="anaekran-messages" ref={messagesContainerRef}>
-            {messagingType === "individual"
-              ? messages.map((message, index) =>
-                  message.sender_id === user.id ? (
-                    <Messagesended key={index} message={message} />
-                  ) : (
-                    <Messagereceived key={index} message={message} />
+          {file != null ? (
+            <div className="file-info-container">
+              <div className="file-info-box">
+                <File size={100} />
+                <h3>{file.name}</h3>
+                <p>{file.type}</p>
+                <p>{(file.size / 1024).toFixed(2)} KB</p>
+                <div className="file-info-buttons">
+                  <GroupCancelButton onClick={clearFile} />
+                  <GroupApprovalButton text="Gönder" onClick={uploadFile} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="anaekran-messages" ref={messagesContainerRef}>
+              {messagingType === "individual"
+                ? messages.map((message, index) =>
+                    message.sender_id === user.id ? (
+                      <Messagesended key={index} message={message} />
+                    ) : (
+                      <Messagereceived key={index} message={message} />
+                    )
                   )
-                )
-              : messages.map((message, index) =>
-                  message.sender_id === user.id ? (
-                    <Messagesended key={index} message={message} />
-                  ) : (
-                    <GroupMessageReceived key={index} message={message} />
-                  )
-                )}
-            <div ref={messagesEndRef} />
-          </div>
+                : messages.map((message, index) =>
+                    message.sender_id === user.id ? (
+                      <Messagesended key={index} message={message} />
+                    ) : (
+                      <GroupMessageReceived key={index} message={message} />
+                    )
+                  )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
 
-          <Sendbox />
+          {file != null ? <div /> : <Sendbox />}
         </div>
       )}
     </div>

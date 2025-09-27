@@ -10,6 +10,7 @@ import { Server } from "socket.io";
 import http from "http";
 import jwt from "jsonwebtoken";
 import { fileURLToPath } from "url";
+import AWS from "aws-sdk";
 
 // Rotalar
 import authRoutes from "./src/routes/auth.routes.js";
@@ -34,6 +35,12 @@ const __dirname = path.dirname(__filename);
 // Express ve HTTP sunucusu
 const app = express();
 const server = http.createServer(app);
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+  region: process.env.AWS_REGION,
+});
 
 // Socket.IO yapılandırması
 const io = new Server(server, {
@@ -332,18 +339,26 @@ io.on("connection", async (socket) => {
   });
 
   socket.on("file_message", async (data) => {
-    const { senderId, receiverId, content, fileKey, fileType } = data;
+    const { senderId, receiverId, fileKey, fileType } = data;
     if (!senderId || !receiverId || !fileKey || !fileType) {
       return socket.emit("message_error", {
         message: "Missing required fields for file message",
       });
     }
     const result = await client.query(
-      "INSERT INTO messages (sender_id, receiver_id, content, file_key, file_type) VALUES ($1,$2,$3,$4,$5) RETURNING *",
-      [senderId, receiverId, content, fileKey, fileType]
+      "INSERT INTO messages (sender_id, receiver_id, file_key, file_type) VALUES ($1,$2,$3,$4) RETURNING *",
+      [senderId, receiverId, fileKey, fileType]
     );
-    io.to(`user_${receiverId}`).emit("new_message", result.rows[0]);
-    socket.emit("message_sent", result.rows[0]);
+    const msg = result.rows[0];
+    const fileUrl = await s3.getSignedUrlPromise("getObject", {
+      Bucket: process.env.S3_BUCKET_FILENAME,
+      Key: msg.file_key,
+      Expires: 600, // 10 dakika geçerli
+    });
+    msg.file_url = fileUrl;
+    console.log("Mesaj urlsiii", msg.file_url);
+    socket.emit("message_sent", msg);
+    io.to(`user_${receiverId}`).emit("new_message", msg);
   });
 
   // Bağlantı kesilmesi

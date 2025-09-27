@@ -80,6 +80,7 @@ function App() {
 
       on("message_sent", (message) => {
         updateChatUsers(message.receiver_id, message);
+        addNewMessage(message);
       });
 
       on("group_message", (message) => {

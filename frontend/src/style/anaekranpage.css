@@ -148,3 +148,37 @@
   font-weight: 600;
   color: #910811;
 }
+
+.file-info-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.file-info-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 50px;
+}
+.file-info-box h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+.file-info-box p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.file-info-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  align-items: center;
+}
