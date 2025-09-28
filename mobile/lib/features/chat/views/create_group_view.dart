@@ -14,8 +14,8 @@ class CreateGroupView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _nameController = TextEditingController();
-    final _descController = TextEditingController();
+    final nameController = TextEditingController();
+    final descController = TextEditingController();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: Color(0xFF910811),
@@ -24,11 +24,11 @@ class CreateGroupView extends ConsumerWidget {
           final List<int> memberIds = groupMembers
               .map((user) => user.id)
               .toList();
-          final String name = _nameController.text.trim().isNotEmpty
-              ? _nameController.text
+          final String name = nameController.text.trim().isNotEmpty
+              ? nameController.text
               : 'Yeni grup';
-          final String? description = _descController.text.trim().isNotEmpty
-              ? _descController.text
+          final String? description = descController.text.trim().isNotEmpty
+              ? descController.text
               : null;
           final bool success = await ref
               .read(groupControllerProvider.notifier)
@@ -96,7 +96,7 @@ class CreateGroupView extends ConsumerWidget {
                 width: double.infinity,
                 padding: EdgeInsets.only(left: 20, right: 20),
                 child: TextField(
-                  controller: _nameController,
+                  controller: nameController,
                   decoration: InputDecoration(
                     hintText: 'Grup Adı',
                     border: OutlineInputBorder(),
@@ -111,7 +111,7 @@ class CreateGroupView extends ConsumerWidget {
                 width: double.infinity,
                 padding: EdgeInsets.only(left: 20, right: 20),
                 child: TextField(
-                  controller: _descController,
+                  controller: descController,
                   decoration: InputDecoration(
                     hintText: 'Grup Açıklaması',
                     border: OutlineInputBorder(),

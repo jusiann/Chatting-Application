@@ -20,7 +20,7 @@ class PhotoView extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: Container(
+            child: SizedBox(
               width: double.infinity,
               child: Image.file(File(path), fit: BoxFit.cover),
             ),

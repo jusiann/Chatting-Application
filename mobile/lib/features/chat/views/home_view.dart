@@ -7,7 +7,7 @@ import 'package:mobile/features/chat/views/contact_view.dart';
 import 'package:mobile/features/settings/views/settings_view.dart';
 
 class HomeShell extends ConsumerStatefulWidget {
-  HomeShell({super.key});
+  const HomeShell({super.key});
 
   @override
   ConsumerState<HomeShell> createState() => _HomeShellState();

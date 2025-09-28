@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
-import 'package:mobile/features/authentication/controllers/register_controller.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -181,7 +179,7 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                       ),
                     ),
                     SizedBox(height: 15),
-                    Container(
+                    SizedBox(
                       width: double.infinity,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

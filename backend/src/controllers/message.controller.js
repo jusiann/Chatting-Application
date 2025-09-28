@@ -329,6 +329,14 @@ export const getLastMessages = async (req, res, next) => {
                 LIMIT 1`,
           [userId, user.id]
         );
+        const messageContent = (value) => {
+          const isFileMessage = value.file_key && value.sender_id != userId;
+          if (isFileMessage) return "Dosya alındı";
+          const isSendedFileMessage =
+            value.file_key && value.sender_id == userId;
+          if (isSendedFileMessage) return "Dosya gönderildi";
+          return value.content || "no Message";
+        };
 
         return {
           id: user.id,
@@ -342,7 +350,7 @@ export const getLastMessages = async (req, res, next) => {
             ? {
                 id: lastMessage.rows[0].id,
                 sender: lastMessage.rows[0].sender.id,
-                content: lastMessage.rows[0].content,
+                content: messageContent(lastMessage.rows[0]),
                 created_at: lastMessage.rows[0].created_at,
                 status: lastMessage.rows[0].status,
               }

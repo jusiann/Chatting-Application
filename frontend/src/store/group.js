@@ -2,6 +2,7 @@ import toast from "react-hot-toast";
 import { create } from "zustand";
 import { createGroup, getGroupMessages, getGroups } from "../api/group";
 import useSocketStore from "./socket";
+import useUserStore from "./user";
 
 const useGroupStore = create((set, get) => ({
   groups: [],
@@ -50,7 +51,20 @@ const useGroupStore = create((set, get) => ({
       await get().fetchGroups();
       return;
     }
-    updatedGroup.last_message = message.content;
+    const messageContent = (value) => {
+      try {
+        const userId = useUserStore.getState().user.id;
+        const isSendedFileMessage = value.file_key && value.sender_id == userId;
+        if (isSendedFileMessage) return "Dosya gönderildi";
+        const isReceivedFileMessage =
+          value.file_key && value.sender_id != userId;
+        if (isReceivedFileMessage) return "Dosya alındı";
+        return value.content || "no Message";
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    updatedGroup.last_message = messageContent(message);
     updatedGroup.last_message_time = message.created_at;
     const filteredGroups = currentGroups.filter(
       (group) => group.id !== groupId

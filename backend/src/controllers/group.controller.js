@@ -1,10 +1,16 @@
 import client from "../lib/db.js";
 import { ApiError } from "../middlewares/error.js";
+import AWS from "aws-sdk";
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+  region: process.env.AWS_REGION,
+});
 
 export const createGroup = async (req, res, next) => {
   const { name, description, memberIds } = req.body;
   const creatorId = req.user.id;
-
   try {
     // Grup oluştur
     const group = await client.query(
@@ -76,6 +82,12 @@ export const getUserGroupsWithLastMessages = async (req, res, next) => {
                    (SELECT content FROM group_messages 
                     WHERE group_id = g.id 
                     ORDER BY created_at DESC LIMIT 1) as last_message,
+                    (SELECT sender_id FROM group_messages 
+                    WHERE group_id = g.id 
+                    ORDER BY created_at DESC LIMIT 1) as sender_id,
+                    (SELECT file_key FROM group_messages 
+                    WHERE group_id = g.id 
+                    ORDER BY created_at DESC LIMIT 1) as file_key,
                    (SELECT created_at FROM group_messages 
                     WHERE group_id = g.id 
                     ORDER BY created_at DESC LIMIT 1) as last_message_time,
@@ -87,8 +99,20 @@ export const getUserGroupsWithLastMessages = async (req, res, next) => {
         `,
       [userId]
     );
+    const contentMessage = (value) => {
+      const userId = req.user.id;
+      const isSendedFileMessage = value.file_key && value.sender_id == userId;
+      if (isSendedFileMessage) return "Dosya gönderildi";
+      const isReceivedFileMessage = value.file_key && value.sender_id != userId;
+      if (isReceivedFileMessage) return "Dosya alındı";
+      return value.last_message || "Grup Oluşturuldu.";
+    };
+    const groupsWithLastMessages = groups.rows.map((group) => ({
+      ...group,
+      last_message: contentMessage(group),
+    }));
 
-    res.status(200).json(groups.rows);
+    res.status(200).json(groupsWithLastMessages);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Gruplar getirilirken hata oluştu" });
@@ -131,9 +155,22 @@ export const getGroupMessages = async (req, res, next) => {
       if (messages.rows.length > 0) {
         newCursor = messages.rows[messages.rows.length - 1].id;
       }
+      const newMessages = await Promise.all(
+        messages.rows.map(async (msg) => {
+          if (msg.file_key) {
+            const fileUrl = await s3.getSignedUrlPromise("getObject", {
+              Bucket: process.env.S3_BUCKET_FILENAME,
+              Key: msg.file_key,
+              Expires: 600, // 10 dakika geçerli
+            });
+            msg.file_url = fileUrl;
+          }
+          return msg;
+        })
+      );
       res
         .status(200)
-        .json({ messages: messages.rows, hasMore, cursor: newCursor });
+        .json({ messages: newMessages, hasMore, cursor: newCursor });
     } else {
       console.log("Checking group membership...");
       const membership = await client.query(
@@ -163,9 +200,22 @@ export const getGroupMessages = async (req, res, next) => {
       if (messages.rows.length > 0) {
         newCursor = messages.rows[messages.rows.length - 1].id;
       }
+      const newMessages = await Promise.all(
+        messages.rows.map(async (msg) => {
+          if (msg.file_key) {
+            const fileUrl = await s3.getSignedUrlPromise("getObject", {
+              Bucket: process.env.S3_BUCKET_FILENAME,
+              Key: msg.file_key,
+              Expires: 600, // 10 dakika geçerli
+            });
+            msg.file_url = fileUrl;
+          }
+          return msg;
+        })
+      );
       res
         .status(200)
-        .json({ messages: messages.rows, hasMore, cursor: newCursor });
+        .json({ messages: newMessages, hasMore, cursor: newCursor });
     }
   } catch (err) {
     console.log(err);

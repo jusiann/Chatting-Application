@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/settings/controllers/profile_controller.dart';
-import 'package:mobile/features/settings/views/widget/account_department_widget.dart';
 import 'package:mobile/features/settings/views/widget/profile_item_lastname.dart';
 import 'package:mobile/features/settings/views/widget/profile_item_name.dart';
 import 'package:mobile/features/settings/views/widget/profile_item_status.dart';

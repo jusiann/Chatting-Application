@@ -175,6 +175,8 @@ exports.up = async function (knex) {
     table.text("content").notNullable();
     table.string("status", 20).defaultTo("sent");
     table.timestamp("created_at").notNullable().defaultTo(knex.fn.now());
+    table.text("file_key");
+    table.text("file_type");
 
     // Indexler
     table.index("group_id", "idx_group_messages_group_id");

@@ -216,16 +216,13 @@ class AuthController extends _$AuthController {
 
   Future<void> markDeliveredMessages() async {
     final uri = Uri.parse('$baseUrl/api/messages/mark-delivered');
-    final response = await http.get(
+    await http.get(
       uri,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $_token',
       },
     );
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-    }
   }
 
   Future<void> signupUser({
@@ -238,7 +235,6 @@ class AuthController extends _$AuthController {
         lastName == null ||
         email == null ||
         password == null) {
-      print('tüm alanların doldurulması zorunludur.');
     } else {
       state = state.copyWith(registering: true);
       await Future.delayed(Duration(seconds: 1));

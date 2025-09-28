@@ -53,7 +53,7 @@ export const verifyToken = async (req, res, next) => {
     const decoded = await jwt.verify(access_token, process.env.JWT_SECRET_KEY);
 
     const user = await client.query(
-      "SELECT id, first_name, last_name, email, title, department FROM users WHERE id = $1",
+      "SELECT id, first_name, last_name, email, title, department, profile_pic FROM users WHERE id = $1",
       [decoded.id]
     );
 

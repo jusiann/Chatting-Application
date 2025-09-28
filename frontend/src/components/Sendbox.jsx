@@ -30,6 +30,13 @@ const Sendbox = () => {
 
   const typingRef = useRef({ isTyping: false, timer: null });
   const menuRef = useRef(null);
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
+  const ALLOWED_TYPES = [
+    "image/png",
+    "image/jpeg",
+    "application/pdf",
+    "text/plain",
+  ];
 
   useEffect(() => {
     setMessage((prev) => ({
@@ -150,6 +157,16 @@ const Sendbox = () => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        alert("Dosya boyutu 5MB'dan büyük olamaz.");
+        e.target.value = null;
+        return;
+      }
+      if (!ALLOWED_TYPES.includes(selectedFile.type)) {
+        alert("Bu dosya türüne izin verilmiyor!");
+        e.target.value = null;
+        return;
+      }
       setFile(selectedFile);
       setOpen(false);
       console.log("Seçilen dosya:", useFileStore.getState().file);
@@ -196,14 +213,12 @@ const Sendbox = () => {
           </button>
 
           <div className={`attachment-menu ${open ? "open" : ""}`}>
-            <button className="menu-item">
-              <Image /> Fotoğraf
-            </button>
             <button className="menu-item" onClick={handleFileClick}>
               <File /> Dosya
             </button>
             <input
               type="file"
+              accept="image/png, image/jpeg, application/pdf"
               ref={fileInputRef}
               style={{ display: "none" }}
               onChange={handleFileChange}

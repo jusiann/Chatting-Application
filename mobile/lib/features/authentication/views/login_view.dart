@@ -47,7 +47,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 50),
-                    Container(
+                    SizedBox(
                       height: 64,
                       width: 353,
                       child: TextField(
@@ -64,7 +64,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 15),
-                    Container(
+                    SizedBox(
                       height: 64,
                       width: 353,
                       child: TextField(
@@ -136,7 +136,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 50),
-                    Container(
+                    SizedBox(
                       height: 59,
                       width: 359,
                       child: FilledButton(

@@ -361,6 +361,27 @@ io.on("connection", async (socket) => {
     io.to(`user_${receiverId}`).emit("new_message", msg);
   });
 
+  socket.on("group_file_message", async (data) => {
+    const { senderId, groupId, fileKey, fileType } = data;
+    if (!senderId || !groupId || !fileKey || !fileType) {
+      return socket.emit("message_error", {
+        message: "Missing required fields for file message",
+      });
+    }
+    const result = await client.query(
+      "INSERT INTO group_messages (sender_id, group_id, file_key, file_type) VALUES ($1,$2,$3,$4) RETURNING *",
+      [senderId, groupId, fileKey, fileType]
+    );
+    const msg = result.rows[0];
+    const fileUrl = await s3.getSignedUrlPromise("getObject", {
+      Bucket: process.env.S3_BUCKET_FILENAME,
+      Key: msg.file_key,
+      Expires: 600, // 10 dakika geçerli
+    });
+    msg.file_url = fileUrl;
+    io.to(`group_${groupId}`).emit("group_message", msg);
+  });
+
   // Bağlantı kesilmesi
   socket.on("disconnect", async () => {
     console.log(`[SOCKET] User disconnected: ${socket.user.id}`);

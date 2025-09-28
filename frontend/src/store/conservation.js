@@ -2,6 +2,7 @@ import { create } from "zustand";
 import axios from "../api/axios.js";
 import useSocketStore from "./socket.js";
 import useGroupStore from "./group.js";
+import useUserStore from "./user.js";
 
 const useConservationStore = create((set, get) => ({
   // Typing state
@@ -51,13 +52,22 @@ const useConservationStore = create((set, get) => ({
     }
   },
   updateChatUsers: async (newUserId, message) => {
+    const messageContent = (value) => {
+      const isFileMessage =
+        value.file_key && value.sender_id != useUserStore.getState().user.id;
+      if (isFileMessage) return "Dosya alındı";
+      const isSendedFileMessage =
+        value.file_key && value.sender_id == useUserStore.getState().user.id;
+      if (isSendedFileMessage) return "Dosya gönderildi";
+      return value.content || "no Message";
+    };
     const currentUsers = get().chatUsers;
     const updatedUser = currentUsers.find((user) => user.id === newUserId);
     if (!updatedUser || updatedUser.lastMessage == null) {
       await get().chatUsersFetch();
       return;
     } // Kullanıcı bulunamazsa çıkış yap
-    updatedUser.lastMessage.content = message.content; // Yeni mesaj içeriği
+    updatedUser.lastMessage.content = messageContent(message); // Yeni mesaj içeriği
     updatedUser.lastMessage.created_at = message.created_at; // Yeni mesaj zamanı
     updatedUser.lastMessage.status = message.status; // Yeni mesaj durumu
     updatedUser.lastMessage.sender = message.sender_id; // Yeni mesaj gönderen

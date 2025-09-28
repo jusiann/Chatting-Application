@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 
 class AccountPasswordWidget extends ConsumerStatefulWidget {
   const AccountPasswordWidget({
@@ -29,7 +28,6 @@ class _AccountPasswordWidgetState extends ConsumerState<AccountPasswordWidget> {
   final _controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authControllerProvider);
     return PopScope(
       canPop: !isEditing,
       onPopInvokedWithResult: (didPop, result) {

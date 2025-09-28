@@ -79,9 +79,7 @@ class SocketService extends _$SocketService {
           'sender_id': msg.senderid,
         });
       }
-      if (openChatId != null &&
-          openChatId == msg.senderid &&
-          openChatType == 'individual') {
+      if (openChatId == msg.senderid && openChatType == 'individual') {
         _socket!.emit('mark_read', {
           'receiver_id': msg.receiverid,
           'sender_id': msg.senderid,
@@ -96,16 +94,16 @@ class SocketService extends _$SocketService {
     });
 
     _socket!.on('message_delivered', (data) {
-      final receiver_id = data['receiver_id'];
+      final receiverId = data['receiver_id'];
       final decoded = JwtDecoder.decode(_token!);
       final user = AuthUserModel.fromJwt(decoded);
-      if (receiver_id != user.id) {
+      if (receiverId != user.id) {
         ref
             .read(messageControllerProvider.notifier)
-            .markAsDelivered(receiver_id);
+            .markAsDelivered(receiverId);
         ref
             .read(userServiceProvider.notifier)
-            .changeChatStatus(receiver_id, 'delivered');
+            .changeChatStatus(receiverId, 'delivered');
       }
     });
 

@@ -10,7 +10,7 @@ class ContactCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Container(
+      leading: SizedBox(
         height: 60,
         width: 55,
         child: Stack(

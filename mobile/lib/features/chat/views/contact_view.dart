@@ -9,7 +9,7 @@ import 'package:mobile/features/chat/views/widgets/group_card_widget.dart';
 import 'package:mobile/main.dart';
 
 class ContactPage extends ConsumerStatefulWidget {
-  ContactPage({super.key});
+  const ContactPage({super.key});
 
   @override
   ConsumerState<ContactPage> createState() => _ContactPageState();

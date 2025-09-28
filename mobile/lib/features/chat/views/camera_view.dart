@@ -24,7 +24,7 @@ class _CameraViewState extends State<CameraView> {
   @override
   void initState() {
     super.initState();
-    if (cameras.length > 0) {
+    if (cameras.isNotEmpty) {
       _cameraController = CameraController(cameras[0], ResolutionPreset.high);
     }
     if (_cameraController != null) {
@@ -47,7 +47,7 @@ class _CameraViewState extends State<CameraView> {
       body: Column(
         children: [
           Expanded(
-            child: Container(
+            child: SizedBox(
               width: double.infinity,
               child: FutureBuilder(
                 future: cameraValue,

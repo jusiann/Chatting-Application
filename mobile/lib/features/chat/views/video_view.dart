@@ -43,7 +43,7 @@ class _VideoViewState extends State<VideoView> {
           Expanded(
             child: Stack(
               children: [
-                Container(
+                SizedBox(
                   width: double.infinity,
                   child: _controller!.value.isInitialized
                       ? AspectRatio(

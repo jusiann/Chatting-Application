@@ -7,7 +7,7 @@ import 'package:mobile/features/chat/views/widgets/contact_card_widget.dart';
 import 'package:go_router/go_router.dart';
 
 class GroupPage extends ConsumerStatefulWidget {
-  GroupPage({super.key});
+  const GroupPage({super.key});
 
   @override
   ConsumerState<GroupPage> createState() => _GroupPageState();
