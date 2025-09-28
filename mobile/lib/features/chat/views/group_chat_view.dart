@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
 import 'package:mobile/features/chat/controllers/group_controller.dart';
 import 'package:mobile/features/chat/controllers/providers.dart';
+import 'package:mobile/features/chat/controllers/send_file_controller.dart';
 import 'package:mobile/features/chat/controllers/socket_service.dart';
 import 'package:mobile/features/chat/controllers/unread_group_messages.dart';
 import 'package:mobile/features/chat/models/group_model.dart';
@@ -86,6 +87,7 @@ class _GroupChatViewState extends ConsumerState<GroupChatView>
 
   @override
   Widget build(BuildContext context) {
+    final sendFileController = SendFileController(ref);
     final currentUser = ref.watch(authControllerProvider).authUser!;
     final allMessages = ref.watch(groupMessageControllerProvider);
     final messages =
@@ -231,7 +233,16 @@ class _GroupChatViewState extends ConsumerState<GroupChatView>
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          sendFileController.sendFileMessage(
+                                            ref
+                                                .read(authControllerProvider)
+                                                .authUser!
+                                                .id,
+                                            widget.group.id,
+                                            true,
+                                          );
+                                        },
                                         icon: Icon(
                                           Icons.attach_file,
                                           color: Color(0xFF910811),
@@ -243,7 +254,16 @@ class _GroupChatViewState extends ConsumerState<GroupChatView>
                                             context,
                                             MaterialPageRoute(
                                               builder: (builder) =>
-                                                  CameraView(),
+                                                  CameraView(
+                                                senderId: ref
+                                                    .read(
+                                                      authControllerProvider,
+                                                    )
+                                                    .authUser!
+                                                    .id,
+                                                receiverId: widget.group.id,
+                                                isGroup: true,
+                                              ),
                                             ),
                                           );
                                         },

@@ -27,10 +27,7 @@ class MessageController extends _$MessageController {
     if (_isLoading) return;
     _isLoading = true;
     final token = ref.read(authControllerProvider.notifier).token!;
-    final uri = Uri.parse(
-      /* 'http://10.10.1.197:5001/api/messages/$otherUserId/$page/$pageSize', */
-      '$baseUrl/api/messages/$otherUserId?isFirst=true',
-    );
+    final uri = Uri.parse('$baseUrl/api/messages/$otherUserId?isFirst=true');
     final response = await http.get(
       uri,
       headers: {
@@ -171,7 +168,11 @@ class MessageController extends _$MessageController {
     if (otherUser != null) {
       final updatedModel = ChatModel.fromUser(otherUser).copyWith(
         time: DateTime.parse(data['created_at']).toLocal(),
-        currentMessage: data['content'],
+        currentMessage: data['content'] != null
+            ? data['content']
+            : senderId == currentUserId
+            ? 'Dosya gönderildi'
+            : 'Dosya alındı',
         senderid: data['sender_id'],
         messageStatus: data['status'],
         messageId: data['id'],

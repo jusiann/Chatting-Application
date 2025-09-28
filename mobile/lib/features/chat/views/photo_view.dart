@@ -1,12 +1,24 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/features/chat/controllers/send_file_controller.dart';
 
-class PhotoView extends StatelessWidget {
-  const PhotoView({super.key, required this.path});
+class PhotoView extends ConsumerWidget {
+  const PhotoView({
+    super.key,
+    required this.path,
+    required this.senderId,
+    required this.receiverId,
+    required this.isGroup,
+  });
   final String path;
+  final int senderId;
+  final int receiverId;
+  final bool isGroup;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sendFileController = SendFileController(ref);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -32,7 +44,18 @@ class PhotoView extends StatelessWidget {
             child: Align(
               alignment: Alignment(1, 0),
               child: IconButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await sendFileController.sendPhoto(
+                    senderId,
+                    receiverId,
+                    isGroup,
+                    path,
+                  );
+                  int count = 0;
+                  Navigator.popUntil(context, (route) {
+                    return count++ == 2;
+                  });
+                },
                 icon: CircleAvatar(
                   backgroundColor: Color(0xFF910811),
                   radius: 25,

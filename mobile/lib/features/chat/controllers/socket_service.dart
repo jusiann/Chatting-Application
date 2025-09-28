@@ -175,7 +175,11 @@ class SocketService extends _$SocketService {
       final int groupId = rawGroupId is int
           ? rawGroupId
           : int.tryParse(rawGroupId?.toString() ?? '') ?? -1;
-      final content = data['content'];
+      final content = data['content'] != null
+          ? data['content']
+          : myId == userId
+          ? 'Dosya gönderildi.'
+          : 'Dosya alındı.';
       final DateTime createdAt =
           DateTime.tryParse(data['created_at']?.toString() ?? '')?.toLocal() ??
           DateTime.now().toLocal();

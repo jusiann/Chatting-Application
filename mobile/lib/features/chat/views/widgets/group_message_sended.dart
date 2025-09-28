@@ -10,9 +10,26 @@ class GroupMessageSended extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isFileMessage(GroupMessageModel msg) {
+      if (msg.fileUrl != null && msg.fileType != null) {
+        return msg.fileType!.startsWith('image') ||
+            msg.fileType!.startsWith('application');
+      }
+      return false;
+    }
     final status = message.status;
+    bool isFile = false;
+    String fileText(String fileKey) {
+      String fileName = fileKey.split('_').last;
+      String shortName = fileName.length > 20
+          ? fileName.substring(0, 20) + "..."
+          : fileName;
+      return shortName;
+    }
+
     Widget messageContent(GroupMessageModel msg) {
       if (msg.fileUrl != null && msg.fileType!.startsWith('image')) {
+        isFile = true;
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -41,6 +58,7 @@ class GroupMessageSended extends StatelessWidget {
         );
       }
       if (msg.fileUrl != null && msg.fileType!.startsWith('application')) {
+        isFile = true;
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -56,14 +74,18 @@ class GroupMessageSended extends StatelessWidget {
               border: Border.all(color: Colors.grey),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.picture_as_pdf, color: Colors.red, size: 30),
-                SizedBox(width: 8),
+                const Icon(Icons.picture_as_pdf, color: Colors.white, size: 30),
+                const SizedBox(width: 8),
                 Text(
-                  'dosya.pdf',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  fileText(msg.fileKey!),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -87,7 +109,9 @@ class GroupMessageSended extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(right: 70, left: 5, top: 5),
+                    padding: !isFileMessage(message)
+                        ? const EdgeInsets.only(right: 70, left: 5, top: 5)
+                        : const EdgeInsets.only(right: 5, left: 5, top: 5),
                     child: messageContent(message),
                   ),
                   const SizedBox(height: 5),

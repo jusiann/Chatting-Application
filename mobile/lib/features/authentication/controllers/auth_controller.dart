@@ -230,6 +230,8 @@ class AuthController extends _$AuthController {
     String? lastName,
     String? email,
     String? password,
+    String? title,
+    String? department,
   }) async {
     if (firstName == null ||
         lastName == null ||
@@ -247,6 +249,8 @@ class AuthController extends _$AuthController {
           'last_name': lastName,
           'email': email,
           'password': password,
+          'title': title,
+          'department': department,
         }),
       );
 

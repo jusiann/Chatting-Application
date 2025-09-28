@@ -4,9 +4,6 @@ import RehberPage from "./pages/RehberPage";
 import GrupPage from "./pages/GrupPage";
 import AnaekranPage from "./pages/AnaekranPage";
 import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import Textinput from "./components/Textinput";
-import { User } from "lucide-react";
 import DepartmanPage from "./pages/DepartmanPage";
 import SettingsPage from "./pages/SettingsPage";
 import KayıtOl from "./pages/KayıtOl";
@@ -141,13 +138,13 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/home" element={<AnaekranPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<KayıtOl />} />
-        <Route path="/rehber" element={<RehberPage />} />
-        <Route path="/grup" element={<GrupPage />} />
-        <Route path="/departman" element={<DepartmanPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/home" element={user ? <AnaekranPage /> : <Navigate to="/login" replace />} />
+        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to='/home' replace />} />
+        <Route path="/register" element={!user ? <KayıtOl /> : <Navigate to='/home' replace />} />
+        <Route path="/rehber" element={user ? <RehberPage /> : <Navigate to='/login' replace />} />
+        <Route path="/grup" element={user ? <GrupPage /> : <Navigate to='/login' replace />} />
+        <Route path="/departman" element={user ? <DepartmanPage /> : <Navigate to='/login' replace />} />
+        <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to='/login' replace />} />
       </Routes>
     </BrowserRouter>
   );

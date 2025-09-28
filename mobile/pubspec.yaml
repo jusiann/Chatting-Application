@@ -54,6 +54,11 @@ dependencies:
   http_parser: ^4.1.2
   flutter_dotenv: ^6.0.0
   syncfusion_flutter_pdfviewer: ^31.1.19
+  file_picker: ^10.3.3
+  dio: ^5.9.0
+  mime: ^2.0.0
+  flutter_launcher_icons: ^0.14.4
+  rename: ^3.1.0
 
 dev_dependencies:
   flutter_test:
@@ -113,3 +118,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/chat-app-logo.png"

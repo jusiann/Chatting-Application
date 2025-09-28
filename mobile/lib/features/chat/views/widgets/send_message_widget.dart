@@ -11,6 +11,22 @@ class SendMessageWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final status = message.status;
+    bool isFileMessage(MessageModel msg) {
+      if (msg.fileUrl != null && msg.fileType != null) {
+        return msg.fileType!.startsWith('image') ||
+            msg.fileType!.startsWith('application');
+      }
+      return false;
+    }
+
+    String fileText(String fileKey) {
+      String fileName = fileKey.split('_').last;
+      String shortName = fileName.length > 20
+          ? fileName.substring(0, 20) + "..."
+          : fileName;
+      return shortName;
+    }
+
     Widget messageContent(MessageModel msg) {
       if (msg.fileUrl != null && msg.fileType!.startsWith('image')) {
         return GestureDetector(
@@ -46,14 +62,18 @@ class SendMessageWidget extends ConsumerWidget {
               border: Border.all(color: Colors.grey),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.picture_as_pdf, color: Colors.red, size: 30),
-                SizedBox(width: 8),
+                const Icon(Icons.picture_as_pdf, color: Colors.white, size: 30),
+                const SizedBox(width: 8),
                 Text(
-                  'dosya.pdf',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  fileText(msg.fileKey!),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -70,7 +90,7 @@ class SendMessageWidget extends ConsumerWidget {
           ),
         );
       }
-      return Text('no message');
+      return const Text('no message');
     }
 
     return Align(
@@ -81,33 +101,35 @@ class SendMessageWidget extends ConsumerWidget {
         ),
         child: IntrinsicWidth(
           child: Card(
-            color: Color(0xFF910811),
+            color: const Color(0xFF910811),
             child: Padding(
-              padding: EdgeInsets.only(left: 5, right: 10),
+              padding: const EdgeInsets.only(left: 5, right: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(right: 70, left: 5, top: 5),
+                    padding: !isFileMessage(message)
+                        ? const EdgeInsets.only(right: 70, left: 5, top: 5)
+                        : const EdgeInsets.only(right: 5, left: 5, top: 5),
                     child: messageContent(message),
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
                         formatMessageTime(message.time),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 12,
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(width: 5),
+                      const SizedBox(width: 5),
                       buildStatusIcon(status),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),

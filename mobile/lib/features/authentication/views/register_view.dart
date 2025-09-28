@@ -17,6 +17,18 @@ class _RegisterState extends ConsumerState<RegisterPage> {
   final _passwordReplyController = TextEditingController();
   bool _obscureText1 = true;
   bool _obscureText2 = true;
+  String? selectedTitle;
+  String? selectedDepartment;
+  final List<String> titleItems = [
+    "Prof.Dr",
+    "Dr. Öğretim Üyesi",
+    "Araştırma Görevlisi",
+  ];
+  final List<String> departmentItems = [
+    "Bilgisayar Mühendisliği",
+    "Endüstri Mühendisliği",
+    "İnşaat Mühendisliği",
+  ];
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
@@ -34,10 +46,10 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                   children: [
                     Image.asset(
                       'assets/images/Logo1.png',
-                      height: 175,
-                      width: 175,
+                      height: 150,
+                      width: 150,
                     ),
-                    SizedBox(height: 50),
+                    SizedBox(height: 30),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: Row(
@@ -53,7 +65,7 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                               ),
                             ),
                           ),
-                          SizedBox(width: 20),
+                          SizedBox(width: 15),
                           Expanded(
                             child: TextField(
                               controller: _surnameController,
@@ -68,7 +80,7 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: 8),
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
@@ -83,7 +95,75 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      height: 64,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: Container(
+                        padding: EdgeInsets.only(left: 10),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Color(0xFF444444)),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.school, color: Color(0xFF444444)),
+                            SizedBox(width: 15),
+                            DropdownButton<String>(
+                              value: selectedTitle,
+                              hint: Text('Ünvanınızı seçiniz.'),
+                              items: titleItems.map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedTitle = newValue;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      height: 64,
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                      child: Container(
+                        padding: EdgeInsets.only(left: 10),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Color(0xFF444444)),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.apartment, color: Color(0xFF444444)),
+                            SizedBox(width: 15),
+                            DropdownButton<String>(
+                              value: selectedDepartment,
+                              hint: Text('Bölümünüzü seçiniz.'),
+                              items: departmentItems.map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedDepartment = newValue;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8),
                     Container(
                       width: double.infinity,
                       height: 64,
@@ -140,7 +220,7 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 50),
+                    SizedBox(height: 20),
                     Container(
                       height: 64,
                       width: double.infinity,
@@ -162,6 +242,8 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                                   lastName: lastName,
                                   email: email,
                                   password: password,
+                                  title: selectedTitle,
+                                  department: selectedDepartment,
                                 );
                           }
                         },

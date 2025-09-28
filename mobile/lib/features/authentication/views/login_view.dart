@@ -95,47 +95,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     Container(
                       height: 64,
-                      width: 383,
-                      padding: EdgeInsets.only(right: 20),
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            activeColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            value: _isChecked,
-                            onChanged: (bool? newValue) {
-                              setState(() {
-                                _isChecked = newValue;
-                              });
-                            },
-                          ),
-                          Text(
-                            'Beni hatırla',
+                      padding: EdgeInsets.only(left: 30),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'Şifreni mi unuttun?',
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
+                              color: Colors.black,
                             ),
                           ),
-                          Expanded(child: Container()),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              'Şifreni mi unuttun?',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ),           
                     ),
-                    SizedBox(height: 50),
+                    SizedBox(height: 30),
                     SizedBox(
                       height: 59,
                       width: 359,

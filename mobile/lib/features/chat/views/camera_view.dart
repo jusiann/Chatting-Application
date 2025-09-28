@@ -8,7 +8,15 @@ import 'package:path_provider/path_provider.dart';
 List<CameraDescription> cameras = [];
 
 class CameraView extends StatefulWidget {
-  const CameraView({super.key});
+  const CameraView({
+    super.key,
+    required this.senderId,
+    required this.receiverId,
+    required this.isGroup,
+  });
+  final int senderId;
+  final int receiverId;
+  final bool isGroup;
 
   @override
   State<CameraView> createState() => _CameraViewState();
@@ -91,7 +99,13 @@ class _CameraViewState extends State<CameraView> {
                       onTap: () {
                         if (!isRecording) {
                           if (_cameraController != null) {
-                            takePhoto(_cameraController!, context);
+                            takePhoto(
+                              _cameraController!,
+                              context,
+                              widget.senderId,
+                              widget.receiverId,
+                              widget.isGroup,
+                            );
                           }
                         }
                       },

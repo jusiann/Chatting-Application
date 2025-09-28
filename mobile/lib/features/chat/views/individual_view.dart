@@ -7,6 +7,7 @@ import 'package:mobile/features/authentication/controllers/auth_controller.dart'
 import 'package:mobile/features/chat/controllers/custom_card_controller.dart';
 import 'package:mobile/features/chat/controllers/message_controller.dart';
 import 'package:mobile/features/chat/controllers/providers.dart';
+import 'package:mobile/features/chat/controllers/send_file_controller.dart';
 import 'package:mobile/features/chat/controllers/socket_service.dart';
 import 'package:mobile/features/chat/controllers/unread_message_controller.dart';
 import 'package:mobile/features/chat/controllers/user_service.dart';
@@ -84,11 +85,11 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
   @override
   void didChangeMetrics() {
     super.didChangeMetrics();
-    Future.delayed(Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
       if (mounted) {
         _scrollController.animateTo(
           0,
-          duration: Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
         );
       }
@@ -97,6 +98,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
 
   @override
   Widget build(BuildContext context) {
+    final sendFileController = SendFileController(ref);
     final typingUser = ref
         .watch(userServiceProvider)
         .contactUsers
@@ -134,7 +136,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
         backgroundColor: Colors.white,
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new, color: Colors.white),
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -147,7 +149,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
               children: [
                 Text(
                   '${widget.chat.title ?? ''} ${widget.chat.fullname}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -155,7 +157,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                   ),
                 ),
                 typingUser.typing!
-                    ? Align(
+                    ? const Align(
                         alignment: Alignment.center,
                         child: Text(
                           'Yazıyor...',
@@ -170,7 +172,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
+                          const Text(
                             'Son görülme: ',
                             style: TextStyle(
                               fontFamily: 'Inter',
@@ -179,7 +181,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                             ),
                           ),
                           messagingUser.isOnline
-                              ? Text(
+                              ? const Text(
                                   'Çevrimiçi',
                                   style: TextStyle(
                                     fontFamily: 'Inter',
@@ -190,13 +192,13 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                               : messagingUser.lastSeen != null
                               ? Text(
                                   formatMessageTime(messagingUser.lastSeen!),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontFamily: 'Inter',
                                     fontSize: 12,
                                     color: Colors.white,
                                   ),
                                 )
-                              : Text(
+                              : const Text(
                                   'Bilinmiyor.',
                                   style: TextStyle(
                                     fontFamily: 'Inter',
@@ -241,13 +243,13 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
           ],
           backgroundColor: Color(0xFF910811),
           actionsPadding: EdgeInsets.only(left: 10),
-          bottom: PreferredSize(
+          bottom: const PreferredSize(
             preferredSize: Size.fromHeight(5),
             child: SizedBox(),
           ),
         ),
         body: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage('assets/images/chat_background.png'),
               fit: BoxFit.cover,
@@ -259,7 +261,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                 child: ListView.builder(
                   reverse: true,
                   controller: _scrollController,
-                  padding: EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 10),
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   itemBuilder: (context, index) {
@@ -281,7 +283,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
-                  padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                  padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
                   child: Column(
                     children: [
                       Row(
@@ -316,7 +318,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                                     },
                                   );
                                 },
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontFamily: 'Inter',
                                   fontSize: 16,
                                 ),
@@ -335,7 +337,7 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                                         _showemoji = !_showemoji;
                                       });
                                     },
-                                    icon: Icon(
+                                    icon: const Icon(
                                       Icons.emoji_emotions,
                                       color: Color(0xFF910811),
                                     ),
@@ -344,8 +346,17 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
-                                        onPressed: () {},
-                                        icon: Icon(
+                                        onPressed: () {
+                                          sendFileController.sendFileMessage(
+                                            ref
+                                                .read(authControllerProvider)
+                                                .authUser!
+                                                .id,
+                                            widget.chat.id,
+                                            false,
+                                          );
+                                        },
+                                        icon: const Icon(
                                           Icons.attach_file,
                                           color: Color(0xFF910811),
                                         ),
@@ -356,11 +367,20 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                                             context,
                                             MaterialPageRoute(
                                               builder: (builder) =>
-                                                  CameraView(),
+                                                  CameraView(
+                                                senderId: ref
+                                                    .read(
+                                                      authControllerProvider,
+                                                    )
+                                                    .authUser!
+                                                    .id,
+                                                receiverId: widget.chat.id,
+                                                isGroup: false,
+                                              ),
                                             ),
                                           );
                                         },
-                                        icon: Icon(
+                                        icon: const Icon(
                                           Icons.photo_camera,
                                           color: Color(0xFF910811),
                                         ),
@@ -389,14 +409,14 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
                                 );
                                 _scrollController.animateTo(
                                   0,
-                                  duration: Duration(milliseconds: 300),
+                                  duration: const Duration(milliseconds: 300),
                                   curve: Curves.easeOut,
                                 );
                               }
                             },
                             icon: Transform.rotate(
                               angle: 3.14 * 3 / 2,
-                              child: CircleAvatar(
+                              child: const CircleAvatar(
                                 radius: 24,
                                 backgroundColor: Colors.white,
                                 child: Icon(
