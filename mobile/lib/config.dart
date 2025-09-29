@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// (for example the .env file failed to load), it returns the
 /// hard-coded fallback to avoid throwing NotInitializedError.
 String get baseUrl {
-  const fallback = 'http://192.168.1.9:5001';
+  const fallback = 'http://13.60.211.144';
   try {
     // `dotenv.isInitialized` guards access to `dotenv.env`.
     if (dotenv.isInitialized && dotenv.env.containsKey('BASE_URL')) {

@@ -61,6 +61,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           fillColor: Color(0xFFF5F7FA),
                           prefixIcon: Icon(Icons.mail),
                         ),
+                        keyboardType: TextInputType.emailAddress,
                       ),
                     ),
                     SizedBox(height: 15),
@@ -81,8 +82,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureText
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                             ),
                             onPressed: () {
                               setState(() {

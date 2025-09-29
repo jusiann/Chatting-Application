@@ -12,6 +12,7 @@ import {
   checkUser,
   uploadProfileImage,
   logout,
+  fcmToken,
 } from "../controllers/auth.controller.js";
 import { verifyToken } from "../middlewares/auth.js";
 import upload from "../middlewares/multer.js";
@@ -45,6 +46,7 @@ router.post(
   upload.single("profile_image"),
   uploadProfileImage
 );
+router.post("/fcm-token", verifyToken, fcmToken);
 
 router.post("/change-password-auth", verifyToken, changePasswordAuthenticated);
 router.put("/change-name", verifyToken, changeName);
@@ -52,7 +54,7 @@ router.put("/change-title", verifyToken, changeTitle);
 
 router.get("/check", verifyToken, checkUser);
 // Logout: clear auth cookies (supports both GET and POST)
-router.get("/logout", logout);
+router.get("/logout/:id", logout);
 router.post("/logout", logout);
 
 export default router;

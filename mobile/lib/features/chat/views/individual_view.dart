@@ -50,6 +50,11 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
         'sender_id': widget.chat.id,
       });
 
+      ref.read(socketServiceProvider.notifier).emit('join_chat', {
+        'userId': currentUserId,
+        'chatWith': widget.chat.id,
+      });
+
       ref
           .read(unreadMessageControllerProvider.notifier)
           .clearUnread(widget.chat.id);
@@ -75,10 +80,12 @@ class _IndividualPageState extends ConsumerState<IndividualPage>
 
   @override
   void dispose() {
+    final socket = ref.read(socketServiceProvider.notifier);
     _typingDebounce?.cancel();
     _typingClearTimer?.cancel();
     _scrollController.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    socket.emit('leave_chat', {});
     super.dispose();
   }
 

@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
@@ -7,6 +8,7 @@ import 'package:mobile/router/app_router.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +21,16 @@ Future<void> main() async {
 
   await initializeDateFormatting('tr_TR');
   Intl.defaultLocale = 'tr_TR';
+  await Firebase.initializeApp();
 
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Foreground message: ${message.notification?.title}');
+    // Mesaj geldi, kullanıcı login değilse UI güncellemesini bekletebilirsin
+  });
+
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    print('App opened from notification');
+  });
   runApp(const ProviderScope(child: MyApp()));
 }
 

@@ -11,6 +11,17 @@ import http from "http";
 import jwt from "jsonwebtoken";
 import { fileURLToPath } from "url";
 import AWS from "aws-sdk";
+import admin from "firebase-admin";
+import fs from "fs";
+
+const serviceAccount = JSON.parse(
+  fs.readFileSync(
+    new URL(
+      "./rumeli-chat-app-firebase-adminsdk-fbsvc-5dd8147f7f.json",
+      import.meta.url
+    )
+  )
+);
 
 // Rotalar
 import authRoutes from "./src/routes/auth.routes.js";
@@ -35,6 +46,10 @@ const __dirname = path.dirname(__filename);
 // Express ve HTTP sunucusu
 const app = express();
 const server = http.createServer(app);
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -117,6 +132,10 @@ io.on("connection", async (socket) => {
   global.connectedUsers.set(socket.user.id, socket);
   socket.join(`user_${socket.user.id}`);
 
+  function getSocketByUserId(userId) {
+    return global.connectedUsers.get(userId);
+  }
+
   io.emit("message_delivered", {
     receiver_id: socket.user.id,
   });
@@ -149,6 +168,15 @@ io.on("connection", async (socket) => {
     });
   });
 
+  socket.on("join_chat", (data) => {
+    const { userId, chatWith } = data;
+    socket.activeChatWith = chatWith; // socket üzerinde geçici state
+  });
+
+  socket.on("leave_chat", ({ userId }) => {
+    socket.activeChatWith = null;
+  });
+
   socket.on("send_message", async (messageData) => {
     try {
       const { receiver_id, content } = messageData;
@@ -156,7 +184,7 @@ io.on("connection", async (socket) => {
         throw new Error("Eksik alanlar: receiver_id veya content");
 
       const senderResult = await client.query(
-        "SELECT first_name, last_name FROM users WHERE id = $1",
+        "SELECT first_name, last_name, title FROM users WHERE id = $1",
         [socket.user.id]
       );
       if (senderResult.rows.length === 0)
@@ -178,17 +206,27 @@ io.on("connection", async (socket) => {
 
       io.to(`user_${receiver_id}`).emit("new_message", newMessage);
 
-      await createNotification({
-        userId: receiver_id,
-        senderId: socket.user.id,
-        type: NOTIFICATION_TYPES.NEW_MESSAGE,
-        content:
-          content.substring(0, 100) + (content.length > 100 ? "..." : ""),
-        data: {
-          message_id: newMessage.id,
-          sender_name: `${sender.first_name} ${sender.last_name}`,
-        },
-      });
+      const receiverSocket = getSocketByUserId(receiver_id);
+      if (!receiverSocket || receiverSocket.activeChatWith !== socket.user.id) {
+        const tokenResult = await client.query(
+          "SELECT fcm_token FROM user_tokens WHERE user_id=$1",
+          [receiver_id]
+        );
+        const userFcmToken = tokenResult.rows[0]?.fcm_token;
+        if (userFcmToken) {
+          await admin.messaging().send({
+            token: userFcmToken,
+            notification: {
+              title: `${sender.title} ${sender.first_name} ${sender.last_name}`,
+              body: newMessage.content,
+            },
+            data: {
+              senderId: socket.user.id.toString(),
+              messageId: newMessage.id.toString(),
+            },
+          });
+        }
+      }
     } catch (error) {
       console.error("[SOCKET] Send message error:", error);
       socket.emit("message_error", {

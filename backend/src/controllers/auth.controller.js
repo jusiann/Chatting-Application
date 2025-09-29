@@ -592,6 +592,8 @@ export const uploadProfileImage = async (req, res) => {
 
 export const logout = async (req, res, next) => {
   try {
+    const userId = req.body.userId || req.params.id;
+
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -599,14 +601,36 @@ export const logout = async (req, res, next) => {
       path: "/",
     };
 
+    await client.query(
+      'DELETE FROM user_tokens WHERE user_id = $1',
+      [userId]
+    );
+
     // Clear auth-related cookies
     res.clearCookie("access_token", cookieOptions);
     res.clearCookie("temporary_token", cookieOptions);
+
 
     return res.status(200).json({
       success: true,
       message: "Logged out successfully.",
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const fcmToken = async (req, res, next) => {
+  try {
+     const { userId, fcmToken } = req.body;
+  if (!userId || !fcmToken) return res.status(400).json({ error: 'Missing fields' });
+
+  await client.query(
+    'INSERT INTO user_tokens (user_id, fcm_token) VALUES ($1, $2) ON CONFLICT (user_id) DO UPDATE SET fcm_token = EXCLUDED.fcm_token',
+    [userId, fcmToken]
+  );
+
+  res.json({ message: 'Token saved' });
   } catch (error) {
     next(error);
   }

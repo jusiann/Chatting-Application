@@ -93,6 +93,7 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                             borderRadius: BorderRadius.circular(15),
                           ),
                         ),
+                        keyboardType: TextInputType.emailAddress,
                       ),
                     ),
                     SizedBox(height: 8),
@@ -182,8 +183,8 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                             },
                             icon: Icon(
                               _obscureText1
-                                  ? (Icons.visibility)
-                                  : (Icons.visibility_off),
+                                  ? (Icons.visibility_off)
+                                  : (Icons.visibility),
                             ),
                           ),
                           border: OutlineInputBorder(
@@ -210,8 +211,8 @@ class _RegisterState extends ConsumerState<RegisterPage> {
                             },
                             icon: Icon(
                               _obscureText2
-                                  ? (Icons.visibility)
-                                  : (Icons.visibility_off),
+                                  ? (Icons.visibility_off)
+                                  : (Icons.visibility),
                             ),
                           ),
                           border: OutlineInputBorder(

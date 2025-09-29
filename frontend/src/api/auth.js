@@ -14,7 +14,7 @@ export const checkAuth = async () => {
   return res.data;
 };
 
-export const logout = async () => {
-  const res = await axios.post("/auth/logout");
+export const logout = async (userId) => {
+  const res = await axios.post("/auth/logout", {'userId': userId});
   return res.data;
 };

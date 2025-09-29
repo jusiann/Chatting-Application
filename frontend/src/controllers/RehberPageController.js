@@ -1,9 +1,8 @@
 import useConservationStore from "../store/conservation";
 
 export const messageWithUser = (userId, navigate) => {
-    const { fetchMessages, setMessagingUser, setMessagingType } = useConservationStore.getState();
-    setMessagingType("individual");
-    setMessagingUser({ id: userId });
+    const { fetchMessages, setMessagingUser} = useConservationStore.getState();
+    setMessagingUser({ id: userId, type: "individual" });
     fetchMessages({ id: userId }); 
     navigate("/home");
 }

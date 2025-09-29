@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { checkAuth, signIn, logout as apiLogout, signUp } from "../api/auth";
 import toast from "react-hot-toast";
 
-const useUserStore = create((set) => ({
+const useUserStore = create((set,get) => ({
   user: null,
   loggingIn: false,
   setUser: (user) => set({ user }),
@@ -41,7 +41,7 @@ const useUserStore = create((set) => ({
   },
   logout: async () => {
     try {
-      await apiLogout();
+      await apiLogout(get().user.id);
     } catch {}
     try {
       localStorage.removeItem("access_token");

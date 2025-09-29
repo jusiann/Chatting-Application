@@ -12,6 +12,7 @@ import 'package:mobile/features/chat/controllers/user_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/config.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 part 'auth_controller.g.dart';
 
 class AuthState {
@@ -159,6 +160,7 @@ class AuthController extends _$AuthController {
         isChecking: false,
         loggingIn: false,
       );
+      await registerFcmToken();
     }
     if (response.statusCode != 201) {
       dynamic data = jsonDecode(response.body);
@@ -178,6 +180,11 @@ class AuthController extends _$AuthController {
   }
 
   Future<void> logout() async {
+    await http.post(
+      Uri.parse('$baseUrl/api/auth/logout'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'userId': state.authUser?.id}),
+    );
     await _storage.deleteAll();
     _token = null;
     state = AuthState(isLoggedIn: false, isChecking: false, authUser: null);
@@ -287,5 +294,32 @@ class AuthController extends _$AuthController {
       state = state.copyWith(registering: false);
     }
     state = state.copyWith(registering: false);
+  }
+  
+  
+  Future<void> registerFcmToken() async {
+    final fcm = FirebaseMessaging.instance;
+
+    // Token al
+    String? token = await fcm.getToken();
+    if (token != null) {
+      print("FCM Token: $token");
+
+      // Backend'e gönder
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/auth/fcm-token'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token', // opsiyonel, auth varsa
+        },
+        body: jsonEncode({'userId': state.authUser!.id, 'fcmToken': token}),
+      );
+
+      if (response.statusCode == 200) {
+        print('Token backend’e kaydedildi.');
+      } else {
+        print('Token kaydedilirken hata: ${response.body}');
+      }
+    }
   }
 }

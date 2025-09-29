@@ -26,6 +26,27 @@ class MySocket {
 class SocketService extends _$SocketService {
   IO.Socket? _socket;
   String? _token;
+  bool _handlersBound = false;
+  final Set<int> _seenDirectMessageIds = {};
+  final Set<int> _seenGroupMessageIds = {};
+
+  void _unbindAll() {
+    if (_socket == null) return;
+    for (final ev in [
+      'new_message',
+      'message_sent',
+      'message_delivered',
+      'messages_read',
+      'group_message',
+      'online',
+      'offline',
+    ]) {
+      try {
+        _socket!.off(ev);
+      } catch (_) {}
+    }
+    _handlersBound = false;
+  }
 
   @override
   MySocket build() {
@@ -38,6 +59,9 @@ class SocketService extends _$SocketService {
       print('Zaten bağlı');
       return;
     }
+
+    _unbindAll();
+
 
     print('[SOCKET] Yeni bağlantı kuruluyor');
     _token = token;
@@ -67,6 +91,12 @@ class SocketService extends _$SocketService {
     _socket!.onDisconnect((_) => print('[SOCKET] Bağlantı koptu'));
 
     _socket!.on('new_message', (data) async {
+      final int? msgId =
+          (data['id'] as int?) ?? int.tryParse(data['id']?.toString() ?? '');
+      if (msgId != null) {
+        if (_seenDirectMessageIds.contains(msgId)) return;
+        _seenDirectMessageIds.add(msgId);
+      }
       final openChatId = ref.read(openChatControllerProvider).id;
       final openChatType = ref.read(openChatControllerProvider).type;
       final msg = MessageModel.fromJson(data);
@@ -88,6 +118,12 @@ class SocketService extends _$SocketService {
     });
 
     _socket!.on('message_sent', (data) async {
+      final int? msgId =
+          (data['id'] as int?) ?? int.tryParse(data['id']?.toString() ?? '');
+      if (msgId != null) {
+        if (_seenDirectMessageIds.contains(msgId)) return;
+        _seenDirectMessageIds.add(msgId);
+      }
       final msg = MessageModel.fromJson(data);
       ref.read(messageControllerProvider.notifier).addFromSocket(msg);
       ref.read(messageControllerProvider.notifier).handleIncomingMessages(data);
@@ -141,7 +177,12 @@ class SocketService extends _$SocketService {
 
     // ...existing code...
     _socket!.on('group_message', (data) {
-      print('MESSAGE ALINDI GROUP');
+      final int? gid =
+          (data['id'] as int?) ?? int.tryParse(data['id']?.toString() ?? '');
+      if (gid != null) {
+        if (_seenGroupMessageIds.contains(gid)) return;
+        _seenGroupMessageIds.add(gid);
+      }
       final myId = ref.read(authControllerProvider).authUser!.id;
       final userId = data['sender_id'];
       final UserModel? sender = ref

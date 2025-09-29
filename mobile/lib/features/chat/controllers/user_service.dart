@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:mobile/features/authentication/controllers/auth_controller.dart';
@@ -79,30 +80,45 @@ class UserService extends _$UserService {
   ContactUsers build() {
     return ContactUsers(contactUsers: [], messageUsers: [], userGroups: []);
   }
-
+  
+  final Map<int, Timer> _typingTimers = {}; // userId -> Timer
   void addTypingUser(int userId) {
     final idx = state.contactUsers.indexWhere((user) => user.id == userId);
-    if (idx != -1) {
-      final typingUser = state.contactUsers[idx];
-      final updatedTypingUser = typingUser.copyWith(typing: true);
-      final updatedList = List<UserModel>.from(state.contactUsers);
-      updatedList[idx] = updatedTypingUser;
-      state = state.copyWith(contactUsers: updatedList);
+    if (idx == -1) return;
+
+    final typingUser = state.contactUsers[idx];
+    if (typingUser.typing == true) {
+      _typingTimers[userId]?.cancel();
+      _typingTimers[userId] = Timer(const Duration(seconds: 3), () {
+        removeTypingUser(userId);
+        _typingTimers.remove(userId);
+        return;
+      });
     }
-    Future.delayed(const Duration(seconds: 3), () {
+    final updatedTypingUser = typingUser.copyWith(typing: true);
+    final updatedList = List<UserModel>.from(state.contactUsers);
+    updatedList[idx] = updatedTypingUser;
+    state = state.copyWith(contactUsers: updatedList);
+
+    // Eski timer varsa iptal et
+    _typingTimers[userId]?.cancel();
+
+    // Yeni timer başlat
+    _typingTimers[userId] = Timer(const Duration(seconds: 3), () {
       removeTypingUser(userId);
+      _typingTimers.remove(userId);
     });
   }
 
   void removeTypingUser(int userId) {
     final idx = state.contactUsers.indexWhere((user) => user.id == userId);
-    if (idx != -1) {
-      final typingUser = state.contactUsers[idx];
-      final updatedTypingUser = typingUser.copyWith(typing: false);
-      final updatedList = List<UserModel>.from(state.contactUsers);
-      updatedList[idx] = updatedTypingUser;
-      state = state.copyWith(contactUsers: updatedList);
-    }
+    if (idx == -1) return;
+
+    final user = state.contactUsers[idx];
+    final updatedUser = user.copyWith(typing: false);
+    final updatedList = List<UserModel>.from(state.contactUsers);
+    updatedList[idx] = updatedUser;
+    state = state.copyWith(contactUsers: updatedList);
   }
 
   Future<void> fetchUsers() async {

@@ -38,3 +38,5 @@ uploads/*
 pids
 *.pid
 *.seed
+
+rumeli-chat-app-firebase-adminsdk-fbsvc-5dd8147f7f.json
