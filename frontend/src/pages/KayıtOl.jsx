@@ -1,4 +1,4 @@
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, GraduationCap } from "lucide-react";
 import "../style/KayıtOl.css";
 import LoginButton from "../components/loginButton";
 import Textinput from "../components/Textinput";
@@ -66,55 +66,52 @@ const KayıtOl = () => {
   };
 
   return (
-    <div className="register-container">
-      {/* Sol Panel */}
-      <div className="register-left">
-        <h1 className="left-title">Rumeli Üniversitesi İletişim Uygulaması</h1>
-        <p className="left-subtitle">Kayıt ol</p>
+    <div className="register-page">
+      <div className="register-left-container">
+        <h1 className="welcome-title">
+          Rumeli Üniversitesi İletişim Uygulaması
+        </h1>
+        <p className="welcome-subtitle">
+          Kurumsal email bilgileriniz ile giriş yapınız
+        </p>
       </div>
-
-      {/* Sağ Panel */}
-      <div className="register-right">
+      <div className="register-right-container">
         <img src={logo} alt="Logo" className="register-logo" />
-        <div className="right-texts">
-          <h1 className="welcome-title">Hoşgeldiniz</h1>
-          <p className="welcome-subtitle">Lütfen bilgilerinizi giriniz</p>
+        <div className="register-texts">
+          <h1 className="register-title">Hesap oluştur</h1>
+          <p className="register-description">Lütfen bilgilerinizi giriniz</p>
         </div>
 
         <form className="register-form" onSubmit={handleSubmit}>
-          <div className="name-surname">
+          <div className="name-surname-container">
             <Textinput
-              icon={User}
+              type="text"
               placeholder="Adınız"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              width="183px"
+              className="register-input name-input"
+              width="190px"
+              icon={User}
             />
             <Textinput
-              icon={User}
+              type="text"
               placeholder="Soyadınız"
               name="surname"
               value={formData.surname}
               onChange={handleChange}
-              width="183px"
+              className="register-input surname-input"
+              width="190px"
+              icon={User}
             />
           </div>
-
-          <Textinput
-            icon={Mail}
-            placeholder="Email adresinizi giriniz"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
 
           <select
             name="title"
             value={formData.title}
             onChange={handleChange}
             className="register-select"
+            required
           >
             <option value="">Ünvanınızı seçiniz</option>
             <option value="Prof. Dr.">Prof. Dr.</option>
@@ -127,6 +124,7 @@ const KayıtOl = () => {
             value={formData.department}
             onChange={handleChange}
             className="register-select"
+            required
           >
             <option value="">Bölümünüzü seçiniz</option>
             <option value="Bilgisayar Mühendisliği">
@@ -137,30 +135,42 @@ const KayıtOl = () => {
           </select>
 
           <Textinput
-            icon={Lock}
-            placeholder="Şifrenizi giriniz"
-            name="password"
+            type="email"
+            placeholder="E-posta adresiniz"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="register-input"
+          />
+
+          <Textinput
             type="password"
+            placeholder="Şifreniz"
+            name="password"
             value={formData.password}
             onChange={handleChange}
-          />
-          <Textinput
+            className="register-input"
             icon={Lock}
-            placeholder="Şifrenizi tekrar giriniz"
-            name="confirmPassword"
+          />
+
+          <Textinput
             type="password"
+            placeholder="Şifreniz tekrar"
+            name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
+            className="register-input"
+            icon={Lock}
           />
 
           <LoginButton
             type="submit"
             className="register-button"
-            text="Kayıt ol"
+            text="Kayıt Ol"
           />
 
           <p className="register-login-link">
-            Zaten hesabın var mı? <a href="/login">Giriş yap</a>
+            Zaten bir hesabınız var mı? <a href="/login">Giriş yap</a>
           </p>
         </form>
       </div>

@@ -1,0 +1,559 @@
+/* Responsive Login Page Container */
+.login-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.login-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 95%;
+    max-width: 1400px;
+    display: flex;
+    height: 85vh;
+    max-height: 850px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Sol Panel */
+.login-left {
+    flex: 1;
+    background: linear-gradient(135deg, #910811 0%, #b91e28 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: white;
+    text-align: center;
+}
+
+.left-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 3rem;
+    line-height: 1.2;
+    margin-bottom: 25px;
+    color: white;
+}
+
+.left-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Sağ Panel */
+.login-right {
+    flex: 1;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 60px;
+    overflow-y: auto;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Custom Scrollbar for login right panel */
+.login-right::-webkit-scrollbar {
+    width: 8px;
+}
+
+.login-right::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.login-right::-webkit-scrollbar-thumb {
+    background: #910811;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.login-right::-webkit-scrollbar-thumb:hover {
+    background: #b91e28;
+}
+
+/* Firefox scrollbar */
+.login-right {
+    scrollbar-width: thin;
+    scrollbar-color: #910811 #f1f1f1;
+}
+
+.login-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    padding: 20px 0;
+}
+
+.login-logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 25px;
+    border-radius: 50%;
+    box-shadow: 0 10px 30px rgba(145, 8, 17, 0.2);
+}
+
+.right-texts {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.welcome-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 2.2rem;
+    color: #910811;
+    margin-bottom: 10px;
+}
+
+.welcome-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: #777777;
+}
+
+/* Form */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.login-form .textinput {
+    transition: all 0.3s ease;
+}
+
+.login-form .textinput:focus-within {
+    box-shadow: 0 0 0 3px rgba(145, 8, 17, 0.1);
+    background-color: #ffffff;
+    border: 2px solid #910811;
+}
+
+.login-button {
+    width: 100%;
+    height: 64px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #910811 0%, #b91e28 100%);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    border: 2px solid transparent;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(145, 8, 17, 0.3);
+    margin-top: 10px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(145, 8, 17, 0.4);
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+.login-register-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    text-align: center;
+    margin-top: 20px;
+    color: #777777;
+}
+
+.login-register-link a {
+    color: #910811;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.login-register-link a:hover {
+    color: #b91e28;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .login-page {
+        padding: 10px;
+    }
+    
+    .login-container {
+        flex-direction: column;
+        max-width: 450px;
+        min-height: auto;
+    }
+    
+    .login-left {
+        padding: 30px 20px;
+        min-height: 200px;
+    }
+    
+    .left-title {
+        font-size: 1.8rem;
+    }
+    
+    .left-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .login-right {
+        padding: 30px 25px;
+        justify-content: flex-start;
+    }
+    
+    .login-content {
+        padding: 10px 0;
+    }
+    
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+    
+    .login-logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .login-form {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-page {
+        padding: 5px;
+    }
+    
+    .login-container {
+        max-width: 380px;
+    }
+    
+    .login-left {
+        padding: 25px 15px;
+    }
+    
+    .left-title {
+        font-size: 1.5rem;
+    }
+    
+    .left-subtitle {
+        font-size: 1rem;
+    }
+    
+    .login-right {
+        padding: 25px 20px;
+    }
+    
+    .login-form .textinput {
+        height: 56px;
+    }
+    
+    .login-button {
+        height: 56px;
+    }
+}
+
+/* Animation for smooth transitions */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Sol Panel */
+.login-left {
+    flex: 1;
+    background: linear-gradient(135deg, #910811 0%, #b91e28 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: white;
+    text-align: center;
+}
+
+.left-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 3rem;
+    line-height: 1.2;
+    margin-bottom: 25px;
+    color: white;
+}
+
+.left-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.8rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Sağ Panel */
+.login-right {
+    flex: 1;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 60px;
+    overflow-y: auto;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Custom Scrollbar for login right panel */
+.login-right::-webkit-scrollbar {
+    width: 8px;
+}
+
+.login-right::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.login-right::-webkit-scrollbar-thumb {
+    background: #910811;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.login-right::-webkit-scrollbar-thumb:hover {
+    background: #b91e28;
+}
+
+/* Firefox scrollbar */
+.login-right {
+    scrollbar-width: thin;
+    scrollbar-color: #910811 #f1f1f1;
+}
+
+.login-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    padding: 20px 0;
+}
+
+.login-logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 25px;
+    border-radius: 50%;
+    box-shadow: 0 10px 30px rgba(145, 8, 17, 0.2);
+}
+
+.right-texts {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.welcome-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 2.2rem;
+    color: #910811;
+    margin-bottom: 10px;
+}
+
+.welcome-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 1.1rem;
+    color: #777777;
+}
+
+/* Form */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.login-form .textinput {
+    transition: all 0.3s ease;
+}
+
+.login-form .textinput:focus-within {
+    box-shadow: 0 0 0 3px rgba(145, 8, 17, 0.1);
+    background-color: #ffffff;
+    border: 2px solid #910811;
+}
+
+.login-button {
+    width: 100%;
+    height: 64px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #910811 0%, #b91e28 100%);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    border: 2px solid transparent;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(145, 8, 17, 0.3);
+    margin-top: 10px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(145, 8, 17, 0.4);
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+.login-register-link {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    text-align: center;
+    margin-top: 20px;
+    color: #777777;
+}
+
+.login-register-link a {
+    color: #910811;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.login-register-link a:hover {
+    color: #b91e28;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .login-page {
+        padding: 10px;
+    }
+    
+    .login-container {
+        flex-direction: column;
+        max-width: 450px;
+        min-height: auto;
+    }
+    
+    .login-left {
+        padding: 30px 20px;
+        min-height: 200px;
+    }
+    
+    .login-left h1 {
+        font-size: 1.8rem;
+    }
+    
+    .login-left p {
+        font-size: 1.2rem;
+    }
+    
+    .login-right {
+        padding: 30px 25px;
+        justify-content: flex-start;
+    }
+    
+    .login-content {
+        padding: 10px 0;
+    }
+    
+    .login-title {
+        font-size: 1.5rem;
+    }
+    
+    .login-logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .login-form {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-page {
+        padding: 5px;
+    }
+    
+    .login-container {
+        max-width: 380px;
+    }
+    
+    .login-left {
+        padding: 25px 15px;
+    }
+    
+    .login-left h1 {
+        font-size: 1.5rem;
+    }
+    
+    .login-left p {
+        font-size: 1rem;
+    }
+    
+    .login-right {
+        padding: 25px 20px;
+    }
+    
+    .login-form .textinput {
+        height: 56px;
+    }
+    
+    .login-button {
+        height: 56px;
+    }
+}
+
+/* Animation for smooth transitions */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
