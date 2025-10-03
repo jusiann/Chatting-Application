@@ -119,3 +119,17 @@
   height: 15px;
   color: hsl(240, 100%, 60%);
 }
+
+/* Mobile Responsive for PersonCard - Orijinal tasarım korunur */
+@media (max-width: 768px) {
+  .personcard-button {
+    min-width: 140px;
+    width: 140px;
+    flex-shrink: 0;
+  }
+
+  .personcard {
+    min-width: 140px;
+    width: 140px;
+  }
+}

@@ -45,3 +45,22 @@
   height: 250px;
   object-fit: cover;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .message-received-container {
+    padding: 2px 0; /* Sağ sola tamamen bitişik */
+    margin: 0;
+  }
+  
+  .message-received {
+    max-width: 85%; /* Mobile'da daha geniş */
+    font-size: 15px;
+    margin-left: 0; /* Sola tamamen bitişik */
+  }
+  
+  .message-received-image {
+    width: 200px;
+    height: 200px;
+  }
+}

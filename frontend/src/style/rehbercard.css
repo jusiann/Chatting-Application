@@ -62,3 +62,57 @@
     color: #777;
     font-family: Inter, sans-serif;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .rehbercard {
+        min-width: 180px; /* Yatay scroll için minimum genişlik */
+        flex-shrink: 0;
+        padding: 12px 16px;
+    }
+    
+    .rehbercard-image,
+    .rehbercard-placeholder {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .rehbercard-name {
+        font-size: 16px;
+    }
+    
+    .rehbercard-department {
+        font-size: 13px;
+    }
+    
+    .rehbercard-image-and-texts {
+        gap: 12px;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .rehbercard {
+        width: 100%; /* Alt alta sıralama için tam genişlik */
+        flex-shrink: 0;
+        padding: 12px 16px;
+    }
+    
+    .rehbercard-image,
+    .rehbercard-placeholder {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .rehbercard-name {
+        font-size: 16px;
+    }
+    
+    .rehbercard-department {
+        font-size: 13px;
+    }
+    
+    .rehbercard-image-and-texts {
+        gap: 12px;
+    }
+}

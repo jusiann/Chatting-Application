@@ -181,8 +181,9 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    margin-top: 10px;
-    padding: 0 20px;;
+    margin-top: 20px; /* Margin artırıldı */
+    margin-bottom: 20px; /* Alt margin eklendi */
+    padding: 0 20px;
 }
 
 .cancel-btn,
@@ -204,4 +205,96 @@ body {
 .create-btn {
     background-color: #d2f6d2;
     color: #0b8d0b;
+}
+
+/* Mobile Responsive Design - Home sayfası gibi aynı düzen */
+@media (max-width: 768px) {
+  .gruppage-container {
+    flex-direction: column;
+    height: 100vh;
+    gap: 0;
+  }
+
+  /* Sidebar mobile'da üst kısma taşınır ama tasarımı aynı kalır */
+  /* Sidebar kendi CSS'inde mobile responsive var */
+
+  /* Grup içeriği mobile düzeni - Home gibi yatay liste */
+  .gruppage-content {
+    width: 100%;
+    height: 240px; /* Yüksekliği artırdık - grup panelini alta almak için */
+    flex: none;
+    padding: 0 5px;
+    margin-bottom: 25px; /* Grup listesi ile sağ panel arasında boşluk */
+  }
+
+  .group-card {
+    width: 100%;
+    height: auto;
+    flex: none;
+    margin-bottom: 0;
+  }
+
+  /* Kişiler listesi yatay scroll olur - Home gibi */
+  .group-person-list {
+    flex-direction: row !important; /* Yatay sıralama */
+    overflow-x: auto !important; /* Yatay scroll */
+    overflow-y: hidden !important;
+    gap: 18px; /* Home gibi boşluk */
+    padding: 20px; /* Home gibi padding */
+    align-items: center;
+    height: 130px; /* Home gibi sabit yükseklik */
+    min-height: 130px;
+  }
+
+  .group-person-list::-webkit-scrollbar {
+    height: 4px; /* Yatay scroll için height */
+  }
+
+  .group-person-list::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 2px;
+  }
+
+  .group-person-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 2px;
+  }
+
+  /* Sağ panel mobile'da alt kısımda - grup oluşturma alanı */
+  .grouppage-right-panel-container {
+    flex: 1;
+    height: calc(100vh - 345px); /* Yüksekliği azalttık - paneli alta aldık */
+    margin: 0;
+    border-radius: 0;
+    width: 100%;
+  }
+
+  .gruppage-right-panel {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  /* Group header ve sortbar mobile düzeni */
+  .group-header {
+    font-size: 15px;
+  }
+
+  .group-sortbar-row {
+    font-size: 13px;
+    padding: 0;
+  }
+
+  /* Action buttons mobile düzeni - alta yapışma sorunu çözümü */
+  .group-action-buttons {
+    margin-top: 25px !important; /* Üst margin artırıldı */
+    margin-bottom: 25px !important; /* Alt margin artırıldı */
+    padding: 0 15px !important; /* Padding küçültüldü */
+    position: sticky; /* Sticky position - her zaman görünür */
+    bottom: 20px; /* Alttan 20px boşluk */
+    background-color: white; /* Arka plan beyaz */
+    border-radius: 10px; /* Yuvarlak köşeler */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); /* Gölge efekti */
+  }
 }

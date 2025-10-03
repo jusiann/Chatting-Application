@@ -60,3 +60,22 @@
   height: 250px;
   object-fit: cover;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .message-sended-container {
+    padding: 2px 0; /* Sağ sola tamamen bitişik */
+    margin: 0;
+  }
+  
+  .message-sended {
+    max-width: 85%; /* Mobile'da daha geniş */
+    font-size: 15px;
+    margin-right: 0; /* Sağa tamamen bitişik */
+  }
+  
+  .message-sended-image {
+    width: 200px;
+    height: 200px;
+  }
+}

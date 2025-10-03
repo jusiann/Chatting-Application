@@ -55,3 +55,27 @@
     line-height: 100%;
     color: #777777;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .setting-card {
+        gap: 35px; /* Gap küçültüldü */
+    }
+    
+    .key-icon {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .title {
+        font-size: 16px; /* Font boyutu küçültüldü */
+    }
+    
+    .subtitle {
+        font-size: 16px; /* Font boyutu küçültüldü */
+    }
+    
+    .page-wrapper {
+        padding: 8px; /* Padding küçültüldü */
+    }
+}

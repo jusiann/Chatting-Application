@@ -70,3 +70,28 @@
 .group-selected-card-remove:hover {
     color: #ff4d4f;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .group-selected-card {
+        padding: 12px 16px;
+    }
+    
+    .group-selected-card-image,
+    .group-selected-card-placeholder {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .group-selected-card-name {
+        font-size: 16px;
+    }
+    
+    .group-selected-card-department {
+        font-size: 13px;
+    }
+    
+    .group-selected-card-image-and-texts {
+        gap: 12px;
+    }
+}
