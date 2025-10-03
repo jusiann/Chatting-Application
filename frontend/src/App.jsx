@@ -1,12 +1,12 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import RehberPage from "./pages/RehberPage";
-import GrupPage from "./pages/GrupPage";
-import AnaekranPage from "./pages/AnaekranPage";
+import ContactBookPage from "./pages/ContactBookPage";
+import GroupPage from "./pages/GroupPage";
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
-import DepartmanPage from "./pages/DepartmanPage";
+import DepartmentPage from "./pages/DepartmentPage";
 import SettingsPage from "./pages/SettingsPage";
-import KayıtOl from "./pages/KayıtOl";
+import RegisterPage from "./pages/RegisterPage";
 import useUserStore from "./store/user.js";
 import { useEffect, useRef } from "react";
 import useConservationStore from "./store/conservation.js";
@@ -138,12 +138,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/home" element={user ? <AnaekranPage /> : <Navigate to="/login" replace />} />
+        <Route path="/home" element={user ? <HomePage /> : <Navigate to="/login" replace />} />
         <Route path="/login" element={!user ? <LoginPage /> : <Navigate to='/home' replace />} />
-        <Route path="/register" element={!user ? <KayıtOl /> : <Navigate to='/home' replace />} />
-        <Route path="/rehber" element={user ? <RehberPage /> : <Navigate to='/login' replace />} />
-        <Route path="/grup" element={user ? <GrupPage /> : <Navigate to='/login' replace />} />
-        <Route path="/departman" element={user ? <DepartmanPage /> : <Navigate to='/login' replace />} />
+        <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to='/home' replace />} />
+        <Route path="/rehber" element={user ? <ContactBookPage /> : <Navigate to='/login' replace />} />
+        <Route path="/grup" element={user ? <GroupPage /> : <Navigate to='/login' replace />} />
+        <Route path="/departman" element={user ? <DepartmentPage /> : <Navigate to='/login' replace />} />
         <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to='/login' replace />} />
       </Routes>
     </BrowserRouter>

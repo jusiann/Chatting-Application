@@ -1,4 +1,4 @@
-import "../style/messagereceived.css";
+import "../style/message.received.css";
 import timeFormatter from "../controllers/TimeController";
 import { useState } from "react";
 import { File } from "lucide-react";

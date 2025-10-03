@@ -1,17 +1,17 @@
-import "../style/rehberpage.css";
-import Sidebar from "../components/Sidebar";
-import Searchbar from "../components/Searchbar";
-import CreateGroupButton from "../components/createGroupButton";
-import CreateDepartmentButton from "../components/createDepartmentButton";
-import SortBar from "../components/sortBar";
-import Rehbercard from "../components/Rehbercard";
+import "../style/contact.book.page.css";
+import SideBar from "../components/SideBar";
+import SearchBar from "../components/SearchBar";
+import CreateGroupButton from "../components/CreateGroupButton";
+import CreateDepartmentButton from "../components/CreateDepartmentButton";
+import SortBar from "../components/SortBar";
+import ContactBookCard from "../components/ContactBookCard";
 import { Building } from "lucide-react";
 import useConservationStore from "../store/conservation";
 import { useEffect } from "react";
 import { messageWithUser } from "../controllers/RehberPageController";
 import { useNavigate } from "react-router-dom";
 
-function RehberPage() {
+function ContactBookPage() {
   const { contactUsers, contactUsersFetch } = useConservationStore();
   const navigate = useNavigate();
 
@@ -23,10 +23,10 @@ function RehberPage() {
 
   return (
     <div className="rehber-container">
-      <Sidebar />
+      <SideBar />
 
       <div className="rehber-content">
-        <Searchbar />
+        <SearchBar />
 
         <div className="rehber-card">
           <div className="button-row">
@@ -44,7 +44,7 @@ function RehberPage() {
           <div className="person-list">
             {Array.isArray(contactUsers) &&
               contactUsers.map((contactUser) => (
-                <Rehbercard
+                <ContactBookCard
                   key={contactUser.id}
                   contactUser={contactUser}
                   onClick={() => messageWithUser(contactUser.id, navigate)}
@@ -59,4 +59,4 @@ function RehberPage() {
   );
 }
 
-export default RehberPage;
+export default ContactBookPage;

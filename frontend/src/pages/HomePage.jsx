@@ -1,23 +1,23 @@
 import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
-import Sidebar from "../components/Sidebar";
-import Searchbar from "../components/Searchbar";
-import Personcard from "../components/Personcard";
+import SideBar from "../components/SideBar";
+import SearchBar from "../components/SearchBar";
+import PersonCard from "../components/PersonCard";
 import useGroupStore from "../store/group";
-import Messagetopbar from "../components/Messagetopbar";
-import Messagereceived from "../components/Messagereceived";
-import Messagesended from "../components/Messagesended";
-import Sendbox from "../components/Sendbox";
+import MessageTopBar from "../components/MessageTopBar";
+import MessageReceived from "../components/MessageReceived";
+import MessageSent from "../components/MessageSent";
+import SendBox from "../components/SendBox";
 import useConservationStore from "../store/conservation";
 import useUserStore from "../store/user";
-import "../style/anaekranpage.css";
-import GroupCard from "../components/groupCard";
-import GroupMessageReceived from "../components/groupMessageReceived";
+import "../style/main.screen.page.css";
+import GroupCard from "../components/GroupCard";
+import GroupMessageReceived from "../components/GroupMessageReceived";
 import useFileStore from "../store/file";
 import { File } from "lucide-react";
-import GroupApprovalButton from "../components/groupApprovalButton";
-import GroupCancelButton from "../components/groupCancelButton";
+import GroupApprovalButton from "../components/GroupApprovalButton";
+import GroupCancelButton from "../components/GroupCancelButton";
 
-const AnaekranPage = () => {
+const HomePage = () => {
   const {
     chatUsers,
     messages,
@@ -174,15 +174,15 @@ const AnaekranPage = () => {
 
   return (
     <div className="anaekran-container">
-      <Sidebar />
+      <SideBar />
 
       <div className="anaekran-content">
-        <Searchbar />
+        <SearchBar />
 
         <div className="anaekran-person-list">
           {conversationList.map((c) =>
             c.type === "user" ? (
-              <Personcard key={c.id} chatUser={c.original} />
+              <PersonCard key={c.id} chatUser={c.original} />
             ) : (
               <GroupCard key={c.id} groupRoom={c.original} /> //Değişecek
             )
@@ -194,7 +194,7 @@ const AnaekranPage = () => {
       ) : (
         <div className="anaekran-chat-panel">
           <div className="messagetopbar-container-home">
-            <Messagetopbar />
+            <MessageTopBar />
           </div>
 
           {file != null ? (
@@ -231,11 +231,11 @@ const AnaekranPage = () => {
             </div>
           )}
 
-          {file != null ? <div /> : <Sendbox />}
+          {file != null ? <div /> : <SendBox />}
         </div>
       )}
     </div>
   );
 };
 
-export default AnaekranPage;
+export default HomePage;

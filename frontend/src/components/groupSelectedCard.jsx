@@ -1,5 +1,5 @@
 import { XCircle } from "lucide-react";
-import "../style/groupSelectedCard.css";
+import "../style/group.selected.card.css";
 
 function GroupSelectedCard({ contactUser, onClick }) {
     return (

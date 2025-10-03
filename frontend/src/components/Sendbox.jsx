@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import "emoji-picker-element";
-import "../style/sendbox.css";
+import "../style/send.box.css";
 import { SmilePlus, Paperclip, Send, Image, File, Camera } from "lucide-react";
 import useConservationStore from "../store/conservation";
 import useFileStore from "../store/file";
 
-const Sendbox = () => {
+const SendBox = () => {
   const [message, setMessage] = useState({
     content: "",
     receiver_id: "",
@@ -234,4 +234,4 @@ const Sendbox = () => {
   );
 };
 
-export default Sendbox;
+export default SendBox;

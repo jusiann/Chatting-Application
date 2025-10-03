@@ -1,8 +1,8 @@
-import SearchBar from "../components/Searchbar";
-import "../style/SettingsPage.css";
-import Settingsuser from "../components/Settinguser";
-import SettingCard from "../components/Settingcard";
-import Sidebar from "../components/Sidebar";
+import SearchBar from "../components/SearchBar";
+import "../style/settings.page.css";
+import SettingUser from "../components/SettingUser";
+import SettingCard from "../components/SettingCard";
+import SideBar from "../components/SideBar";
 import {
   Bell,
   Globe,
@@ -25,11 +25,11 @@ const SettingsPage = () => {
 
   return (
     <div className="settings-container">
-      <Sidebar />
+      <SideBar />
       <div className="settings-content">
         <SearchBar />
         <div className="settings-card">
-          <Settingsuser />
+          <SettingUser />
           <div className="settings-options">
             <SettingCard />
             <SettingCard

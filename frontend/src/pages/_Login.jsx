@@ -4,7 +4,7 @@ import LoginButton from "../components/loginButton";
 import { useState } from "react";
 import useUserStore from "../store/user";
 import { useNavigate } from "react-router-dom";
-import "../style/Login.css";
+import "../style/login.css";
 import logo from "../assets/Logo1.png";
 
 const Login = () => {

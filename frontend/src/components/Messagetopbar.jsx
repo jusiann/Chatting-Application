@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../style/Messagetopbar.css";
+import "../style/message.top.bar.css";
 import { Search, MoreVertical } from "lucide-react";
 import useConservationStore from "../store/conservation";
 import GroupIcon from "../assets/group.svg";

@@ -1,20 +1,20 @@
-import "../style/gruppage.css";
-import Sidebar from "../components/Sidebar";
-import Searchbar from "../components/Searchbar";
-import ContactCard from "../components/contactCard";
+import "../style/group.page.css";
+import SideBar from "../components/SideBar";
+import SearchBar from "../components/SearchBar";
+import ContactCard from "../components/ContactCard";
 import { ChevronDown } from "lucide-react";
-import GroupCancelButton from "../components/groupCancelButton";
-import GroupApprovalButton from "../components/groupApprovalButton";
+import GroupCancelButton from "../components/GroupCancelButton";
+import GroupApprovalButton from "../components/GroupApprovalButton";
 import useConservationStore from "../store/conservation";
-import Rehbercard from "../components/Rehbercard";
+import ContactBookCard from "../components/ContactBookCard";
 import { useState } from "react";
-import GroupSelectedCard from "../components/groupSelectedCard";
+import GroupSelectedCard from "../components/GroupSelectedCard";
 import useGroupStore from "../store/group";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import useSocketStore from "../store/socket";
 
-function Gruppage() {
+function GroupPage() {
   const { contactUsers } = useConservationStore();
   const { groupCreate } = useGroupStore();
   const navigate = useNavigate();
@@ -130,4 +130,4 @@ function Gruppage() {
   );
 }
 
-export default Gruppage;
+export default GroupPage;

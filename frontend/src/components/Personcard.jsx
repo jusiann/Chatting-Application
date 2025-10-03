@@ -1,4 +1,4 @@
-import "../style/personcard.css";
+import "../style/person.card.css";
 import useConservationStore from "../store/conservation";
 import { useEffect } from "react";
 import timeFormatter from "../controllers/TimeController";

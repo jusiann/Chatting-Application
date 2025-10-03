@@ -1,6 +1,6 @@
-import "../style/rehbercard.css";
+import "../style/contact.book.card.css";
 
-function Rehbercard({ contactUser, onClick }) {
+function ContactBookCard({ contactUser, onClick }) {
     return (
         <button className="rehbercard-button" onClick={onClick}>
             <div className="rehbercard">
@@ -30,4 +30,4 @@ function Rehbercard({ contactUser, onClick }) {
     );
 }
 
-export default Rehbercard;
+export default ContactBookCard;

@@ -1,14 +1,14 @@
 import { Mail, Lock, User, GraduationCap } from "lucide-react";
-import "../style/KayıtOl.css";
-import LoginButton from "../components/loginButton";
-import Textinput from "../components/Textinput";
+import "../style/signup.css";
+import LoginButton from "../components/LoginButton";
+import TextInput from "../components/TextInput";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../store/user";
 import logo from "../assets/Logo1.png";
 
-const KayıtOl = () => {
+const RegisterPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -84,7 +84,7 @@ const KayıtOl = () => {
 
         <form className="register-form" onSubmit={handleSubmit}>
           <div className="name-surname-container">
-            <Textinput
+            <TextInput
               type="text"
               placeholder="Adınız"
               name="name"
@@ -94,7 +94,7 @@ const KayıtOl = () => {
               width="190px"
               icon={User}
             />
-            <Textinput
+            <TextInput
               type="text"
               placeholder="Soyadınız"
               name="surname"
@@ -134,7 +134,7 @@ const KayıtOl = () => {
             <option value="İnşaat Mühendisliği">İnşaat Mühendisliği</option>
           </select>
 
-          <Textinput
+          <TextInput
             type="email"
             placeholder="E-posta adresiniz"
             name="email"
@@ -143,7 +143,7 @@ const KayıtOl = () => {
             className="register-input"
           />
 
-          <Textinput
+          <TextInput
             type="password"
             placeholder="Şifreniz"
             name="password"
@@ -153,7 +153,7 @@ const KayıtOl = () => {
             icon={Lock}
           />
 
-          <Textinput
+          <TextInput
             type="password"
             placeholder="Şifreniz tekrar"
             name="confirmPassword"
@@ -178,4 +178,4 @@ const KayıtOl = () => {
   );
 };
 
-export default KayıtOl;
+export default RegisterPage;

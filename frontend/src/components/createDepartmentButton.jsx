@@ -1,4 +1,4 @@
-import "../style/createDepartmentButton.css";
+import "../style/create.department.button.css";
 import { Building } from "lucide-react";
 
 const CreateDepartmentButton = () => {

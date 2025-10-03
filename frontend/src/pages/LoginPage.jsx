@@ -1,7 +1,7 @@
-import "../style/LoginPage.css";
+import "../style/login.page.css";
 import { LockKeyhole, Mail } from "lucide-react";
-import LoginButton from "../components/loginButton";
-import Textinput from "../components/Textinput";
+import LoginButton from "../components/LoginButton";
+import TextInput from "../components/TextInput";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import useUserStore from "../store/user";
@@ -48,7 +48,7 @@ const LoginPage = () => {
           <p className="login-description">Lütfen bilgilerinizi giriniz</p>
         </div>
         <form className="login-form" onSubmit={handleSubmit}>
-          <Textinput
+          <TextInput
             type="email"
             placeholder="E-posta adresiniz"
             name="email"
@@ -58,7 +58,7 @@ const LoginPage = () => {
             icon={Mail}
             required
           />
-          <Textinput
+          <TextInput
             type="password"
             placeholder="Şifre"
             name="password"

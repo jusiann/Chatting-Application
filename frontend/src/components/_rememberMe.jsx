@@ -1,4 +1,4 @@
-import "../style/rememberMe.css";
+import "../style/remember.me.css";
 
 const RememberMe = () => {
     return (

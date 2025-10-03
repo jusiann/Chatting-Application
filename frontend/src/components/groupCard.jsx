@@ -1,4 +1,4 @@
-import "../style/groupCard.css";
+import "../style/group.card.css";
 import useConservationStore from "../store/conservation";
 import { useEffect } from "react";
 import timeFormatter from "../controllers/TimeController";
@@ -7,7 +7,7 @@ import useUserStore from "../store/user";
 import useGroupStore from "../store/group";
 import groupIcon from "../assets/group.svg";
 
-function groupCard({ groupRoom }) {
+function GroupCard({ groupRoom }) {
   const fetchMessages = useConservationStore(
     (state) => state.fetchGroupMessages
   );
@@ -72,4 +72,4 @@ function groupCard({ groupRoom }) {
   );
 }
 
-export default groupCard;
+export default GroupCard;
