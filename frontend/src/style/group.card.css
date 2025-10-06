@@ -102,3 +102,17 @@
   justify-content: center;
   margin-top: 6px;
 }
+
+/* Mobile Responsive for GroupCard - Orijinal tasarım korunur */
+@media (max-width: 768px) {
+  .groupcard-button {
+    min-width: 140px;
+    width: 140px;
+    flex-shrink: 0;
+  }
+
+  .groupcard {
+    min-width: 140px;
+    width: 140px;
+  }
+}

@@ -1,14 +1,14 @@
-import { Mail, Lock, User } from "lucide-react";
-import "../style/KayıtOl.css";
+import { GraduationCap, Lock, User } from "lucide-react";
 import LoginButton from "../components/loginButton";
 import Textinput from "../components/Textinput";
+import "../style/register.page.css";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { signUp } from "../api/auth";
 import { useNavigate } from "react-router-dom";
-import useUserStore from "../store/user";
 import logo from "../assets/Logo1.png";
 
-const KayıtOl = () => {
+const RegisterPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -19,8 +19,6 @@ const KayıtOl = () => {
     password: "",
     confirmPassword: "",
   });
-
-  const signUp = useUserStore((state) => state.signUp);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -66,101 +64,95 @@ const KayıtOl = () => {
   };
 
   return (
-    <div className="register-container">
-      {/* Sol Panel */}
-      <div className="register-left">
-        <h1 className="left-title">Rumeli Üniversitesi İletişim Uygulaması</h1>
-        <p className="left-subtitle">Kayıt ol</p>
+    <div className="register-page">
+      <div className="register-left-container">
+        <h1 className="welcome-title">
+          Rumeli Üniversitesi İletişim Uygulaması
+        </h1>
+        <p className="welcome-subtitle">
+          Kurumsal email bilgileriniz ile giriş yapınız
+        </p>
       </div>
-
-      {/* Sağ Panel */}
-      <div className="register-right">
+      <div className="register-right-container">
         <img src={logo} alt="Logo" className="register-logo" />
-        <div className="right-texts">
-          <h1 className="welcome-title">Hoşgeldiniz</h1>
-          <p className="welcome-subtitle">Lütfen bilgilerinizi giriniz</p>
+        <div className="register-texts">
+          <h1 className="register-title">Hesap oluştur</h1>
+          <p className="register-description">Lütfen bilgilerinizi giriniz</p>
         </div>
-
         <form className="register-form" onSubmit={handleSubmit}>
-          <div className="name-surname">
+          <div className="name-surname-container">
             <Textinput
-              icon={User}
+              type="text"
               placeholder="Adınız"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              width="183px"
+              className="register-input name-input"
+              width="190px"
+              icon={User}
             />
             <Textinput
-              icon={User}
+              type="text"
               placeholder="Soyadınız"
               name="surname"
               value={formData.surname}
               onChange={handleChange}
-              width="183px"
+              className="register-input surname-input"
+              width="190px"
+              icon={User}
             />
           </div>
-
           <Textinput
-            icon={Mail}
-            placeholder="Email adresinizi giriniz"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-
-          <select
+            type="text"
+            placeholder="Ünvanınız örn: Prof. Dr."
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className="register-select"
-          >
-            <option value="">Ünvanınızı seçiniz</option>
-            <option value="Prof. Dr.">Prof. Dr.</option>
-            <option value="Dr. Öğretim Üyesi">Dr. Öğretim Üyesi</option>
-            <option value="Araştırma Görevlisi">Araştırma Görevlisi</option>
-          </select>
-
-          <select
+            className="register-input"
+            icon={GraduationCap}
+          />
+          <Textinput
+            type="text"
+            placeholder="Bölüm adı örn: Bilgisayar Mühendisliği"
             name="department"
             value={formData.department}
             onChange={handleChange}
-            className="register-select"
-          >
-            <option value="">Bölümünüzü seçiniz</option>
-            <option value="Bilgisayar Mühendisliği">
-              Bilgisayar Mühendisliği
-            </option>
-            <option value="Endüstri Mühendisliği">Endüstri Mühendisliği</option>
-            <option value="İnşaat Mühendisliği">İnşaat Mühendisliği</option>
-          </select>
-
+            className="register-input"
+            icon={GraduationCap}
+          />
           <Textinput
-            icon={Lock}
-            placeholder="Şifrenizi giriniz"
-            name="password"
+            type="email"
+            placeholder="E-posta adresiniz"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="register-input"
+          />
+          <Textinput
             type="password"
+            placeholder="Şifreniz"
+            name="password"
             value={formData.password}
             onChange={handleChange}
+            className="register-input"
+            icon={Lock}
           />
           <Textinput
-            icon={Lock}
-            placeholder="Şifrenizi tekrar giriniz"
-            name="confirmPassword"
             type="password"
+            placeholder="Şifreniz tekrar"
+            name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
+            className="register-input"
+            icon={Lock}
           />
-
           <LoginButton
             type="submit"
             className="register-button"
-            text="Kayıt ol"
+            text="Kayıt Ol"
           />
-
           <p className="register-login-link">
-            Zaten hesabın var mı? <a href="/login">Giriş yap</a>
+            Zaten bir hesabınız var mı? <a href="/login">Giriş yap</a>
           </p>
         </form>
       </div>
@@ -168,4 +160,4 @@ const KayıtOl = () => {
   );
 };
 
-export default KayıtOl;
+export default RegisterPage;

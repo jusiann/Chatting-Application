@@ -1,0 +1,71 @@
+.textinput {
+  width: 100%;
+  height: 64px;
+  background-color: #f5f7fa;
+  border-radius: 15px;
+  border: 2px solid transparent;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.textinput:focus-within {
+  border-color: #910811;
+  box-shadow: 0 0 0 3px rgba(145, 8, 17, 0.1);
+  background-color: #ffffff;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: #777777;
+  flex-shrink: 0;
+  transition: color 0.3s ease;
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.textinput:focus-within .icon {
+  color: #910811;
+}
+
+.textinput input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  color: #333;
+  flex: 1;
+  min-width: 0;
+  padding-left: 32px;
+  padding-right: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.textinput input::placeholder {
+  color: #777777;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 480px) {
+  .textinput {
+    height: 56px;
+    padding: 0 12px;
+  }
+  
+  .textinput input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}

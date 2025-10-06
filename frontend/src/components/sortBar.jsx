@@ -1,4 +1,4 @@
-import "../style/sortBar.css";
+import "../style/sort.bar.css";
 import { ChevronDown } from "lucide-react";
 
 const SortBar = () => {

@@ -1,11 +1,11 @@
-import { GraduationCap, Lock, User } from "lucide-react";
-import LoginButton from "../components/loginButton";
-import Textinput from "../components/Textinput";
-import "../style/RegisterPage.css";
+import { Mail, Lock, User, GraduationCap } from "lucide-react";
+import "../style/signup.css";
+import LoginButton from "../components/LoginButton";
+import TextInput from "../components/TextInput";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { signUp } from "../api/auth";
 import { useNavigate } from "react-router-dom";
+import useUserStore from "../store/user";
 import logo from "../assets/Logo1.png";
 
 const RegisterPage = () => {
@@ -19,6 +19,8 @@ const RegisterPage = () => {
     password: "",
     confirmPassword: "",
   });
+
+  const signUp = useUserStore((state) => state.signUp);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -79,9 +81,10 @@ const RegisterPage = () => {
           <h1 className="register-title">Hesap oluştur</h1>
           <p className="register-description">Lütfen bilgilerinizi giriniz</p>
         </div>
+
         <form className="register-form" onSubmit={handleSubmit}>
           <div className="name-surname-container">
-            <Textinput
+            <TextInput
               type="text"
               placeholder="Adınız"
               name="name"
@@ -91,7 +94,7 @@ const RegisterPage = () => {
               width="190px"
               icon={User}
             />
-            <Textinput
+            <TextInput
               type="text"
               placeholder="Soyadınız"
               name="surname"
@@ -102,25 +105,36 @@ const RegisterPage = () => {
               icon={User}
             />
           </div>
-          <Textinput
-            type="text"
-            placeholder="Ünvanınız örn: Prof. Dr."
+
+          <select
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className="register-input"
-            icon={GraduationCap}
-          />
-          <Textinput
-            type="text"
-            placeholder="Bölüm adı örn: Bilgisayar Mühendisliği"
+            className="register-select"
+            required
+          >
+            <option value="">Ünvanınızı seçiniz</option>
+            <option value="Prof. Dr.">Prof. Dr.</option>
+            <option value="Dr. Öğretim Üyesi">Dr. Öğretim Üyesi</option>
+            <option value="Araştırma Görevlisi">Araştırma Görevlisi</option>
+          </select>
+
+          <select
             name="department"
             value={formData.department}
             onChange={handleChange}
-            className="register-input"
-            icon={GraduationCap}
-          />
-          <Textinput
+            className="register-select"
+            required
+          >
+            <option value="">Bölümünüzü seçiniz</option>
+            <option value="Bilgisayar Mühendisliği">
+              Bilgisayar Mühendisliği
+            </option>
+            <option value="Endüstri Mühendisliği">Endüstri Mühendisliği</option>
+            <option value="İnşaat Mühendisliği">İnşaat Mühendisliği</option>
+          </select>
+
+          <TextInput
             type="email"
             placeholder="E-posta adresiniz"
             name="email"
@@ -128,7 +142,8 @@ const RegisterPage = () => {
             onChange={handleChange}
             className="register-input"
           />
-          <Textinput
+
+          <TextInput
             type="password"
             placeholder="Şifreniz"
             name="password"
@@ -137,7 +152,8 @@ const RegisterPage = () => {
             className="register-input"
             icon={Lock}
           />
-          <Textinput
+
+          <TextInput
             type="password"
             placeholder="Şifreniz tekrar"
             name="confirmPassword"
@@ -146,11 +162,13 @@ const RegisterPage = () => {
             className="register-input"
             icon={Lock}
           />
+
           <LoginButton
             type="submit"
             className="register-button"
             text="Kayıt Ol"
           />
+
           <p className="register-login-link">
             Zaten bir hesabınız var mı? <a href="/login">Giriş yap</a>
           </p>

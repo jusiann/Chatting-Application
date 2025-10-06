@@ -53,3 +53,25 @@
   object-fit: cover;
   border-radius: 50%;
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .settinguser-wrapper {
+        width: 100%; /* Tam genişlik */
+        padding-left: 15px; /* Padding küçültüldü */
+        gap: 15px; /* Gap küçültüldü */
+    }
+    
+    .settinguser-image {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .settinguser-name {
+        font-size: 16px; /* Font boyutu küçültüldü */
+    }
+    
+    .settinguser-status {
+        font-size: 14px; /* Font boyutu küçültüldü */
+    }
+}

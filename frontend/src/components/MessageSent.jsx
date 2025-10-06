@@ -1,9 +1,9 @@
-import "../style/messagesended.css";
+import "../style/message.sent.css";
 import { CheckCheck, Check, File } from "lucide-react";
 import timeFormatter from "../controllers/TimeController";
 import { useState } from "react";
 
-function MessageSended({ message }) {
+function MessageSent({ message }) {
   let statusIcon = null;
   const [open, setOpen] = useState(false);
 
@@ -101,4 +101,4 @@ function MessageSended({ message }) {
   );
 }
 
-export default MessageSended;
+export default MessageSent;

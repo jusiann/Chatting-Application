@@ -1,7 +1,7 @@
-import "../style/LoginPage.css";
+import "../style/login.page.css";
 import { LockKeyhole, Mail } from "lucide-react";
-import LoginButton from "../components/loginButton";
-import Textinput from "../components/Textinput";
+import LoginButton from "../components/LoginButton";
+import TextInput from "../components/TextInput";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import useUserStore from "../store/user";
@@ -32,50 +32,51 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-left-panel">
-        <img src={logo} alt="Logo" className="logo" />
-        <div className="login-texts">
-          <h1 className="login-title">Hoşgeldiniz</h1>
-          <p className="login-subtitle">Lütfen bilgileriniz giriniz</p>
-        </div>
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="login-inputs">
-            <Textinput
-              type="email"
-              placeholder="E-posta adresiniz"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              icon={Mail}
-              required
-            />
-            <Textinput
-              type="password"
-              placeholder="Şifre"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              icon={LockKeyhole}
-              required
-            />
-          </div>
-          <LoginButton type="submit" />
-        </form>
-        <p>
-          Hesabın yok mu ?{" "}
-          <a href="/register" className="register-link">
-            Kayıt ol
-          </a>
-        </p>
-      </div>
-      <div className="login-right-panel">
+    <div className="login-page">
+      <div className="login-left-container">
         <h1 className="welcome-title">
           Rumeli Üniversitesi İletişim Uygulaması
         </h1>
         <p className="welcome-subtitle">
           Kurumsal email bilgileriniz ile giriş yapınız
         </p>
+      </div>
+      <div className="login-right-container">
+        <img src={logo} alt="Logo" className="login-logo" />
+        <div className="login-texts">
+          <h1 className="login-title">Hoşgeldiniz</h1>
+          <p className="login-description">Lütfen bilgilerinizi giriniz</p>
+        </div>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <TextInput
+            type="email"
+            placeholder="E-posta adresiniz"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="login-input"
+            icon={Mail}
+            required
+          />
+          <TextInput
+            type="password"
+            placeholder="Şifre"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="login-input"
+            icon={LockKeyhole}
+            required
+          />
+          <LoginButton
+            type="submit"
+            className="login-button"
+            text="Giriş Yap"
+          />
+          <p className="login-register-link">
+            Hesabın yok mu? <a href="/register">Kayıt ol</a>
+          </p>
+        </form>
       </div>
     </div>
   );

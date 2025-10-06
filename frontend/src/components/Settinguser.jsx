@@ -1,8 +1,8 @@
 import React, { use, useEffect } from "react";
-import "../style/settinguser.css";
+import "../style/setting.user.css";
 import useUserStore from "../store/user";
 
-const Settinguser = () => {
+const SettingUser = () => {
   const myUser = useUserStore((s) => s.user);
   if (!myUser) {
     return (
@@ -46,4 +46,4 @@ const Settinguser = () => {
   );
 };
 
-export default Settinguser;
+export default SettingUser;

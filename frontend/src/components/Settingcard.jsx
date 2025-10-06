@@ -1,5 +1,5 @@
 import { KeyRound } from "lucide-react";
-import "../style/settingcard.css";
+import "../style/setting.card.css";
 
 const SettingCard = ({
   icon: Icon = KeyRound,

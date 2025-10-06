@@ -1,19 +1,19 @@
-import "../style/DepartmanPage.css";
-import Sidebar from "../components/Sidebar";
-import Searchbar from "../components/Searchbar";
-import ContactCard from "../components/contactCard";
+import "../style/department.page.css";
+import SideBar from "../components/SideBar";
+import SearchBar from "../components/SearchBar";
+import ContactCard from "../components/ContactCard";
 import { ChevronDown } from "lucide-react";
-import DepartmentButton from "../components/departmentButton";
-import GroupCancelButton from "../components/groupCancelButton";
-import GroupApprovalButton from "../components/groupApprovalButton";
+import DepartmentButton from "../components/DepartmentButton";
+import GroupCancelButton from "../components/GroupCancelButton";
+import GroupApprovalButton from "../components/GroupApprovalButton";
 
-function DepartmanPage() {
+function DepartmentPage() {
     return (
         <div className="departmanpage-container">
-            <Sidebar />
+            <SideBar />
 
             <div className="departmanpage-content">
-                <Searchbar placeholder="Kişilerde arama yap" />
+                <SearchBar placeholder="Kişilerde arama yap" />
 
                 <div className="departman-card">
                     <div className="departman-header">Departman seçimi yapınız</div>
@@ -56,4 +56,4 @@ function DepartmanPage() {
     );
 }
 
-export default DepartmanPage;
+export default DepartmentPage;

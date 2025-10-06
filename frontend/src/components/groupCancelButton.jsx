@@ -1,4 +1,4 @@
-import "../style/groupCancelButton.css";
+import "../style/group.cancel.button.css";
 import { XCircle } from "lucide-react";
 const GroupCancelButton = ({ onClick }) => {
   return (
