@@ -66,7 +66,7 @@ function GroupPage() {
           <div className="group-person-list">
             {Array.isArray(contactUsers) &&
               contactUsers.map((contactUser) => (
-                <Rehbercard
+                <ContactBookCard
                   key={contactUser.id}
                   contactUser={contactUser}
                   onClick={() => addMember(contactUser)}
