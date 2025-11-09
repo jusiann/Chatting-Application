@@ -1,8 +1,8 @@
 import toast from "react-hot-toast";
 import { create } from "zustand";
 import { createGroup, getGroupMessages, getGroups } from "../api/group";
-import useSocketStore from "./socket";
-import useUserStore from "./user";
+import useSocketStore from "./Socket";
+import useUserStore from "./User";
 
 const useGroupStore = create((set, get) => ({
   groups: [],

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "../style/message.top.bar.css";
 import { Search, MoreVertical } from "lucide-react";
-import useConservationStore from "../store/conservation";
+import useConservationStore from "../store/Conservation";
 import GroupIcon from "../assets/group.svg";
 import timeFormatter from "../controllers/TimeController";
 

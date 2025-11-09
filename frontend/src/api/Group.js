@@ -1,4 +1,4 @@
-import axios from "./axios";
+import axios from "./Axios";
 
 export const createGroup = async (formData) => {
     const res = await axios.post("/groups/create", formData);

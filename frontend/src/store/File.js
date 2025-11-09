@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import axios from "../api/axios";
-import useSocketStore from "./socket";
-import useConservationStore from "./conservation";
-import useUserStore from "./user";
+import useSocketStore from "./Socket";
+import useConservationStore from "./Conservation";
+import useUserStore from "./User";
 
 const useFileStore = create((set, get) => ({
   file: null,

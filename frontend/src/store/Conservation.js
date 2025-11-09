@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import axios from "../api/axios.js";
-import useSocketStore from "./socket.js";
-import useGroupStore from "./group.js";
-import useUserStore from "./user.js";
+import axios from "../api/Axios.js";
+import useSocketStore from "./Socket.js";
+import useGroupStore from "./Group.js";
+import useUserStore from "./User.js";
 
 const useConservationStore = create((set, get) => ({
   // Typing state

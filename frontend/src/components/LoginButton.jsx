@@ -1,5 +1,5 @@
 import "../style/login.button.css";
-import useUserStore from "../store/user";
+import useUserStore from "../store/User";
 import { LoaderCircle } from "lucide-react";
 const LoginButton = ({ onClick, text = "Giriş yap", type = "button" }) => {
   const { loggingIn } = useUserStore.getState();

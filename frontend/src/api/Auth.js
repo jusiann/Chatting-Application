@@ -1,4 +1,4 @@
-import axios from "./axios";
+import axios from "./Axios";
 
 export const signUp = async (formData) => {
   return await axios.post("/auth/sign-up", formData).then((res) => res.data);

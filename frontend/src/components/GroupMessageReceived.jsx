@@ -1,6 +1,6 @@
 import "../style/group.message.received.css";
 import timeFormatter from "../controllers/TimeController";
-import useConservationStore from "../store/conservation";
+import useConservationStore from "../store/Conservation";
 import { File } from "lucide-react";
 import { useState } from "react";
 

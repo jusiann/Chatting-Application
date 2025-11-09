@@ -1,8 +1,8 @@
 import { Lock, User } from "lucide-react";
-import Textinput from "../components/Textinput";
-import LoginButton from "../components/loginButton";
+import Textinput from "../components/TextInput";
+import LoginButton from "../components/LoginButton";
 import { useState } from "react";
-import useUserStore from "../store/user";
+import useUserStore from "../store/User";
 import { useNavigate } from "react-router-dom";
 import "../style/login.css";
 import logo from "../assets/Logo1.png";

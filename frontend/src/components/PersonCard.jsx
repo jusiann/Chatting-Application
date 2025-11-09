@@ -1,9 +1,9 @@
 import "../style/person.card.css";
-import useConservationStore from "../store/conservation";
+import useConservationStore from "../store/Conservation";
 import { useEffect } from "react";
 import timeFormatter from "../controllers/TimeController";
-import useSocketStore from "../store/socket";
-import useUserStore from "../store/user";
+import useSocketStore from "../store/Socket";
+import useUserStore from "../store/User";
 import { Check, CheckCheck } from "lucide-react";
 
 function Personcard({ chatUser }) {

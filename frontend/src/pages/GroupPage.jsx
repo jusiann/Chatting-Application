@@ -9,10 +9,10 @@ import useConservationStore from "../store/conservation";
 import ContactBookCard from "../components/ContactBookCard";
 import { useState } from "react";
 import GroupSelectedCard from "../components/GroupSelectedCard";
-import useGroupStore from "../store/group";
+import useGroupStore from "../store/Group";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import useSocketStore from "../store/socket";
+import useSocketStore from "../store/Socket";
 
 function GroupPage() {
   const { contactUsers } = useConservationStore();
@@ -47,10 +47,10 @@ function GroupPage() {
 
   return (
     <div className="gruppage-container">
-      <Sidebar />
+      <SideBar />
 
       <div className="gruppage-content">
-        <Searchbar placeholder="Kişilerde arama yap" />
+        <SearchBar placeholder="Kişilerde arama yap" />
 
         <div className="group-card">
           <div className="group-header">Grup üyelerini seçiniz</div>

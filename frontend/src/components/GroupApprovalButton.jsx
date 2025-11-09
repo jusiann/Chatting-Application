@@ -1,6 +1,6 @@
 import "../style/group.approval.button.css";
 import { CheckCircle, LoaderCircle } from "lucide-react";
-import useFileStore from "../store/file.js";
+import useFileStore from "../store/File.js";
 
 const GroupApprovalButton = ({ text, onClick }) => {
   const { uploading } = useFileStore();

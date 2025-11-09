@@ -5,7 +5,7 @@ import TextInput from "../components/TextInput";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import useUserStore from "../store/user";
+import useUserStore from "../store/User";
 import logo from "../assets/Logo1.png";
 
 const RegisterPage = () => {

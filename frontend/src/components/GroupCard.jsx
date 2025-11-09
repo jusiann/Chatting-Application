@@ -1,10 +1,10 @@
 import "../style/group.card.css";
-import useConservationStore from "../store/conservation";
+import useConservationStore from "../store/Conservation";
 import { useEffect } from "react";
 import timeFormatter from "../controllers/TimeController";
-import useSocketStore from "../store/socket";
-import useUserStore from "../store/user";
-import useGroupStore from "../store/group";
+import useSocketStore from "../store/Socket";
+import useUserStore from "../store/User";
+import useGroupStore from "../store/Group";
 import groupIcon from "../assets/group.svg";
 
 function GroupCard({ groupRoom }) {

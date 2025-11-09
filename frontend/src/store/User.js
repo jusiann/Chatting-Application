@@ -48,7 +48,7 @@ const useUserStore = create((set,get) => ({
       localStorage.removeItem("refresh_token");
     } catch {}
     try {
-      const socketStore = require("./socket").default;
+      const socketStore = require("./Socket").default;
       socketStore.getState().disconnect();
     } catch {}
     set({ user: null });
