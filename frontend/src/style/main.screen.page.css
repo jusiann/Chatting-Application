@@ -1,3 +1,19 @@
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Inter, sans-serif;
+  height: 100%;
+  overflow: hidden;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
 .anaekran-container {
   display: flex;
   height: 100vh;
@@ -7,6 +23,7 @@
   overflow: hidden;
   gap: 20px;
   align-items: center;
+  padding: 0 0 0 20px;
 }
 
 .anaekran-content {
@@ -132,10 +149,6 @@
   justify-content: center;
 }
 
-*::-webkit-scrollbar {
-  display: none;
-}
-
 .anaekran-right-panel {
   width: calc(100% - 20px);
   height: calc(100% - 20px);
@@ -166,11 +179,13 @@
   border-radius: 10px;
   padding: 50px;
 }
+
 .file-info-box h3 {
   margin: 0;
   font-size: 18px;
   color: #333;
 }
+
 .file-info-box p {
   margin: 0;
   font-size: 14px;
@@ -184,65 +199,73 @@
   align-items: center;
 }
 
-/* Mobile Responsive Design - Sadece layout değişikliği, tasarım aynı */
-@media (max-width: 768px) {
+/* Tablet Uyumu */
+@media screen and (max-width: 1024px) {
+  .anaekran-content {
+    width: 350px;
+  }
+}
+
+
+/* Mobil Uyumu */
+@media screen and (max-width: 768px) {
+
   .anaekran-container {
     flex-direction: column;
-    height: 100vh;
+    height: auto;
+    min-height: 100vh;
     gap: 0;
+    padding: 0;
   }
 
-  /* Sidebar mobile'da üst kısma taşınır ama tasarımı aynı kalır */
-  /* Sidebar kendi CSS'inde mobile responsive var */
-
-  /* Sohbet edilenler listesi yatay scroll olur */
   .anaekran-content {
     width: 100%;
-    height: 220px; /* Yüksekliği daha da artırdık */
+    max-width: 100%;
+    height: auto;
+    padding: 0 10px;
     flex: none;
-    padding: 0 5px;
-    margin-bottom: 25px; /* Kişi listesi ile mesaj kutusu arasında daha fazla boşluk */
+    margin-top: 10px;
   }
 
   .anaekran-person-list {
     flex-direction: row;
     overflow-x: auto;
     overflow-y: hidden;
-    gap: 18px; /* Kişiler arası boşluğu artırdık */
-    padding: 20px; /* Padding'i de artırdık */
-    align-items: center;
-    height: 130px; /* Auto yerine sabit yükseklik veriyoruz */
-    min-height: 130px; /* Min height'ı da aynı yapıyoruz */
+    gap: 15px;
+    padding: 15px 10px;
+    height: 120px;
+    min-height: 120px;
+    margin-bottom: 0;
   }
 
-  .anaekran-person-list::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  .anaekran-person-list::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 2px;
-  }
-
-  .anaekran-person-list::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 2px;
-  }
-
-  /* Sohbet alanı kalan yeri kaplar */
   .anaekran-chat-panel,
   .anaekran-right-panel {
     flex: 1;
-    height: calc(100vh - 305px); /* Content yüksekliği artışına göre ayarlandı */
+    width: 100%;
+    height: calc(100vh - 230px);
+    min-height: 50vh;
     margin-right: 0;
     border-radius: 0;
-    padding: 0; /* Sağ sola bitişik için padding sıfır */
+    padding: 0;
+    margin-top: 15px;
   }
 
-  /* Mesaj alanını sağ sola tamamen bitişik yap */
   .anaekran-messages {
-    padding: 10px 0; /* Sadece üst alt padding */
-    margin: 0;
+    padding: 10px 10px;
+    padding-right: 10px;
+  }
+
+  .messagetopbar-container-home {
+    border-radius: 0;
+  }
+
+  .sendbox-container,
+  .sendbox-wrapper {
+    border-radius: 0;
+  }
+
+  .anaekran-right-panel {
+    margin: 15px 0 0 0;
     width: 100%;
   }
 }
