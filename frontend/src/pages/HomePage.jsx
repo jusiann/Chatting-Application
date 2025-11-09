@@ -2,17 +2,17 @@ import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
 import SideBar from "../components/SideBar";
 import SearchBar from "../components/SearchBar";
 import PersonCard from "../components/PersonCard";
-import useGroupStore from "../store/group";
+import useGroupStore from "../store/Group";
 import MessageTopBar from "../components/MessageTopBar";
 import MessageReceived from "../components/MessageReceived";
 import MessageSent from "../components/MessageSent";
 import SendBox from "../components/SendBox";
-import useConservationStore from "../store/conservation";
-import useUserStore from "../store/user";
+import useConservationStore from "../store/Conservation";
+import useUserStore from "../store/User";
 import "../style/main.screen.page.css";
 import GroupCard from "../components/GroupCard";
 import GroupMessageReceived from "../components/GroupMessageReceived";
-import useFileStore from "../store/file";
+import useFileStore from "../store/File";
 import { File } from "lucide-react";
 import GroupApprovalButton from "../components/GroupApprovalButton";
 import GroupCancelButton from "../components/GroupCancelButton";
@@ -215,14 +215,14 @@ const HomePage = () => {
               {messagingType === "individual"
                 ? messages.map((message, index) =>
                     message.sender_id === user.id ? (
-                      <Messagesended key={index} message={message} />
+                      <MessageSent key={index} message={message} />
                     ) : (
-                      <Messagereceived key={index} message={message} />
+                      <MessageReceived key={index} message={message} />
                     )
                   )
                 : messages.map((message, index) =>
                     message.sender_id === user.id ? (
-                      <Messagesended key={index} message={message} />
+                      <MessageSent key={index} message={message} />
                     ) : (
                       <GroupMessageReceived key={index} message={message} />
                     )

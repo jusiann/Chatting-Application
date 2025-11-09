@@ -3,7 +3,7 @@ import "../style/group.selected.card.css";
 
 function GroupSelectedCard({ contactUser, onClick }) {
     return (
-        <button className="group-selected-card-button">
+        <div className="group-selected-card-button">
             <div className="group-selected-card">
                 <div className="group-selected-card-image-and-texts">
                     {contactUser.profile_pic ? (
@@ -31,7 +31,7 @@ function GroupSelectedCard({ contactUser, onClick }) {
                     </button>
                 </div>
             </div>
-        </button>
+        </div>
     );
 }
 

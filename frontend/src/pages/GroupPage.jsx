@@ -5,7 +5,7 @@ import ContactCard from "../components/ContactCard";
 import { ChevronDown } from "lucide-react";
 import GroupCancelButton from "../components/GroupCancelButton";
 import GroupApprovalButton from "../components/GroupApprovalButton";
-import useConservationStore from "../store/conservation";
+import useConservationStore from "../store/Conservation";
 import ContactBookCard from "../components/ContactBookCard";
 import { useState } from "react";
 import GroupSelectedCard from "../components/GroupSelectedCard";

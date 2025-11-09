@@ -7,11 +7,11 @@ import LoginPage from "./pages/LoginPage";
 import DepartmentPage from "./pages/DepartmentPage";
 import SettingsPage from "./pages/SettingsPage";
 import RegisterPage from "./pages/RegisterPage";
-import useUserStore from "./store/user.js";
+import useUserStore from "./store/User.js";
 import { useEffect, useRef } from "react";
-import useConservationStore from "./store/conservation.js";
-import useGroupStore from "./store/group.js";
-import useSocketStore from "./store/socket.js";
+import useConservationStore from "./store/Conservation.js";
+import useGroupStore from "./store/Group.js";
+import useSocketStore from "./store/Socket.js";
 
 function App() {
   const { checkAuth, user } = useUserStore();

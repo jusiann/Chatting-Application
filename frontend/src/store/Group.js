@@ -16,6 +16,7 @@ const useGroupStore = create((set, get) => ({
       emit("join_group", res.id);
       emit("new_group", { memberIds: formData.memberIds, groupId: res.id });
       toast.success("Grup oluşturuldu!");
+      await get().fetchGroups();
       return true;
     } catch (error) {
       toast.error(error.response?.data?.message || "Grup oluşturulamadı.");
