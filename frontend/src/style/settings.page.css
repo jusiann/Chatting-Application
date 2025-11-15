@@ -1,88 +1,123 @@
-.settings-container{
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 30px;
-    width: 100vw;
-    height: 100vh;
-    align-items: center;
+html {
+  height: 100%;
 }
 
-.settings-content{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 30px;
-    width: 500px;
-    align-self: stretch;
-    padding: 0;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Inter, sans-serif;
+  height: 100%;
+  overflow: hidden;
 }
 
-.settings-card{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-    align-self: stretch;
-    flex: 1;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 30px;
-    margin-bottom: 10px;
-    padding: 10px;
-}
-    
-.settings-options{
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
-    padding: 20px;
-    align-self: stretch;
+.settings-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 30px;
+  width: 100vw;
+  height: 100vh;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
-.settings-right{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-    align-self: stretch;
-    color: var(--rumeli-color);
-    background-color: #f3d8db;
-    margin: 10px 20px 10px 0;
-    border-radius: 30px;
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 30px;
+  width: 500px;
+  align-self: stretch;
+  padding: 0;
+  flex-grow: 0;
 }
 
-/* Mobile Responsive Design - Rehber sayfası gibi sağ panel kaldırılır */
-@media (max-width: 768px) {
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  align-self: stretch;
+  flex: 1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 30px;
+  margin-bottom: 10px;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.settings-options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
+  align-self: stretch;
+}
+
+.settings-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  align-self: stretch;
+  color: var(--rumeli-color);
+  background-color: #f3d8db;
+  margin: 10px 20px 10px 0;
+  border-radius: 30px;
+}
+
+/* Tablet Uyumu */
+@media screen and (max-width: 1024px) {
   .settings-container {
-    flex-direction: column;
-    height: 100vh;
-    gap: 0;
+    gap: 10px;
+    padding: 10px;
   }
 
-  /* Sidebar mobile'da üst kısma taşınır ama tasarımı aynı kalır */
-  /* Sidebar kendi CSS'inde mobile responsive var */
+  .settings-content {
+    width: 400px;
+  }
 
-  /* Settings içeriği mobile'da tam alan kaplar */
+  .settings-right {
+    flex: 0 0 250px;
+  }
+}
+
+
+/* Mobil Uyumu */
+@media screen and (max-width: 768px) {
+
+  .settings-container {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    gap: 0;
+    padding: 0;
+  }
+
   .settings-content {
     width: 100%;
-    height: calc(100vh - 80px); /* Sidebar yüksekliği çıkarıldı */
-    padding: 0 5px;
-    gap: 20px;
+    max-width: 100%;
+    height: auto;
+    padding: 0 10px;
+    gap: 15px;
+    flex: none;
+    margin-top: 10px;
   }
 
   .settings-card {
-    height: calc(100vh - 150px); /* Daha fazla alan */
-    overflow-y: auto;
-    margin-bottom: 0;
+    height: auto;
+    min-height: 70vh;
+    padding: 10px 5px;
+    box-shadow: none;
+    border-radius: 15px;
   }
 
-  /* Sağ panel mobile'da gizle - ayarlar yazısı ve kart yapısını kaldır */
   .settings-right {
     display: none;
   }
 
-  /* Settings options mobile düzeni */
   .settings-options {
     gap: 15px;
     padding: 15px;
