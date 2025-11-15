@@ -1,0 +1,72 @@
+.group-selected-card-button {
+    all: unset;
+    width: 100%;
+}
+
+.group-selected-card {
+    background-color: white;
+    border-radius: 16px;
+    padding: 15px 20px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.group-selected-card-image-and-texts {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-grow: 1;
+}
+
+.group-selected-card-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.group-selected-card-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #ddd;
+}
+
+.group-selected-card-texts {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.group-selected-card-name {
+    font-weight: 500;
+    font-size: 18px;
+    color: #000;
+    font-family: Inter, sans-serif;
+}
+
+.group-selected-card-department {
+    font-size: 14px;
+    color: #777;
+    font-family: Inter, sans-serif;
+}
+
+.group-selected-card-spacer {
+    flex-grow: 1;
+}
+
+.group-selected-card-remove {
+    all: unset;
+    font-size: 20px;
+    color: #777;
+    cursor: pointer;
+    padding: 0 10px;
+}
+
+.group-selected-card-remove:hover {
+    color: #ff4d4f;
+}

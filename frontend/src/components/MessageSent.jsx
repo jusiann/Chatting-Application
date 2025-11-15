@@ -1,4 +1,4 @@
-import "../style/message.sent.css";
+import "../style/MessageSent.css";
 import { CheckCheck, Check, File } from "lucide-react";
 import timeFormatter from "../controllers/TimeController";
 import { useState } from "react";

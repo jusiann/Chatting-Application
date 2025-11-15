@@ -1,10 +1,10 @@
 import { GraduationCap, Lock, User } from "lucide-react";
-import LoginButton from "../components/loginButton";
-import Textinput from "../components/Textinput";
-import "../style/register.page.css";
+import LoginButton from "../components/LoginButton";
+import Textinput from "../components/TextInput";
+import "../style/RegisterPage.css";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { signUp } from "../api/auth";
+import { signUp } from "../api/Auth";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/Logo1.png";
 

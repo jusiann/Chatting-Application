@@ -1,0 +1,77 @@
+.settinguser-wrapper {
+  width: 470px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  border-bottom: 1px solid #000000;
+  padding-left: 20px;
+  padding-bottom: 10px;
+  font-family: "Inter", sans-serif;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.settinguser-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #ddd;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settinguser-texts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.settinguser-name {
+  font-size: 18px;
+  font-weight: 500;
+  color: #910811;
+  line-height: 100%;
+}
+
+.settinguser-status {
+  font-size: 16px;
+  font-weight: 500;
+  color: #777777;
+  line-height: 100%;
+}
+
+.settinguser-img {
+  width: 100%;
+  cursor: pointer;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .settinguser-wrapper {
+        width: 100%; /* Tam genişlik */
+        padding-left: 15px; /* Padding küçültüldü */
+        gap: 15px; /* Gap küçültüldü */
+    }
+    
+    .settinguser-image {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .settinguser-name {
+        font-size: 16px; /* Font boyutu küçültüldü */
+    }
+    
+    .settinguser-status {
+        font-size: 14px; /* Font boyutu küçültüldü */
+    }
+}

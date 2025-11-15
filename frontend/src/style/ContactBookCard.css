@@ -1,0 +1,118 @@
+.rehbercard-button {
+    all: unset;
+    width: 100%;
+    cursor: pointer;
+}
+
+.rehbercard-button:hover {
+    background-color: #f0f0f0;
+}
+
+.rehbercard {
+    background-color: white;
+    border-radius: 16px;
+    padding: 15px 20px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+}
+.rehbercard:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+}
+
+.rehbercard-image-and-texts {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.rehbercard-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.rehbercard-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #ddd;
+}
+
+.rehbercard-texts {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.rehbercard-name {
+    font-weight: 500;
+    font-size: 18px;
+    color: #000;
+    font-family: Inter, sans-serif;
+}
+
+.rehbercard-department {
+    font-size: 14px;
+    color: #777;
+    font-family: Inter, sans-serif;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .rehbercard {
+        min-width: 180px; /* Yatay scroll için minimum genişlik */
+        flex-shrink: 0;
+        padding: 12px 16px;
+    }
+    
+    .rehbercard-image,
+    .rehbercard-placeholder {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .rehbercard-name {
+        font-size: 16px;
+    }
+    
+    .rehbercard-department {
+        font-size: 13px;
+    }
+    
+    .rehbercard-image-and-texts {
+        gap: 12px;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .rehbercard {
+        width: 100%; /* Alt alta sıralama için tam genişlik */
+        flex-shrink: 0;
+        padding: 12px 16px;
+    }
+    
+    .rehbercard-image,
+    .rehbercard-placeholder {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .rehbercard-name {
+        font-size: 16px;
+    }
+    
+    .rehbercard-department {
+        font-size: 13px;
+    }
+    
+    .rehbercard-image-and-texts {
+        gap: 12px;
+    }
+}

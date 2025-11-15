@@ -1,4 +1,4 @@
-import "../style/side.bar.css";
+import "../style/SideBar.css";
 import {MessageSquareMore , Contact , Settings , User } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 

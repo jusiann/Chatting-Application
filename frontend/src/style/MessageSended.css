@@ -1,0 +1,62 @@
+.message-sended-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 4px 8px;
+}
+
+.message-sended {
+  background-color: #910811;
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  /* let bubble size to its content but not exceed a max width */
+  display: inline-block;
+  width: auto;
+  max-width: 40%;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  position: relative;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.message-sended-text {
+  margin: 0;
+  padding: 0;
+}
+
+.message-sended-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.message-sended-time {
+  font-size: 12px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.message-sended-check {
+  width: 15px;
+  height: 15px;
+  color: #ffffff;
+}
+
+.message-sended-check-read {
+  width: 15px;
+  height: 15px;
+  color: hsl(240, 100%, 60%);
+}
+
+.message-sended-image {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+}

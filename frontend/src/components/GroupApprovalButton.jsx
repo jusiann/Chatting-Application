@@ -1,4 +1,4 @@
-import "../style/group.approval.button.css";
+import "../style/GroupApprovalButton.css";
 import { CheckCircle, LoaderCircle } from "lucide-react";
 import useFileStore from "../store/File.js";
 

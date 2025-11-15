@@ -1,5 +1,5 @@
 import React, { use, useEffect } from "react";
-import "../style/setting.user.css";
+import "../style/SettingUser.css";
 import useUserStore from "../store/User";
 
 const SettingUser = () => {

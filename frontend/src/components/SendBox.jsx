@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "emoji-picker-element";
-import "../style/send.box.css";
+import "../style/SendBox.css";
 import { SmilePlus, Paperclip, Send, Image, File, Camera } from "lucide-react";
 import useConservationStore from "../store/Conservation";
 import useFileStore from "../store/File";

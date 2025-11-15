@@ -1,4 +1,4 @@
-import "../style/group.page.css";
+import "../style/GroupPage.css";
 import SideBar from "../components/SideBar";
 import SearchBar from "../components/SearchBar";
 import ContactCard from "../components/ContactCard";
@@ -47,10 +47,10 @@ function GroupPage() {
 
   return (
     <div className="gruppage-container">
-      <SideBar />
+      <Sidebar />
 
       <div className="gruppage-content">
-        <SearchBar placeholder="Kişilerde arama yap" />
+        <Searchbar placeholder="Kişilerde arama yap" />
 
         <div className="group-card">
           <div className="group-header">Grup üyelerini seçiniz</div>
@@ -66,7 +66,7 @@ function GroupPage() {
           <div className="group-person-list">
             {Array.isArray(contactUsers) &&
               contactUsers.map((contactUser) => (
-                <ContactBookCard
+                <Rehbercard
                   key={contactUser.id}
                   contactUser={contactUser}
                   onClick={() => addMember(contactUser)}

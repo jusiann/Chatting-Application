@@ -7,7 +7,7 @@ const useSocketStore = create((set, get) => ({
   connectionError: null,
 
   // Socket bağlantısını başlat
-  connect: (serverUrl = "http://localhost:5001") => {    //http://localhost:5001   http://13.60.211.144
+  connect: (serverUrl = "http://localhost:5001") => {    //http://localhost:5001  http://13.60.211.144
     const { socket } = get();
 
     if (socket && socket.connected) {

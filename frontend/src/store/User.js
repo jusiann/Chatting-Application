@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { checkAuth, signIn, logout as apiLogout, signUp } from "../api/auth";
+import { checkAuth, signIn, logout as apiLogout, signUp } from "../api/Auth";
 import toast from "react-hot-toast";
 
 const useUserStore = create((set,get) => ({

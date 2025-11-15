@@ -1,5 +1,5 @@
 import { Mail, Lock, User, GraduationCap } from "lucide-react";
-import "../style/signup.css";
+import "../style/SignUp.css";
 import LoginButton from "../components/LoginButton";
 import TextInput from "../components/TextInput";
 import { useState } from "react";

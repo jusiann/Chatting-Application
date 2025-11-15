@@ -1,4 +1,4 @@
-import "../style/department.page.css";
+import "../style/DepartmentPage.css";
 import SideBar from "../components/SideBar";
 import SearchBar from "../components/SearchBar";
 import ContactCard from "../components/ContactCard";

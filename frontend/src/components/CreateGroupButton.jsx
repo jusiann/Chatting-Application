@@ -1,4 +1,4 @@
-import "../style/create.group.button.css";
+import "../style/CreateGroupButton.css";
 import { Users } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 

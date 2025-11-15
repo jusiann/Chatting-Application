@@ -1,0 +1,66 @@
+.message-received-container {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 10px;
+}
+
+.message-received {
+  background-color: #ffffff;
+  color: #910811;
+  border: 0.5px solid #910811;
+  border-radius: 12px;
+  padding: 12px 16px;
+  /* let bubble size to its content but not exceed a max width */
+  display: inline-block;
+  width: auto;
+  max-width: 40%; /* responsive: bubble won't be wider than 40% of container */
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  position: relative;
+  /* allow long words/URLs to break and wrap to next line */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap; /* preserve line breaks if any */
+}
+
+.message-received-text {
+  margin: 0;
+  padding: 0;
+}
+
+.message-received-time {
+  font-size: 12px;
+  font-weight: 500;
+  color: #910811;
+  display: block;
+  text-align: right;
+  margin-top: 8px;
+}
+
+.message-received-image {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .message-received-container {
+    padding: 2px 0; /* Sağ sola tamamen bitişik */
+    margin: 0;
+  }
+  
+  .message-received {
+    max-width: 85%; /* Mobile'da daha geniş */
+    font-size: 15px;
+    margin-left: 0; /* Sola tamamen bitişik */
+  }
+  
+  .message-received-image {
+    width: 200px;
+    height: 200px;
+  }
+}

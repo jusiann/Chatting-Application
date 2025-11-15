@@ -1,4 +1,4 @@
-import "../style/group.card.css";
+import "../style/GroupCard.css";
 import useConservationStore from "../store/Conservation";
 import { useEffect } from "react";
 import timeFormatter from "../controllers/TimeController";

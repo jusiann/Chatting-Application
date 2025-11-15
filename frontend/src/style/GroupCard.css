@@ -1,0 +1,104 @@
+.groupcard-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  height: 70px;
+  display: flex;
+  margin: 0;
+  width: 100%;
+}
+
+.groupcard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+  padding: 0 10px;
+  border: 1px solid #f5f7fa;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.groupcard:hover {
+  background-color: #f5f7fa;
+}
+.groupcard-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  flex-shrink: 0;
+}
+.groupcard-image-and-texts {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.groupcard-texts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 12px;
+  flex-grow: 1;
+  align-items: flex-start;
+}
+
+.groupcard-name {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000000;
+}
+
+.groupcard-message {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #777777;
+  margin-top: 3px;
+}
+
+.groupcard-time {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #777777;
+  padding-left: 8px;
+}
+
+.groupcard-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.groupcard-unread-and-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding-right: 10px;
+}
+
+.groupcard-unread-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 1px 1px;
+  border-radius: 50%; /* pill/circle */
+  background-color: #910811; /* customize your color */
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 6px;
+}

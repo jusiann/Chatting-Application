@@ -1,0 +1,101 @@
+body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.rememberMe {
+    width: 138px;
+
+    height: 20px;
+
+    opacity: 1;
+
+    position: relative;
+
+}
+
+.rememberMe-text {
+    width: 86px;
+
+    height: 19px;
+
+    position: absolute;
+    left: 27px;
+
+    font-family: Inter;
+
+    font-weight: 500;
+
+    font-style: normal;
+
+    font-size: 16px;
+
+    line-height: 100%;
+
+    letter-spacing: 0%;
+
+    vertical-align: middle;
+
+    color: #222222;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+.rememberMe-checkbox {
+    width: 16px;
+
+    height: 16px;
+
+    position: absolute;
+    top: 2px;
+
+    left: 2px;
+
+    opacity: 1;
+
+    background-color: #ffffff;
+
+    border: 1px solid #000000;
+
+}
+
+.rememberMe-forgot {
+    width: 144px;
+
+    height: 19px;
+
+    position: absolute;
+    left: 200px;
+
+    font-family: Inter;
+
+    font-weight: 500;
+
+    font-style: normal;
+
+    font-size: 16px;
+
+    line-height: 100%;
+
+    letter-spacing: 0%;
+
+    vertical-align: middle;
+
+    color: #910811;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}

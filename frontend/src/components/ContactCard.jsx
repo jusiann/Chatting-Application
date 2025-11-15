@@ -1,4 +1,4 @@
-import "../style/contact.card.css";
+import "../style/ContactCard.css";
 import tanerCevik from "../assets/tanerCevik.jpg";
 
 const ContactCard = ({name = "Prof. Dr. Taner Çevik", title = "Bilgisayar Mühendisliği Bölüm Başkanı", image = "src/assets/tanerCevik.jpg"}) => {

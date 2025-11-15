@@ -1,11 +1,11 @@
-import "../style/login.page.css";
+import "../style/LoginPage.css";
 import { LockKeyhole, Mail } from "lucide-react";
 import LoginButton from "../components/LoginButton";
 import TextInput from "../components/TextInput";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import useUserStore from "../store/user";
-import useConservationStore from "../store/conservation";
+import useUserStore from "../store/User";
+import useConservationStore from "../store/Conservation";
 import logo from "../assets/Logo1.png";
 
 const LoginPage = () => {

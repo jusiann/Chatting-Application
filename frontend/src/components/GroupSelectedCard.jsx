@@ -1,9 +1,9 @@
 import { XCircle } from "lucide-react";
-import "../style/group.selected.card.css";
+import "../style/GroupSelectedCard.css";
 
 function GroupSelectedCard({ contactUser, onClick }) {
     return (
-        <div className="group-selected-card-button">
+        <button className="group-selected-card-button">
             <div className="group-selected-card">
                 <div className="group-selected-card-image-and-texts">
                     {contactUser.profile_pic ? (
@@ -31,7 +31,7 @@ function GroupSelectedCard({ contactUser, onClick }) {
                     </button>
                 </div>
             </div>
-        </div>
+        </button>
     );
 }
 

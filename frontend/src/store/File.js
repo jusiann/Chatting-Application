@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "../api/axios";
+import axios from "../api/Axios";
 import useSocketStore from "./Socket";
 import useConservationStore from "./Conservation";
 import useUserStore from "./User";

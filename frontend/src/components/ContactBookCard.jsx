@@ -1,4 +1,4 @@
-import "../style/contact.book.card.css";
+import "../style/ContactBookCard.css";
 
 function ContactBookCard({ contactUser, onClick }) {
     return (

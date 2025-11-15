@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import { create } from "zustand";
-import { createGroup, getGroupMessages, getGroups } from "../api/group";
+import { createGroup, getGroupMessages, getGroups } from "../api/Group";
 import useSocketStore from "./Socket";
 import useUserStore from "./User";
 
@@ -16,7 +16,6 @@ const useGroupStore = create((set, get) => ({
       emit("join_group", res.id);
       emit("new_group", { memberIds: formData.memberIds, groupId: res.id });
       toast.success("Grup oluşturuldu!");
-      await get().fetchGroups();
       return true;
     } catch (error) {
       toast.error(error.response?.data?.message || "Grup oluşturulamadı.");

@@ -1,0 +1,52 @@
+.group-message-received-container {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 10px;
+}
+
+.group-message-received {
+  background-color: #ffffff;
+  color: #910811;
+  border: 0.5px solid #910811;
+  border-radius: 12px;
+  padding: 12px 16px;
+  max-width: 40%;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.group-message-received h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #910811;
+  border-bottom: #910811 1px solid;
+}
+
+.group-message-received-text {
+  margin: 0;
+  padding: 0;
+}
+
+.group-message-received-time {
+  font-size: 12px;
+  font-weight: 500;
+  color: #910811;
+  display: block;
+  text-align: right;
+  margin-top: 8px;
+}
+
+.group-message-received-image {
+  width: 250px;
+  height: 250px;
+  object-fit: cover;
+}

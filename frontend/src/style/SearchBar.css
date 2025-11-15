@@ -1,0 +1,72 @@
+.searchbar {
+    height: 84px;
+    background-color: white;
+    border-radius: 18px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1.5px solid #e6eaef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.searchLogo {
+    border-radius: 50%;
+    width: 50px;
+}
+
+.input-area {
+    flex: 1;
+    height: 60px;
+    background-color: #f5f7fa;
+    border-radius: 40px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    color: #444;
+    flex-shrink: 0;
+}
+
+.input-area input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+    flex: 1;
+    padding-left: 32px; /* Arama yap yazısına left padding */
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .searchbar {
+        height: 70px;
+        padding: 8px;
+        margin-top: 5px;
+        gap: 12px;
+    }
+    
+    .searchLogo {
+        width: 40px;
+    }
+    
+    .input-area {
+        height: 50px;
+        padding: 6px 12px;
+    }
+    
+    .input-area input {
+        font-size: 14px;
+    }
+}

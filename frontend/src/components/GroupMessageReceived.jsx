@@ -1,4 +1,4 @@
-import "../style/group.message.received.css";
+import "../style/GroupMessageReceived.css";
 import timeFormatter from "../controllers/TimeController";
 import useConservationStore from "../store/Conservation";
 import { File } from "lucide-react";

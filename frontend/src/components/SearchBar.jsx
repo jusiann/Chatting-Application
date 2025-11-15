@@ -1,4 +1,4 @@
-import "../style/search.bar.css";
+import "../style/SearchBar.css";
 import logo from "../assets/Logo1.png";
 import { Search } from "lucide-react";
 

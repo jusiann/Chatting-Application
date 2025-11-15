@@ -1,5 +1,5 @@
 import SearchBar from "../components/SearchBar";
-import "../style/settings.page.css";
+import "../style/SettingsPage.css";
 import SettingUser from "../components/SettingUser";
 import SettingCard from "../components/SettingCard";
 import SideBar from "../components/SideBar";
@@ -12,7 +12,7 @@ import {
   LogOut,
   User,
 } from "lucide-react";
-import useUserStore from "../store/user";
+import useUserStore from "../store/User";
 import { useNavigate } from "react-router-dom";
 
 const SettingsPage = () => {

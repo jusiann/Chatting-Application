@@ -9,7 +9,7 @@ import MessageSent from "../components/MessageSent";
 import SendBox from "../components/SendBox";
 import useConservationStore from "../store/Conservation";
 import useUserStore from "../store/User";
-import "../style/main.screen.page.css";
+import "../style/MainScreenPage.css";
 import GroupCard from "../components/GroupCard";
 import GroupMessageReceived from "../components/GroupMessageReceived";
 import useFileStore from "../store/File";

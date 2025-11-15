@@ -1,4 +1,4 @@
-import "../style/department.button.css";
+import "../style/DepartmentButton.css";
 import { Building } from "lucide-react";
 
 const DepartmentButton = ({text = "Bilgisayar mühendisliği"}) => {
