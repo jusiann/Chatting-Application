@@ -1,7 +1,8 @@
 import client from "../lib/db.js";
 import moment from "moment";
-import { ApiError } from "../middlewares/error.js";
+import {ApiError} from "../middlewares/error.js";
 import AWS from "aws-sdk";
+import {encrypt, decrypt} from "../utils/encryption.js";
 
 const MESSAGE_STATUS = {
   SENT: "sent",
@@ -82,6 +83,11 @@ export const getMessages = async (req, res, next) => {
       }
       const newMessages = await Promise.all(
         messages.rows.map(async (msg) => {
+          // Decrypt message content
+          if (msg.content) {
+            msg.content = decrypt(msg.content);
+          }
+          
           if (msg.file_key) {
             const fileUrl = await s3.getSignedUrlPromise("getObject", {
               Bucket: process.env.S3_BUCKET_FILENAME,
@@ -140,6 +146,11 @@ export const getMessages = async (req, res, next) => {
       }
       const newMessages = await Promise.all(
         messages.rows.map(async (msg) => {
+          // Decrypt message content
+          if (msg.content) {
+            msg.content = decrypt(msg.content);
+          }
+          
           if (msg.file_key) {
             const fileUrl = await s3.getSignedUrlPromise("getObject", {
               Bucket: process.env.S3_BUCKET_FILENAME,
@@ -181,6 +192,8 @@ export const sendMessage = async (req, res, next) => {
     if (receiver.rows.length === 0)
       throw new ApiError("Recipient not found.", 404);
 
+    // Encrypt message before saving
+    const encryptedContent = encrypt(content);
     const newMessage = await client.query(
       `
             INSERT INTO messages (
@@ -192,7 +205,7 @@ export const sendMessage = async (req, res, next) => {
             ) 
             VALUES ($1, $2, $3, $4, $5) 
             RETURNING *`,
-      [userId, receiverId, content, MESSAGE_STATUS.SENT, moment().format()]
+      [userId, receiverId, encryptedContent, MESSAGE_STATUS.SENT, moment().format()]
     );
 
     const messageWithDetails = await client.query(
@@ -217,6 +230,9 @@ export const sendMessage = async (req, res, next) => {
             WHERE m.id = $1`,
       [newMessage.rows[0].id]
     );
+    
+    // Decrypt message content before sending response
+    messageWithDetails.rows[0].content = decrypt(messageWithDetails.rows[0].content);
 
     res.status(201).json({
       success: true,
@@ -335,7 +351,9 @@ export const getLastMessages = async (req, res, next) => {
           const isSendedFileMessage =
             value.file_key && value.sender_id == userId;
           if (isSendedFileMessage) return "Dosya gönderildi";
-          return value.content || "no Message";
+          
+          // Decrypt message content
+          return value.content ? decrypt(value.content) : "no Message";
         };
 
         return {

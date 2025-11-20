@@ -36,6 +36,7 @@ import { errorHandler } from "./src/middlewares/error.js";
 import client from "./src/lib/db.js";
 import { createNotification } from "./src/controllers/notification.controller.js";
 import { NOTIFICATION_TYPES } from "./src/lib/db.js";
+import { encrypt, decrypt } from "./src/utils/encryption.js";
 
 dotenv.config();
 
@@ -191,11 +192,20 @@ io.on("connection", async (socket) => {
         throw new Error("Gönderen bulunamadı");
       const sender = senderResult.rows[0];
 
+      // Encrypt message before saving
+      const encryptedContent = encrypt(content);
+      console.log('[SOCKET] Original content:', content);
+      console.log('[SOCKET] Encrypted content:', encryptedContent.substring(0, 50) + '...');
+
       const result = await client.query(
         "INSERT INTO messages (sender_id, receiver_id, content, status, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *",
-        [socket.user.id, receiver_id, content, "sent"]
+        [socket.user.id, receiver_id, encryptedContent, "sent"]
       );
       let newMessage = result.rows[0];
+      
+      // Decrypt for sending to users
+      newMessage.content = decrypt(newMessage.content);
+      
       const lastMessage = {
         sender: newMessage.sender_id,
         status: newMessage.status,

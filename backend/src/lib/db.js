@@ -58,6 +58,20 @@ const createUsersTable = async () => {
                     WHEN duplicate_column THEN 
                         NULL;
                 END;
+                
+                BEGIN
+                    ALTER TABLE users ADD COLUMN is_online BOOLEAN DEFAULT FALSE;
+                EXCEPTION
+                    WHEN duplicate_column THEN 
+                        NULL;
+                END;
+                
+                BEGIN
+                    ALTER TABLE users ADD COLUMN last_seen TIMESTAMP;
+                EXCEPTION
+                    WHEN duplicate_column THEN 
+                        NULL;
+                END;
             END $$;
         `);
 
@@ -79,7 +93,7 @@ const createMessagesTable = async () => {
                 id SERIAL PRIMARY KEY,
                 sender_id INTEGER NOT NULL REFERENCES users(id),
                 receiver_id INTEGER NOT NULL REFERENCES users(id),
-                content TEXT NOT NULL,
+                content TEXT,
                 status VARCHAR(20) DEFAULT 'sent',
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 delivered_at TIMESTAMP,
@@ -88,6 +102,34 @@ const createMessagesTable = async () => {
                 CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
             )
         `);
+    
+    // Eğer kolonlar yoksa ekle
+    await client.query(`
+            DO $$ 
+            BEGIN 
+                BEGIN
+                    ALTER TABLE messages ADD COLUMN file_key TEXT;
+                EXCEPTION
+                    WHEN duplicate_column THEN 
+                        NULL;
+                END;
+                
+                BEGIN
+                    ALTER TABLE messages ADD COLUMN file_type VARCHAR(50);
+                EXCEPTION
+                    WHEN duplicate_column THEN 
+                        NULL;
+                END;
+                
+                BEGIN
+                    ALTER TABLE messages ALTER COLUMN content DROP NOT NULL;
+                EXCEPTION
+                    WHEN others THEN 
+                        NULL;
+                END;
+            END $$;
+        `);
+    
     await client.query(`
             CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
             CREATE INDEX IF NOT EXISTS idx_messages_receiver_id ON messages(receiver_id);
@@ -184,11 +226,39 @@ const createGroupMessagesTable = async () => {
                 id SERIAL PRIMARY KEY,
                 group_id INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
                 sender_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                content TEXT NOT NULL,
+                content TEXT,
                 status VARCHAR(20) DEFAULT 'sent',
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         `);
+    
+    // Eğer kolonlar yoksa ekle
+    await client.query(`
+            DO $$ 
+            BEGIN 
+                BEGIN
+                    ALTER TABLE group_messages ADD COLUMN file_key TEXT;
+                EXCEPTION
+                    WHEN duplicate_column THEN 
+                        NULL;
+                END;
+                
+                BEGIN
+                    ALTER TABLE group_messages ADD COLUMN file_type VARCHAR(50);
+                EXCEPTION
+                    WHEN duplicate_column THEN 
+                        NULL;
+                END;
+                
+                BEGIN
+                    ALTER TABLE group_messages ALTER COLUMN content DROP NOT NULL;
+                EXCEPTION
+                    WHEN others THEN 
+                        NULL;
+                END;
+            END $$;
+        `);
+    
     await client.query(`
             CREATE INDEX IF NOT EXISTS idx_group_messages_group_id ON group_messages(group_id);
             CREATE INDEX IF NOT EXISTS idx_group_messages_sender_id ON group_messages(sender_id);
@@ -201,8 +271,30 @@ const createGroupMessagesTable = async () => {
   }
 };
 
-client.connect();
-/* .then(() => {
+const createUserTokensTable = async () => {
+  try {
+    await client.query(`
+            CREATE TABLE IF NOT EXISTS user_tokens (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                fcm_token TEXT,
+                device_info TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+    await client.query(`
+            CREATE INDEX IF NOT EXISTS idx_user_tokens_user_id ON user_tokens(user_id);
+            CREATE INDEX IF NOT EXISTS idx_user_tokens_fcm_token ON user_tokens(fcm_token);
+        `);
+    console.log("[DB] User tokens table checked/created successfully");
+  } catch (error) {
+    console.error("[DB] Error creating user tokens table:", error);
+  }
+};
+
+client.connect().
+    then(() => {
         console.log("[DB] Database connection successful.");
         createUsersTable()
             .then(() => createMessagesTable())
@@ -210,6 +302,7 @@ client.connect();
             .then(() => createGroupsTable())
             .then(() => createGroupMembersTable())
             .then(() => createGroupMessagesTable())
+            .then(() => createUserTokensTable())
             .catch(err => {
                 console.error("[DB] Error initializing database tables:", err);
                 process.exit(1);
@@ -218,6 +311,6 @@ client.connect();
     .catch(err => {
         console.error("[DB] Database connection failed!", err);
         process.exit(1);
-    }); */
+    });
 
 export default client;
